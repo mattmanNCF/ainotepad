@@ -1,0 +1,29 @@
+{
+  "project": "AInotepad",
+  "created": "2026-04-14",
+  "workflow": {
+    "parallelism": "wave",
+    "checkpoints": "auto",
+    "verification": true,
+    "_auto_chain_active": false
+  },
+  "phases": {
+    "total": 6,
+    "current": 0,
+    "completed": []
+  },
+  "stack": {
+    "frontend": "electron-vite + React 19 + Vite 6 + TailwindCSS",
+    "runtime": "Electron v28+",
+    "storage": "better-sqlite3 + Drizzle ORM + sqlite-vec",
+    "ai": "Anthropic SDK (claude-haiku-4-5-20251001 default) + OpenAI SDK fallback",
+    "packaging": "electron-builder + electron-updater"
+  },
+  "directories": {
+    "frontend": "src/renderer",
+    "main": "src/main",
+    "preload": "src/preload",
+    "worker": "src/worker",
+    "migrations": "scripts/migrations"
+  }
+}

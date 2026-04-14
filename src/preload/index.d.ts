@@ -1,8 +1,16 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
+interface NoteRecord {
+  id: string
+  rawText: string
+  submittedAt: string
+  aiState: 'pending' | 'complete' | 'failed'
+  aiAnnotation: string | null
+}
 
-declare global {
-  interface Window {
-    electron: ElectronAPI
-    api: unknown
+interface Window {
+  api: {
+    notes: {
+      getAll: () => Promise<NoteRecord[]>
+      create: (rawText: string) => Promise<NoteRecord>
+    }
   }
 }
