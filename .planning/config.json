@@ -5,7 +5,8 @@
     "parallelism": "wave",
     "checkpoints": "auto",
     "verification": true,
-    "_auto_chain_active": false
+    "_auto_chain_active": false,
+    "nyquist_validation": false
   },
   "phases": {
     "total": 6,
