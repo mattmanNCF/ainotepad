@@ -3,22 +3,31 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 01
-current_plan: 01
-status: in_progress
-last_updated: "2026-04-14T21:55:49.119Z"
+current_phase_name: Shell & Capture
+current_plan: 1
+status: verifying
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-04-14T22:07:43.571Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 6
-  completed_phases: 0
-  total_plans: 4
-  completed_plans: 0
+  total_phases: 1
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
+  percent: 100
 ---
 
 # AInotepad — Project State
 
-**Last updated:** 2026-04-14
-**Current phase:** 01
-**Current plan:** 01
-**Next action:** Executing Phase 01 Plan 01 — Shell & Capture scaffold
+- **Current Phase:** 01
+- **Current Phase Name:** Shell & Capture
+- **Current Plan:** 1
+- **Total Plans in Phase:** 1
+- **Total Phases:** 6
+- **Status:** Phase complete — ready for verification
+- **Progress:** [██████████] 100%
+- **Last Activity:** 2026-04-14
+- **Stopped At:** Completed 01-01-PLAN.md
 
 ---
 
@@ -26,7 +35,7 @@ progress:
 
 | Phase | Name | Status | Plans |
 |-------|------|--------|-------|
-| 1 | Shell & Capture | In Progress | 01-01 executing |
+| 1 | Shell & Capture | Complete | 01-01 done |
 | 2 | AI Pipeline | ○ Pending | Not yet planned |
 | 3 | Karpathy Wiki | ○ Pending | Not yet planned |
 | 4 | Search | ○ Pending | Not yet planned |
@@ -38,7 +47,7 @@ progress:
 ## Architecture Snapshot
 
 - **Framework:** Electron v28+ (electron-vite, electron-builder)
-- **Frontend:** React 19 + Vite 6 + TailwindCSS
+- **Frontend:** React 19 + Vite 6 + TailwindCSS v4
 - **Storage:** better-sqlite3 + Drizzle ORM + WAL + sqlite-vec
 - **AI worker:** Electron utilityProcess + MessagePort
 - **AI providers:** Claude (Anthropic SDK) + OpenAI (user's own API key)
@@ -56,6 +65,18 @@ progress:
 4. Windows temp file rename — write temp to same directory as target
 
 ---
+
+## Decisions
+
+- TailwindCSS v4 uses @import 'tailwindcss' in CSS — no tailwind.config.ts created
+- rollupOptions.external set in both main AND preload builds to prevent native module bundling
+- Preload stripped to notes API shape only; window.electron (electronAPI) removed for clean surface
+- electron-rebuild succeeded on Windows for better-sqlite3 (Python + MSVC build tools present)
+
+---
+- [Phase 01]: TailwindCSS v4 uses @import tailwindcss in CSS - no tailwind.config.ts created
+- [Phase 01]: rollupOptions.external set in both main AND preload builds to prevent native module bundling
+- [Phase 01]: Preload simplified to notes API surface only - removed window.electron/electronAPI
 
 ## Notes
 
