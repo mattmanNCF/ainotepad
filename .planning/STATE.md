@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 01
 current_phase_name: Shell & Capture
-current_plan: 1
-status: verifying
-stopped_at: Completed 01-03-PLAN.md, starting 01-04
-last_updated: "2026-04-14T22:17:47.072Z"
+current_plan: 4
+status: complete
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-04-14T22:45:00.000Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 6
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 100
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 01
 - **Current Phase Name:** Shell & Capture
-- **Current Plan:** 1
-- **Total Plans in Phase:** 1
+- **Current Plan:** 4
+- **Total Plans in Phase:** 4
 - **Total Phases:** 6
-- **Status:** Phase complete — ready for verification
-- **Progress:** [████████░░] 75%
+- **Status:** Phase 01 complete — all 4 plans done
+- **Progress:** [██████████] 100% (Phase 01)
 - **Last Activity:** 2026-04-14
-- **Stopped At:** Completed 01-03-PLAN.md, starting 01-04
+- **Stopped At:** Completed 01-04-PLAN.md
 
 ---
 
@@ -35,7 +35,7 @@ progress:
 
 | Phase | Name | Status | Plans |
 |-------|------|--------|-------|
-| 1 | Shell & Capture | ◆ In Progress | 01-01 done, 01-02/03/04 pending |
+| 1 | Shell & Capture | ✓ Complete | 01-01, 01-02, 01-03, 01-04 done |
 | 2 | AI Pipeline | ○ Pending | Not yet planned |
 | 3 | Karpathy Wiki | ○ Pending | Not yet planned |
 | 4 | Search | ○ Pending | Not yet planned |
@@ -83,6 +83,10 @@ progress:
 - [Phase 01-03]: Used Electron.NativeImage type (not nativeImage namespace) for tray icon variable
 - [Phase 01-03]: window-all-closed no longer quits on Windows/Linux — app lives in tray permanently
 - [Phase 01-03]: createWindow() returns BrowserWindow so caller passes it to createTray() and globalShortcut
+- [Phase 01-04]: Optimistic prepend uses temporary id (optimistic-${Date.now()}) replaced by real ID after IPC resolves
+- [Phase 01-04]: NoteRecord type inlined in renderer — keeps renderer self-contained without preload type coupling
+- [Phase 01-04]: @keyframes slideIn defined in main.css — TailwindCSS v4 does not support arbitrary keyframe classes in JSX
+- [Phase 01-04]: Failed IPC in v1 leaves optimistic entry visible — no error UI (deferred to v2)
 
 ## Notes
 

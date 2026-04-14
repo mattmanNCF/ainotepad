@@ -4,7 +4,7 @@
 
 | Phase | Name | Plans | Complete | Status |
 |-------|------|-------|----------|--------|
-| 01 | Shell & Capture | 1/4 | — | In Progress |
+| 01 | Shell & Capture | 4/4 | 4 | Complete |
 | 02 | AI Pipeline | TBD | 0 | Pending |
 | 03 | Karpathy Wiki | TBD | 0 | Pending |
 | 04 | Search | TBD | 0 | Pending |
@@ -20,9 +20,9 @@
 | Plan | Name | Status |
 |------|------|--------|
 | 01-01 | Scaffold + three-tab shell | ✓ Complete (2026-04-14) |
-| 01-02 | SQLite DB layer + IPC handlers | ○ Pending |
-| 01-03 | System tray + global shortcut | ○ Pending |
-| 01-04 | Capture buffer + note list | ○ Pending |
+| 01-02 | SQLite DB layer + IPC handlers | ✓ Complete (2026-04-14) |
+| 01-03 | System tray + global shortcut | ✓ Complete (2026-04-14) |
+| 01-04 | Capture buffer + note list | ✓ Complete (2026-04-14) |
 
 ---
 
