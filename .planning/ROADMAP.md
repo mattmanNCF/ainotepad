@@ -4,7 +4,7 @@
 
 | Phase | Name | Plans | Complete | Status |
 |-------|------|-------|----------|--------|
-| 01 | 1/1 | Complete   | 2026-04-14 | Complete |
+| 01 | Shell & Capture | 1/4 | — | In Progress |
 | 02 | AI Pipeline | TBD | 0 | Pending |
 | 03 | Karpathy Wiki | TBD | 0 | Pending |
 | 04 | Search | TBD | 0 | Pending |
@@ -15,11 +15,14 @@
 
 ## Phase 01: Shell & Capture
 
-**Goal:** Scaffold Electron app with tabbed shell and all Phase 1 dependencies.
+**Goal:** Scaffold Electron app, SQLite DB layer, system tray, and capture buffer UI.
 
 | Plan | Name | Status |
 |------|------|--------|
-| 01-01 | Scaffold + three-tab shell | Complete |
+| 01-01 | Scaffold + three-tab shell | ✓ Complete (2026-04-14) |
+| 01-02 | SQLite DB layer + IPC handlers | ○ Pending |
+| 01-03 | System tray + global shortcut | ○ Pending |
+| 01-04 | Capture buffer + note list | ○ Pending |
 
 ---
 
