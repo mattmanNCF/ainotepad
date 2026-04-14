@@ -31,7 +31,7 @@ export function CaptureBuffer({ onSubmit }: CaptureBufferProps) {
   }
 
   return (
-    <div className="px-4 pt-4 pb-2">
+    <div className="border-t border-white/10 bg-black/30 px-4 pt-3 pb-3">
       <textarea
         ref={textareaRef}
         value={value}
@@ -39,7 +39,7 @@ export function CaptureBuffer({ onSubmit }: CaptureBufferProps) {
         onKeyDown={handleKeyDown}
         placeholder="Capture a thought… (Enter to submit)"
         rows={1}
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 resize-none overflow-hidden focus:outline-none focus:border-blue-500/50 focus:bg-white/8 transition-colors"
+        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 resize-none overflow-hidden focus:outline-none focus:border-amber-500/40 focus:bg-white/8 transition-colors"
         autoFocus
       />
       <p className="mt-1 text-xs text-gray-600">Enter to submit · Shift+Enter for newline</p>

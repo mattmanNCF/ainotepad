@@ -44,20 +44,22 @@ export function NotesTab() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <CaptureBuffer onSubmit={handleSubmit} />
-      <div className="flex-1 overflow-y-auto py-2">
+      <div className="flex-1 overflow-y-auto p-3">
         {loading && (
           <p className="text-center text-gray-600 text-sm mt-8">Loading notes…</p>
         )}
         {!loading && notes.length === 0 && (
           <p className="text-center text-gray-600 text-sm mt-8">
-            No notes yet. Start typing above.
+            No notes yet. Start typing below.
           </p>
         )}
-        {notes.map((note) => (
-          <NoteCard key={note.id} note={note} />
-        ))}
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
+          {notes.map((note) => (
+            <NoteCard key={note.id} note={note} />
+          ))}
+        </div>
       </div>
+      <CaptureBuffer onSubmit={handleSubmit} />
     </div>
   )
 }
