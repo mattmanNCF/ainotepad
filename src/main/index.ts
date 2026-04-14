@@ -1,10 +1,61 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipc'
 
-function createWindow(): void {
+let tray: Tray | null = null
+let isQuiting = false
+
+function createTray(win: BrowserWindow): void {
+  // Use a simple generated icon for development; production will use the bundled icon
+  let trayIcon: Electron.NativeImage
+  try {
+    trayIcon = nativeImage.createFromDataURL(
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABGSURBVDiNY2CgFPwnoP6PgYGB4T8ZmCFAgUEDGBhJtYCBgYGBgYqWkwUGDWBgJNUCBgYGBgYqWk4WGDSAgZFUCxgYyLcAAHOoBArpAAAAAElFTkSuQmCC'
+    )
+  } catch {
+    trayIcon = nativeImage.createEmpty()
+  }
+
+  tray = new Tray(trayIcon)
+  tray.setToolTip('AInotepad')
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show / Hide',
+      click: () => {
+        if (win.isVisible()) {
+          win.hide()
+        } else {
+          win.show()
+          win.focus()
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        isQuiting = true
+        app.quit()
+      }
+    }
+  ])
+
+  tray.setContextMenu(contextMenu)
+
+  tray.on('click', () => {
+    if (win.isVisible()) {
+      win.hide()
+    } else {
+      win.show()
+      win.focus()
+    }
+  })
+}
+
+function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -22,6 +73,14 @@ function createWindow(): void {
     mainWindow.show()
   })
 
+  // Hide to tray on close instead of quitting
+  mainWindow.on('close', (event) => {
+    if (!isQuiting) {
+      event.preventDefault()
+      mainWindow.hide()
+    }
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -34,6 +93,8 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 // This method will be called when Electron has finished
@@ -55,7 +116,19 @@ app.whenReady().then(() => {
 
   registerIpcHandlers()
 
-  createWindow()
+  const win = createWindow()
+
+  createTray(win)
+
+  // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
+  globalShortcut.register('CommandOrControl+Shift+Space', () => {
+    if (win.isVisible()) {
+      win.hide()
+    } else {
+      win.show()
+      win.focus()
+    }
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -64,13 +137,18 @@ app.whenReady().then(() => {
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// Clean up global shortcuts before quitting
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
+})
+
+// On Windows/Linux, the app stays in the tray — do not quit on all windows closed.
+// On macOS, standard behavior applies.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  if (process.platform === 'darwin') {
     app.quit()
   }
+  // Windows/Linux: intentionally do nothing — app lives in tray
 })
 
 // In this file you can include the rest of your app's specific main process
