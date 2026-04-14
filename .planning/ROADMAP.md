@@ -4,7 +4,7 @@
 
 | Phase | Name | Plans | Complete | Status |
 |-------|------|-------|----------|--------|
-| 01 | Shell & Capture | 4/4 | 4 | Complete |
+| 01 | Shell & Capture | Complete    | 2026-04-14 | Complete |
 | 02 | AI Pipeline | TBD | 0 | Pending |
 | 03 | Karpathy Wiki | TBD | 0 | Pending |
 | 04 | Search | TBD | 0 | Pending |
