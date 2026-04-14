@@ -6,15 +6,15 @@ current_phase: 01
 current_phase_name: Shell & Capture
 current_plan: 1
 status: verifying
-stopped_at: Completed 01-02-PLAN.md, starting 01-03
-last_updated: "2026-04-14T22:15:05.623Z"
+stopped_at: Completed 01-03-PLAN.md, starting 01-04
+last_updated: "2026-04-14T22:17:47.072Z"
 last_activity: 2026-04-14
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 3
+  percent: 75
 ---
 
 # AInotepad — Project State
@@ -25,9 +25,9 @@ progress:
 - **Total Plans in Phase:** 1
 - **Total Phases:** 6
 - **Status:** Phase complete — ready for verification
-- **Progress:** [█████░░░░░] 50%
+- **Progress:** [████████░░] 75%
 - **Last Activity:** 2026-04-14
-- **Stopped At:** Completed 01-02-PLAN.md, starting 01-03
+- **Stopped At:** Completed 01-03-PLAN.md, starting 01-04
 
 ---
 
@@ -80,6 +80,9 @@ progress:
 - [Phase 01-02]: crypto.randomUUID() used instead of uuid package - no extra dependency
 - [Phase 01-02]: Inline CREATE TABLE IF NOT EXISTS in db.ts for v1 - no Drizzle migrate runner needed
 - [Phase 01-02]: Drizzle with better-sqlite3 is synchronous - .all() and .run() used, no async/await
+- [Phase 01-03]: Used Electron.NativeImage type (not nativeImage namespace) for tray icon variable
+- [Phase 01-03]: window-all-closed no longer quits on Windows/Linux — app lives in tray permanently
+- [Phase 01-03]: createWindow() returns BrowserWindow so caller passes it to createTray() and globalShortcut
 
 ## Notes
 
