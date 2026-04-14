@@ -5,7 +5,7 @@
 | Phase | Name | Plans | Complete | Status |
 |-------|------|-------|----------|--------|
 | 01 | Shell & Capture | Complete    | 2026-04-14 | Complete |
-| 02 | AI Pipeline | TBD | 0 | Pending |
+| 02 | AI Pipeline | 5 plans | 0 | Pending |
 | 03 | Karpathy Wiki | TBD | 0 | Pending |
 | 04 | Search | TBD | 0 | Pending |
 | 05 | Agent Layer | TBD | 0 | Pending |
@@ -28,9 +28,16 @@
 
 ## Phase 02: AI Pipeline
 
-**Goal:** IPC handlers, SQLite database, and AI processing pipeline.
+**Goal:** Silent AI processing on every note submission — Electron utilityProcess worker, frontier API integration (Claude/OpenAI with user API key), and aiState/aiAnnotation written back to SQLite and surfaced in the UI.
 
-*Plans to be defined.*
+**Plans:** 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Install AI dependencies + extend schema with organized_text column
+- [ ] 02-02-PLAN.md — AI worker + IPC plumbing (utilityProcess fork, MessagePort, queue, renderer push, startup re-queue)
+- [ ] 02-03-PLAN.md — Real AI provider calls in worker (Anthropic SDK + OpenAI SDK, prompt, error handling)
+- [ ] 02-04-PLAN.md — Settings panel + API key storage (electron-conf, safeStorage, gear icon overlay)
+- [ ] 02-05-PLAN.md — Human verification checkpoint (end-to-end AI pipeline)
 
 ---
 
