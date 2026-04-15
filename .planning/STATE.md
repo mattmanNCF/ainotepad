@@ -3,31 +3,31 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 02
-current_phase_name: ai pipeline
-current_plan: Not started
-status: planning
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-04-14T22:35:25.357Z"
-last_activity: 2026-04-14
+current_phase_name: ai-pipeline
+current_plan: 2
+status: executing
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-04-15T00:11:13.610Z"
+last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
-  percent: 100
+  total_plans: 9
+  completed_plans: 5
+  percent: 56
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 02
-- **Current Phase Name:** ai pipeline
-- **Current Plan:** Not started
-- **Total Plans in Phase:** 4
+- **Current Phase Name:** ai-pipeline
+- **Current Plan:** 2
+- **Total Plans in Phase:** 5
 - **Total Phases:** 6
-- **Status:** Ready to plan
-- **Progress:** [██████████] 100% (Phase 01)
-- **Last Activity:** 2026-04-14
-- **Stopped At:** Completed 01-04-PLAN.md
+- **Status:** Ready to execute
+- **Progress:** [██████░░░░] 56%
+- **Last Activity:** 2026-04-15
+- **Stopped At:** Completed 02-01-PLAN.md
 
 ---
 
@@ -87,6 +87,8 @@ progress:
 - [Phase 01-04]: NoteRecord type inlined in renderer — keeps renderer self-contained without preload type coupling
 - [Phase 01-04]: @keyframes slideIn defined in main.css — TailwindCSS v4 does not support arbitrary keyframe classes in JSX
 - [Phase 01-04]: Failed IPC in v1 leaves optimistic entry visible — no error UI (deferred to v2)
+- [Phase 02-01]: AI packages in dependencies not devDependencies for electron-builder production packaging
+- [Phase 02-01]: ALTER TABLE migration in try-catch before drizzle() for idempotency across app launches
 
 ## Notes
 
