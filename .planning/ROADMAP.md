@@ -5,7 +5,7 @@
 | Phase | Name | Plans | Complete | Status |
 |-------|------|-------|----------|--------|
 | 01 | Shell & Capture | Complete    | 2026-04-14 | Complete |
-| 02 | AI Pipeline | 5 plans | 0 | Pending |
+| 02 | AI Pipeline | Complete    | 2026-04-15 | Pending |
 | 03 | Karpathy Wiki | TBD | 0 | Pending |
 | 04 | Search | TBD | 0 | Pending |
 | 05 | Agent Layer | TBD | 0 | Pending |
@@ -30,7 +30,7 @@
 
 **Goal:** Silent AI processing on every note submission — Electron utilityProcess worker, frontier API integration (Claude/OpenAI with user API key), and aiState/aiAnnotation written back to SQLite and surfaced in the UI.
 
-**Plans:** 5 plans
+**Plans:** 4/5 plans complete
 
 Plans:
 - [x] 02-01-PLAN.md — Install AI dependencies + extend schema with organized_text column
