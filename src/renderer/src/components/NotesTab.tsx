@@ -16,16 +16,21 @@ export function NotesTab() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    window.api.notes.getAll().then((loaded) => {
-      setNotes(loaded)
-      setLoading(false)
-    })
+    window.api.notes.getAll()
+      .then((loaded) => {
+        setNotes(loaded)
+        setLoading(false)
+      })
+      .catch((err) => {
+        console.error('Failed to load notes:', err)
+        setLoading(false)
+      })
   }, [])
 
   // Subscribe to real-time AI result pushes from main process
   useEffect(() => {
     if (!window.api.onAiUpdate) return
-    window.api.onAiUpdate(({ noteId, aiState, aiAnnotation, organizedText }) => {
+    const unsub = window.api.onAiUpdate(({ noteId, aiState, aiAnnotation, organizedText }) => {
       setNotes((prev) =>
         prev.map((n) =>
           n.id === noteId
@@ -39,6 +44,7 @@ export function NotesTab() {
         )
       )
     })
+    return unsub
   }, [])
 
   async function handleSubmit(rawText: string) {

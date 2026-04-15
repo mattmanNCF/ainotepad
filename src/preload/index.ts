@@ -13,7 +13,9 @@ contextBridge.exposeInMainWorld('api', {
       organizedText: string | null
     }) => void
   ) => {
-    ipcRenderer.on('note:aiUpdate', (_event, data) => cb(data))
+    const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+    ipcRenderer.on('note:aiUpdate', handler)
+    return () => ipcRenderer.removeListener('note:aiUpdate', handler)
   },
   settings: {
     save: (key: string, provider: string) =>
