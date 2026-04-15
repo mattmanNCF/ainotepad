@@ -15,4 +15,10 @@ contextBridge.exposeInMainWorld('api', {
   ) => {
     ipcRenderer.on('note:aiUpdate', (_event, data) => cb(data))
   },
+  settings: {
+    save: (key: string, provider: string) =>
+      ipcRenderer.invoke('settings:save', { key, provider }),
+    get: (): Promise<{ provider: string; hasKey: boolean }> =>
+      ipcRenderer.invoke('settings:get'),
+  },
 })

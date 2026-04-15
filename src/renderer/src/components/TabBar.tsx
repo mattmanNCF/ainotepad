@@ -3,9 +3,10 @@ type Tab = 'notes' | 'wiki' | 'search'
 interface TabBarProps {
   activeTab: Tab
   onTabChange: (tab: Tab) => void
+  onSettingsClick: () => void
 }
 
-export function TabBar({ activeTab, onTabChange }: TabBarProps) {
+export function TabBar({ activeTab, onTabChange, onSettingsClick }: TabBarProps) {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'notes', label: 'Notes' },
     { id: 'wiki', label: 'Wiki' },
@@ -13,7 +14,7 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
   ]
 
   return (
-    <div className="flex border-b border-white/10 bg-black/20 shrink-0">
+    <div className="flex items-center border-b border-white/10 bg-black/20 shrink-0">
       {tabs.map((tab) => (
         <button
           key={tab.id}
@@ -28,6 +29,17 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
           {tab.label}
         </button>
       ))}
+      {/* Push gear to the right */}
+      <div className="ml-auto">
+        <button
+          onClick={onSettingsClick}
+          className="px-4 py-3 text-gray-500 hover:text-gray-300 transition-colors"
+          aria-label="Open settings"
+          title="Settings"
+        >
+          &#9881;
+        </button>
+      </div>
     </div>
   )
 }
