@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: karpathy-wiki
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 03-karpathy-wiki-02-PLAN.md
-last_updated: "2026-04-15T15:12:46.017Z"
+stopped_at: Completed 03-karpathy-wiki-03-PLAN.md
+last_updated: "2026-04-15T15:17:24.498Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 13
-  completed_plans: 11
-  percent: 85
+  completed_plans: 12
+  percent: 92
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 03
 - **Current Phase Name:** karpathy-wiki
-- **Current Plan:** 3
+- **Current Plan:** 4
 - **Total Plans in Phase:** 4
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [█████████░] 85%
+- **Progress:** [█████████░] 92%
 - **Last Activity:** 2026-04-15
-- **Stopped At:** Completed 03-karpathy-wiki-02-PLAN.md
+- **Stopped At:** Completed 03-karpathy-wiki-03-PLAN.md
 
 ---
 
@@ -100,6 +100,8 @@ progress:
 - [Phase 03-karpathy-wiki]: tagColors.ts is a separate Conf instance — breaks circular aiOrchestrator to ipc.ts dependency
 - [Phase 03-karpathy-wiki]: enqueueNote is now async — loads _context.md and concept snippets before posting worker task message
 - [Phase 03-karpathy-wiki]: notes:create ipcMain.handle made async to await enqueueNote; ipc.ts imports tagColors.ts directly, no getConf() export
+- [Phase 03-karpathy-wiki]: useRef (not useState) for WikiTab content cache — ref mutations don't invalidate useCallback deps, preventing infinite re-render loop
+- [Phase 03-karpathy-wiki]: remark-wiki-link permalinks derived from existingFiles — required to distinguish known vs new wiki links in rendered Markdown
 
 ## Notes
 
