@@ -35,7 +35,7 @@
 Plans:
 - [x] 02-01-PLAN.md — Install AI dependencies + extend schema with organized_text column
 - [x] 02-02-PLAN.md — AI worker + IPC plumbing (utilityProcess fork, MessagePort, queue, renderer push, startup re-queue)
-- [ ] 02-03-PLAN.md — Real AI provider calls in worker (Anthropic SDK + OpenAI SDK, prompt, error handling)
+- [x] 02-03-PLAN.md — Real AI provider calls in worker (Anthropic SDK + OpenAI SDK, prompt, error handling)
 - [ ] 02-04-PLAN.md — Settings panel + API key storage (electron-conf, safeStorage, gear icon overlay)
 - [ ] 02-05-PLAN.md — Human verification checkpoint (end-to-end AI pipeline)
 
