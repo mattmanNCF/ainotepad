@@ -21,7 +21,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
   const { port1, port2 } = new MessageChannelMain()
 
   // Transfer port2 to the worker in the init message
-  child.postMessage({ type: 'init', provider, apiKey, port: port2 }, [port2])
+  child.postMessage({ type: 'init', provider, apiKey }, [port2])
 
   workerPort = port1
   port1.start() // REQUIRED: port is paused until start() is called
