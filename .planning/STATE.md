@@ -3,31 +3,31 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 03
-current_phase_name: karpathy wiki
-current_plan: Not started
-status: planning
-stopped_at: Phase 03 context gathered
-last_updated: "2026-04-15T03:22:16.735Z"
+current_phase_name: karpathy-wiki
+current_plan: 2
+status: executing
+stopped_at: Completed 03-karpathy-wiki-01-PLAN.md
+last_updated: "2026-04-15T15:08:54.675Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 2
-  total_plans: 9
-  completed_plans: 9
-  percent: 89
+  total_plans: 13
+  completed_plans: 10
+  percent: 77
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 03
-- **Current Phase Name:** karpathy wiki
-- **Current Plan:** Not started
-- **Total Plans in Phase:** 5
+- **Current Phase Name:** karpathy-wiki
+- **Current Plan:** 2
+- **Total Plans in Phase:** 4
 - **Total Phases:** 6
-- **Status:** Ready to plan
-- **Progress:** [█████████░] 89%
+- **Status:** Ready to execute
+- **Progress:** [████████░░] 77%
 - **Last Activity:** 2026-04-15
-- **Stopped At:** Phase 03 context gathered
+- **Stopped At:** Completed 03-karpathy-wiki-01-PLAN.md
 
 ---
 
@@ -95,6 +95,8 @@ progress:
 - [Phase 02-03]: SDK packages externalized (not bundled) via electron-vite externalizeDeps — resolves at runtime from node_modules; correct for Electron packaging
 - [Phase 02]: getProvider() exported from ipc.ts — avoids duplicating electron-conf Conf init; index.ts reads provider and key at startup from shared module-scope instance
 - [Phase 02]: settings:save handler posts settings-update to running worker via getWorkerPort() so same-session notes pick up new key without app restart
+- [Phase 03-karpathy-wiki]: kb.ts writeKbFile uses temp+rename for Windows atomic writes
+- [Phase 03-karpathy-wiki]: updateNoteAiResult extended with optional tags param (backward-compatible default '[]')
 
 ## Notes
 

@@ -6,7 +6,7 @@
 |-------|------|-------|----------|--------|
 | 01 | Shell & Capture | Complete    | 2026-04-14 | Complete |
 | 02 | AI Pipeline | Complete    | 2026-04-15 | Pending |
-| 03 | Karpathy Wiki | 4 plans | 0 | Pending |
+| 03 | 1/4 | In Progress|  | Pending |
 | 04 | Search | TBD | 0 | Pending |
 | 05 | Agent Layer | TBD | 0 | Pending |
 | 06 | Polish & Ship | TBD | 0 | Pending |
@@ -45,10 +45,10 @@ Plans:
 
 **Goal:** AI-maintained knowledge base with Markdown storage, wikilink navigation, and graph visualization.
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 03-01-PLAN.md — Schema + file I/O foundation (kbPages table, notes.tags column, kb.ts helpers)
+- [x] 03-01-PLAN.md — Schema + file I/O foundation (kbPages table, notes.tags column, kb.ts helpers)
 - [ ] 03-02-PLAN.md — AI pipeline extension (expanded prompt, wiki_updates, context loading, IPC surface)
 - [ ] 03-03-PLAN.md — WikiTab UI (WikiSidebar, WikiPane, WikiMarkdown, WikiGraph, color picker)
 - [ ] 03-04-PLAN.md — Human verification checkpoint (end-to-end wiki flow)
