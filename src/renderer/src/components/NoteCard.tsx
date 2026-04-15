@@ -1,3 +1,5 @@
+import { useState, useEffect } from 'react'
+
 interface NoteRecord {
   id: string
   rawText: string
@@ -28,6 +30,28 @@ const aiStateStyle: Record<NoteRecord['aiState'], { border: string; badge: strin
 
 export function NoteCard({ note }: NoteCardProps) {
   const style = aiStateStyle[note.aiState]
+  const [tags, setTags] = useState<string[]>([])
+  const [tagColors, setTagColors] = useState<Record<string, string>>({})
+
+  // Fetch tag colors on mount and refresh when tag colors change
+  useEffect(() => {
+    window.api.kb.getTagColors().then(setTagColors)
+    const cleanup = window.api.kb.onUpdated(() => {
+      window.api.kb.getTagColors().then(setTagColors)
+    })
+    return cleanup
+  }, [])
+
+  // Capture tags from AI update events for this specific note
+  useEffect(() => {
+    if (!window.api.onAiUpdate) return
+    const unsub = window.api.onAiUpdate((data) => {
+      if (data.noteId === note.id && data.tags) {
+        setTags(data.tags)
+      }
+    })
+    return unsub
+  }, [note.id])
 
   return (
     <div
@@ -38,6 +62,18 @@ export function NoteCard({ note }: NoteCardProps) {
         <p className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed break-words">{note.rawText}</p>
         {note.aiAnnotation && (
           <p className="mt-2 text-xs text-blue-400/70 border-t border-white/5 pt-2 leading-relaxed">{note.aiAnnotation}</p>
+        )}
+        {tags.length > 0 && (
+          <div className="flex items-center gap-1 mt-1">
+            {tags.map(tag => (
+              <span
+                key={tag}
+                title={tag}
+                className="w-2 h-2 rounded-full flex-shrink-0"
+                style={{ backgroundColor: tagColors[tag] ?? '#6b7280' }}
+              />
+            ))}
+          </div>
         )}
       </div>
       <div className="flex items-center justify-between px-3 pb-2 pt-1 border-t border-white/5">
