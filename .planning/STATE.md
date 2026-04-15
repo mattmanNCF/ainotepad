@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: ai-pipeline
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-04-15T00:11:13.610Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-04-15T00:16:04.910Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 9
-  completed_plans: 5
-  percent: 56
+  completed_plans: 6
+  percent: 67
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 02
 - **Current Phase Name:** ai-pipeline
-- **Current Plan:** 2
+- **Current Plan:** 3
 - **Total Plans in Phase:** 5
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [██████░░░░] 56%
+- **Progress:** [███████░░░] 67%
 - **Last Activity:** 2026-04-15
-- **Stopped At:** Completed 02-01-PLAN.md
+- **Stopped At:** Completed 02-02-PLAN.md
 
 ---
 
@@ -89,6 +89,9 @@ progress:
 - [Phase 01-04]: Failed IPC in v1 leaves optimistic entry visible — no error UI (deferred to v2)
 - [Phase 02-01]: AI packages in dependencies not devDependencies for electron-builder production packaging
 - [Phase 02-01]: ALTER TABLE migration in try-catch before drizzle() for idempotency across app launches
+- [Phase 02-02]: Electron MessagePortMain uses .on('message', handler) not .onmessage property; handler typed as Electron.MessageEvent not browser MessageEvent<any>
+- [Phase 02-02]: getDecryptedApiKey stub returns null in 02-02; enqueue skipped until 02-04 wires real key
+- [Phase 02-02]: startAiWorker called with empty apiKey at startup; worker launches with stub callAI until 02-03 wires real SDKs
 
 ## Notes
 
