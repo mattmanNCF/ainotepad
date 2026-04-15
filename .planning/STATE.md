@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 02
 current_phase_name: ai-pipeline
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-04-15T00:19:17.618Z"
+stopped_at: Completed 02-04-PLAN.md
+last_updated: "2026-04-15T00:20:21.211Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 89
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 02
 - **Current Phase Name:** ai-pipeline
-- **Current Plan:** 4
+- **Current Plan:** 5
 - **Total Plans in Phase:** 5
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [████████░░] 78%
+- **Progress:** [█████████░] 89%
 - **Last Activity:** 2026-04-15
-- **Stopped At:** Completed 02-03-PLAN.md
+- **Stopped At:** Completed 02-04-PLAN.md
 
 ---
 
@@ -93,6 +93,8 @@ progress:
 - [Phase 02-02]: getDecryptedApiKey stub returns null in 02-02; enqueue skipped until 02-04 wires real key
 - [Phase 02-02]: startAiWorker called with empty apiKey at startup; worker launches with stub callAI until 02-03 wires real SDKs
 - [Phase 02-03]: SDK packages externalized (not bundled) via electron-vite externalizeDeps — resolves at runtime from node_modules; correct for Electron packaging
+- [Phase 02]: getProvider() exported from ipc.ts — avoids duplicating electron-conf Conf init; index.ts reads provider and key at startup from shared module-scope instance
+- [Phase 02]: settings:save handler posts settings-update to running worker via getWorkerPort() so same-session notes pick up new key without app restart
 
 ## Notes
 
