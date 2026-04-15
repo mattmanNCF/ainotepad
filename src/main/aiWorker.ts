@@ -2,9 +2,8 @@
 // NOTE: This file is built as a SEPARATE Rollup entry (aiWorker in electron.vite.config.ts).
 // Static imports are resolved at bundle time — do NOT use dynamic import() for SDK calls.
 
-// SDK imports: stubbed here, replaced in plan 02-03 with real implementations
-// import Anthropic from '@anthropic-ai/sdk'
-// import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 
 let taskPort: Electron.MessagePortMain | null = null
 let provider: string = 'claude'
@@ -56,7 +55,7 @@ async function drain(): Promise<void> {
         organizedText: parsed.organized,
       })
     } catch (err) {
-      console.error('[aiWorker] callAI failed:', err)
+      console.error('[aiWorker] callAI or JSON.parse failed:', err)
       taskPort!.postMessage({
         type: 'result',
         noteId: task.noteId,
@@ -71,12 +70,43 @@ async function drain(): Promise<void> {
   processing = false
 }
 
-// STUB: replaced in plan 02-03 with real Anthropic/OpenAI SDK calls
-async function callAI(rawText: string): Promise<string> {
-  console.log(`[aiWorker] STUB callAI — provider: ${provider}, text length: ${rawText.length}`)
-  // Return a valid JSON response so the pipeline can be tested end-to-end
-  return JSON.stringify({
-    organized: rawText.trim(),
-    annotation: 'AI processing stub — configure API key and provider SDK in plan 02-03.',
+function buildPrompt(rawText: string): string {
+  return `You are a silent note-processing assistant. The user has just captured a raw thought or note. Your task:
+
+1. Organize/clean the note text: fix typos, improve clarity, add minimal structure if needed. Keep the user's voice. Do not add information they did not write.
+2. Write a short annotation (1-2 sentences): a key insight, implication, or connection to consider.
+
+Respond with ONLY a JSON object, no markdown, no explanation:
+{"organized": "<cleaned note text>", "annotation": "<1-2 sentence insight>"}
+
+Raw note:
+${rawText}`
+}
+
+async function callClaude(rawText: string, key: string): Promise<string> {
+  const client = new Anthropic({ apiKey: key })
+  const msg = await client.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 512,
+    messages: [{ role: 'user', content: buildPrompt(rawText) }],
   })
+  const block = msg.content.find((b) => b.type === 'text')
+  if (!block || block.type !== 'text') throw new Error('Unexpected Claude response: no text block')
+  return block.text
+}
+
+async function callOpenAI(rawText: string, key: string): Promise<string> {
+  const client = new OpenAI({ apiKey: key })
+  const resp = await client.chat.completions.create({
+    model: 'gpt-4o-mini',
+    max_tokens: 512,
+    messages: [{ role: 'user', content: buildPrompt(rawText) }],
+  })
+  return resp.choices[0].message.content ?? ''
+}
+
+async function callAI(rawText: string): Promise<string> {
+  if (!apiKey) throw new Error('No API key configured')
+  if (provider === 'openai') return callOpenAI(rawText, apiKey)
+  return callClaude(rawText, apiKey)
 }
