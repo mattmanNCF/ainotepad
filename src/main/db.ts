@@ -36,6 +36,27 @@ export function getDb() {
     // Column already exists — safe to ignore
   }
 
+  // Migration: add tags column to notes (Phase 03)
+  try {
+    sqlite.exec("ALTER TABLE notes ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'")
+  } catch {
+    // Column already exists across app restarts — safe to ignore
+  }
+
+  // Migration: create kb_pages table (Phase 03)
+  try {
+    sqlite.exec(`CREATE TABLE IF NOT EXISTS kb_pages (
+      id TEXT PRIMARY KEY,
+      filename TEXT NOT NULL,
+      title TEXT NOT NULL,
+      tags TEXT NOT NULL DEFAULT '[]',
+      created TEXT NOT NULL,
+      updated TEXT NOT NULL
+    )`)
+  } catch {
+    // Table already exists — safe to ignore
+  }
+
   _db = drizzle(sqlite, { schema })
   return _db
 }
@@ -44,11 +65,12 @@ export function updateNoteAiResult(
   noteId: string,
   aiState: 'complete' | 'failed',
   aiAnnotation: string | null,
-  organizedText: string | null = null
+  organizedText: string | null = null,
+  tags: string = '[]'
 ): void {
   const db = getDb()
   db.update(notes)
-    .set({ aiState, aiAnnotation, organizedText })
+    .set({ aiState, aiAnnotation, organizedText, tags })
     .where(eq(notes.id, noteId))
     .run()
 }
