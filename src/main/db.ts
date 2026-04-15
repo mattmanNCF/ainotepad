@@ -27,6 +27,13 @@ export function getDb() {
     )
   `)
 
+  // Inline migration: add organized_text column (idempotent)
+  try {
+    sqlite.exec('ALTER TABLE notes ADD COLUMN organized_text TEXT')
+  } catch {
+    // Column already exists — safe to ignore
+  }
+
   _db = drizzle(sqlite, { schema })
   return _db
 }

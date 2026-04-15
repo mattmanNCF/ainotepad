@@ -8,6 +8,7 @@ interface NoteRecord {
   submittedAt: string
   aiState: 'pending' | 'complete' | 'failed'
   aiAnnotation: string | null
+  organizedText: string | null
 }
 
 export function NotesTab() {
@@ -29,6 +30,7 @@ export function NotesTab() {
       submittedAt: new Date().toISOString(),
       aiState: 'pending',
       aiAnnotation: null,
+      organizedText: null,
     }
     setNotes((prev) => [optimistic, ...prev])
 

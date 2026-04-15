@@ -4,6 +4,7 @@ interface NoteRecord {
   submittedAt: string
   aiState: 'pending' | 'complete' | 'failed'
   aiAnnotation: string | null
+  organizedText: string | null
 }
 
 interface NoteCardProps {

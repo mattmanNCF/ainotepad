@@ -6,6 +6,7 @@ export const notes = sqliteTable('notes', {
   submittedAt: text('submitted_at').notNull(),
   aiState: text('ai_state').notNull().default('pending'),
   aiAnnotation: text('ai_annotation'),
+  organizedText: text('organized_text'),
 })
 
 export type Note = typeof notes.$inferSelect
