@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeI
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { registerIpcHandlers } from './ipc'
+import { registerIpcHandlers, getDecryptedApiKey, getProvider } from './ipc'
 import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
 
 let tray: Tray | null = null
@@ -121,9 +121,10 @@ app.whenReady().then(() => {
 
   createTray(win)
 
-  // Start AI worker and re-queue any notes that were pending at last shutdown
-  // getDecryptedApiKey stub returns null in 02-02; real key wired in 02-04
-  startAiWorker(win, 'claude', '')
+  // Start AI worker with the persisted provider + decrypted API key.
+  // getDecryptedApiKey() reads from electron-conf + safeStorage — safe here
+  // because we are inside app.whenReady().
+  startAiWorker(win, getProvider(), getDecryptedApiKey() ?? '')
   reQueuePendingNotes()
 
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
