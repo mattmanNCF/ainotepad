@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('api', {
       aiState: string
       aiAnnotation: string | null
       organizedText: string | null
+      tags: string[]
     }) => void
   ) => {
     const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
@@ -22,5 +23,16 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.invoke('settings:save', { key, provider }),
     get: (): Promise<{ provider: string; hasKey: boolean }> =>
       ipcRenderer.invoke('settings:get'),
+  },
+  kb: {
+    listFiles: (): Promise<string[]> => ipcRenderer.invoke('kb:listFiles'),
+    readFile: (filename: string): Promise<string | null> => ipcRenderer.invoke('kb:readFile', filename),
+    getTagColors: (): Promise<Record<string, string>> => ipcRenderer.invoke('kb:getTagColors'),
+    setTagColor: (tag: string, color: string): Promise<void> => ipcRenderer.invoke('kb:setTagColor', tag, color),
+    onUpdated: (cb: () => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent) => cb()
+      ipcRenderer.on('kb:updated', handler)
+      return () => ipcRenderer.removeListener('kb:updated', handler)
+    },
   },
 })

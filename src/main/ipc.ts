@@ -6,6 +6,8 @@ import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
 import { Conf } from 'electron-conf/main'
+import { listKbFiles, readKbFile } from './kb'
+import { getTagColors, setTagColors } from './tagColors'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
@@ -40,7 +42,7 @@ export function registerIpcHandlers() {
     return db.select().from(notes).orderBy(desc(notes.submittedAt)).all()
   })
 
-  ipcMain.handle('notes:create', (_event, rawText: string) => {
+  ipcMain.handle('notes:create', async (_event, rawText: string) => {
     const db = getDb()
     const now = new Date().toISOString()
     const id = randomUUID()
@@ -56,7 +58,7 @@ export function registerIpcHandlers() {
     // Enqueue for AI if key is configured
     const apiKey = getDecryptedApiKey()
     if (apiKey) {
-      enqueueNote(id, rawText)
+      await enqueueNote(id, rawText)
     }
     // If no key: leave aiState='pending'; startup re-queue handles it once key is set
     return record
@@ -90,5 +92,17 @@ export function registerIpcHandlers() {
       }
     }
     return { provider, hasKey }
+  })
+
+  ipcMain.handle('kb:listFiles', async () => listKbFiles())
+
+  ipcMain.handle('kb:readFile', async (_e, filename: string) => readKbFile(filename))
+
+  ipcMain.handle('kb:getTagColors', () => getTagColors())
+
+  ipcMain.handle('kb:setTagColor', (_e, tag: string, color: string) => {
+    const colors = getTagColors()
+    colors[tag] = color
+    setTagColors(colors)
   })
 }
