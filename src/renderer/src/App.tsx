@@ -19,9 +19,15 @@ export default function App() {
         onSettingsClick={() => setShowSettings(true)}
       />
       <div className="flex-1 overflow-hidden">
-        {activeTab === 'notes' && <NotesTab />}
-        {activeTab === 'wiki' && <WikiTab />}
-        {activeTab === 'search' && <SearchTab />}
+        <div className="h-full" style={{ display: activeTab === 'notes' ? 'block' : 'none' }}>
+          <NotesTab />
+        </div>
+        <div className="h-full" style={{ display: activeTab === 'wiki' ? 'block' : 'none' }}>
+          <WikiTab />
+        </div>
+        <div className="h-full" style={{ display: activeTab === 'search' ? 'block' : 'none' }}>
+          <SearchTab />
+        </div>
       </div>
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     </div>
