@@ -22,6 +22,25 @@ export function NotesTab() {
     })
   }, [])
 
+  // Subscribe to real-time AI result pushes from main process
+  useEffect(() => {
+    if (!window.api.onAiUpdate) return
+    window.api.onAiUpdate(({ noteId, aiState, aiAnnotation, organizedText }) => {
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === noteId
+            ? {
+                ...n,
+                aiState: aiState as NoteRecord['aiState'],
+                aiAnnotation,
+                organizedText: organizedText ?? null,
+              }
+            : n
+        )
+      )
+    })
+  }, [])
+
   async function handleSubmit(rawText: string) {
     // Optimistic prepend
     const optimistic: NoteRecord = {

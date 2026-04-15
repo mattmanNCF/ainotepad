@@ -3,6 +3,7 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers } from './ipc'
+import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
 
 let tray: Tray | null = null
 let isQuiting = false
@@ -119,6 +120,11 @@ app.whenReady().then(() => {
   const win = createWindow()
 
   createTray(win)
+
+  // Start AI worker and re-queue any notes that were pending at last shutdown
+  // getDecryptedApiKey stub returns null in 02-02; real key wired in 02-04
+  startAiWorker(win, 'claude', '')
+  reQueuePendingNotes()
 
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
   globalShortcut.register('CommandOrControl+Shift+Space', () => {
