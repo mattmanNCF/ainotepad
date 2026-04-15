@@ -1,8 +1,10 @@
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { eq } from 'drizzle-orm'
 import { app } from 'electron'
 import path from 'path'
 import * as schema from '../../drizzle/schema'
+import { notes } from '../../drizzle/schema'
 
 let _db: ReturnType<typeof drizzle> | null = null
 
@@ -36,4 +38,17 @@ export function getDb() {
 
   _db = drizzle(sqlite, { schema })
   return _db
+}
+
+export function updateNoteAiResult(
+  noteId: string,
+  aiState: 'complete' | 'failed',
+  aiAnnotation: string | null,
+  organizedText: string | null = null
+): void {
+  const db = getDb()
+  db.update(notes)
+    .set({ aiState, aiAnnotation, organizedText })
+    .where(eq(notes.id, noteId))
+    .run()
 }
