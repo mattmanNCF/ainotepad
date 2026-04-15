@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 03
 current_phase_name: karpathy-wiki
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 03-karpathy-wiki-01-PLAN.md
-last_updated: "2026-04-15T15:08:54.675Z"
+stopped_at: Completed 03-karpathy-wiki-02-PLAN.md
+last_updated: "2026-04-15T15:12:46.017Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
-  percent: 77
+  completed_plans: 11
+  percent: 85
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 03
 - **Current Phase Name:** karpathy-wiki
-- **Current Plan:** 2
+- **Current Plan:** 3
 - **Total Plans in Phase:** 4
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [████████░░] 77%
+- **Progress:** [█████████░] 85%
 - **Last Activity:** 2026-04-15
-- **Stopped At:** Completed 03-karpathy-wiki-01-PLAN.md
+- **Stopped At:** Completed 03-karpathy-wiki-02-PLAN.md
 
 ---
 
@@ -97,6 +97,9 @@ progress:
 - [Phase 02]: settings:save handler posts settings-update to running worker via getWorkerPort() so same-session notes pick up new key without app restart
 - [Phase 03-karpathy-wiki]: kb.ts writeKbFile uses temp+rename for Windows atomic writes
 - [Phase 03-karpathy-wiki]: updateNoteAiResult extended with optional tags param (backward-compatible default '[]')
+- [Phase 03-karpathy-wiki]: tagColors.ts is a separate Conf instance — breaks circular aiOrchestrator to ipc.ts dependency
+- [Phase 03-karpathy-wiki]: enqueueNote is now async — loads _context.md and concept snippets before posting worker task message
+- [Phase 03-karpathy-wiki]: notes:create ipcMain.handle made async to await enqueueNote; ipc.ts imports tagColors.ts directly, no getConf() export
 
 ## Notes
 

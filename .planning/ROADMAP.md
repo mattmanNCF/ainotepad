@@ -49,7 +49,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — Schema + file I/O foundation (kbPages table, notes.tags column, kb.ts helpers)
-- [ ] 03-02-PLAN.md — AI pipeline extension (expanded prompt, wiki_updates, context loading, IPC surface)
+- [x] 03-02-PLAN.md — AI pipeline extension (expanded prompt, wiki_updates, context loading, IPC surface)
 - [ ] 03-03-PLAN.md — WikiTab UI (WikiSidebar, WikiPane, WikiMarkdown, WikiGraph, color picker)
 - [ ] 03-04-PLAN.md — Human verification checkpoint (end-to-end wiki flow)
 
