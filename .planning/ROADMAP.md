@@ -6,7 +6,7 @@
 |-------|------|-------|----------|--------|
 | 01 | Shell & Capture | Complete    | 2026-04-14 | Complete |
 | 02 | AI Pipeline | Complete    | 2026-04-15 | Pending |
-| 03 | 1/4 | In Progress|  | Pending |
+| 03 | 1/4 | Complete    | 2026-04-16 | Pending |
 | 04 | Search | TBD | 0 | Pending |
 | 05 | Agent Layer | TBD | 0 | Pending |
 | 06 | Polish & Ship | TBD | 0 | Pending |
@@ -45,7 +45,7 @@ Plans:
 
 **Goal:** AI-maintained knowledge base with Markdown storage, wikilink navigation, and graph visualization.
 
-**Plans:** 1/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 03-01-PLAN.md — Schema + file I/O foundation (kbPages table, notes.tags column, kb.ts helpers)
