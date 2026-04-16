@@ -10,7 +10,7 @@ export function TabBar({ activeTab, onTabChange, onSettingsClick }: TabBarProps)
   const tabs: { id: Tab; label: string }[] = [
     { id: 'notes', label: 'Notes' },
     { id: 'wiki', label: 'Wiki' },
-    { id: 'search', label: 'Search' },
+    { id: 'search', label: 'Patterns' },
   ]
 
   return (
