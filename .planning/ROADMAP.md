@@ -7,7 +7,7 @@
 | 01 | Shell & Capture | Complete    | 2026-04-14 | Complete |
 | 02 | AI Pipeline | Complete    | 2026-04-15 | Pending |
 | 03 | 1/4 | Complete    | 2026-04-16 | Pending |
-| 04 | AI Intelligence + Local Model + Patterns | 8 plans | 0 | Pending |
+| 04 | AI Intelligence + Local Model + Patterns | Complete    | 2026-04-16 | Pending |
 | 05 | Agent Layer | TBD | 0 | Pending |
 | 06 | Polish & Ship | TBD | 0 | Pending |
 
@@ -59,7 +59,7 @@ Plans:
 
 **Goal:** AI worker gains retrieval capabilities (FTS5 + wiki graph) for grounded insight annotations. Local Gemma 4 model via node-llama-cpp as first-class provider. Patterns tab replaces Search placeholder with word cloud + AI digest.
 
-**Plans:** 8 plans
+**Plans:** 7/8 plans complete
 
 Plans:
 - [x] 04-01-PLAN.md — node-llama-cpp install + postinstall fix + ASAR exclusion + externalization
@@ -69,7 +69,7 @@ Plans:
 - [x] 04-05-PLAN.md — Settings: Brave API key + local model tier UI + new IPC channels in preload
 - [x] 04-06-PLAN.md — NoteCard insight rendering (italic amber, live via note:aiUpdate)
 - [x] 04-07-PLAN.md — PatternsTab: word cloud + AI narrative + stats + daily/weekly toggle
-- [ ] 04-08-PLAN.md — Human verification checkpoint (end-to-end Phase 04 flows)
+- [x] 04-08-PLAN.md — Human verification checkpoint (end-to-end Phase 04 flows) (completed 2026-04-16)
 
 ---
 
