@@ -64,7 +64,7 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — node-llama-cpp install + postinstall fix + ASAR exclusion + externalization
 - [x] 04-02-PLAN.md — DB schema: ai_insights column, notes_fts FTS5 table + backfill, digests table
-- [ ] 04-03-PLAN.md — AI worker local model dispatch + FTS5 retrieval + insights schema extension
+- [x] 04-03-PLAN.md — AI worker local model dispatch + FTS5 retrieval + insights schema extension
 - [ ] 04-04-PLAN.md — Digest generation pipeline (scheduler, Brave Search, worker narrative, digest storage)
 - [ ] 04-05-PLAN.md — Settings: Brave API key + local model tier UI + new IPC channels in preload
 - [ ] 04-06-PLAN.md — NoteCard insight rendering (italic amber, live via note:aiUpdate)
