@@ -5,15 +5,23 @@ import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
-import { deleteNote, hideNote, insertNoteToFts } from './db'
+import { deleteNote, hideNote, insertNoteToFts, getSqlite } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
+import { detectModelTier, findExistingModel, getModelStoragePath } from './localModel'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
 // both of which run after app is ready.
-const conf = new Conf<{ apiKeyEncrypted: string; provider: string; ollamaModel: string }>({ name: 'settings' })
+const conf = new Conf<{
+  apiKeyEncrypted: string
+  provider: string
+  ollamaModel: string
+  braveKeyEncrypted: string
+  modelTier: string
+  modelPath: string
+}>({ name: 'settings' })
 
 // Real implementation replacing the 02-02 stub.
 // safeStorage is only called here — never at module load time.
@@ -41,10 +49,16 @@ export function getOllamaModel(): string {
   return conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
 }
 
-// Stub — returns null in v1. Plan 04-05 replaces this with real safeStorage decrypt
-// for the Brave Search API key.
+// Returns the decrypted Brave Search API key, or null if not configured.
+// safeStorage is only called here inside app-ready context.
 export function getBraveKey(): string | null {
-  return null
+  const encStr = conf.get('braveKeyEncrypted', '') as string
+  if (!encStr) return null
+  try {
+    return safeStorage.decryptString(Buffer.from(encStr, 'base64'))
+  } catch {
+    return null
+  }
 }
 
 export function registerIpcHandlers() {
@@ -81,7 +95,7 @@ export function registerIpcHandlers() {
   })
 
   // safeStorage is safe here — ipcMain.handle() callbacks only fire after app is ready
-  ipcMain.handle('settings:save', (_event, { key, provider, ollamaModel }: { key: string; provider: string; ollamaModel?: string }) => {
+  ipcMain.handle('settings:save', (_event, { key, provider, ollamaModel, braveKey }: { key: string; provider: string; ollamaModel?: string; braveKey?: string }) => {
     if (key) {
       const encrypted = safeStorage.encryptString(key)
       conf.set('apiKeyEncrypted', encrypted.toString('base64'))
@@ -89,11 +103,23 @@ export function registerIpcHandlers() {
     conf.set('provider', provider)
     if (ollamaModel) conf.set('ollamaModel', ollamaModel)
 
-    const resolvedKey = provider === 'ollama' ? 'ollama' : (key || getDecryptedApiKey() || '')
+    if (braveKey) {
+      const encryptedBrave = safeStorage.encryptString(braveKey)
+      conf.set('braveKeyEncrypted', encryptedBrave.toString('base64'))
+    }
+
+    let resolvedModelPath = ''
+    if (provider === 'local') {
+      const tier = detectModelTier()
+      conf.set('modelTier', tier)
+      resolvedModelPath = findExistingModel(tier) ?? getModelStoragePath()
+    }
+
+    const resolvedKey = (provider === 'ollama' || provider === 'local') ? provider : (key || getDecryptedApiKey() || '')
     const resolvedModel = ollamaModel || getOllamaModel()
     const workerPort = getWorkerPort()
     if (workerPort) {
-      workerPort.postMessage({ type: 'settings-update', provider, apiKey: resolvedKey, ollamaModel: resolvedModel })
+      workerPort.postMessage({ type: 'settings-update', provider, apiKey: resolvedKey, ollamaModel: resolvedModel, modelPath: resolvedModelPath })
     }
   })
 
@@ -101,8 +127,8 @@ export function registerIpcHandlers() {
     const provider = conf.get('provider', 'claude') as string
     const ollamaModel = conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
     const encStr = conf.get('apiKeyEncrypted', '') as string
-    let hasKey = provider === 'ollama' ? true : false
-    if (encStr && provider !== 'ollama') {
+    let hasKey = (provider === 'ollama' || provider === 'local') ? true : false
+    if (encStr && provider !== 'ollama' && provider !== 'local') {
       try {
         safeStorage.decryptString(Buffer.from(encStr, 'base64'))
         hasKey = true
@@ -110,7 +136,20 @@ export function registerIpcHandlers() {
         hasKey = false
       }
     }
-    return { provider, hasKey, ollamaModel }
+
+    const braveEncStr = conf.get('braveKeyEncrypted', '') as string
+    let hasBraveKey = false
+    if (braveEncStr) {
+      try {
+        safeStorage.decryptString(Buffer.from(braveEncStr, 'base64'))
+        hasBraveKey = true
+      } catch {
+        hasBraveKey = false
+      }
+    }
+
+    const modelTier = conf.get('modelTier', detectModelTier()) as string
+    return { provider, hasKey, ollamaModel, hasBraveKey, modelTier }
   })
 
   ipcMain.handle('kb:listFiles', async () => listKbFiles())
@@ -123,5 +162,18 @@ export function registerIpcHandlers() {
     const colors = getTagColors()
     colors[tag] = color
     setTagColors(colors)
+  })
+
+  ipcMain.handle('localModel:getStatus', () => {
+    const tier = conf.get('modelTier', detectModelTier()) as string
+    const modelPath = findExistingModel(tier as import('./localModel').ModelTier) ?? null
+    return { tier, modelPath, ready: !!modelPath }
+  })
+
+  ipcMain.handle('digests:getLatest', (_e, period: string) => {
+    const row = getSqlite().prepare(
+      `SELECT * FROM digests WHERE period=? ORDER BY generated_at DESC LIMIT 1`
+    ).get(period) as any
+    return row ?? null
   })
 }
