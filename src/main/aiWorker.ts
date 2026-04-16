@@ -75,6 +75,163 @@ async function initLocalModel(modelPath: string): Promise<void> {
   }
 }
 
+/**
+ * Call Brave Search API and return a concatenated string of results.
+ * Returns empty string on any error — never throws.
+ */
+async function searchBrave(query: string, apiKey: string): Promise<string> {
+  try {
+    const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`
+    const res = await fetch(url, {
+      headers: {
+        'X-Subscription-Token': apiKey,
+        'Accept': 'application/json',
+      },
+    })
+    if (!res.ok) return ''
+    const data = await res.json() as { web?: { results?: Array<{ title?: string; description?: string }> } }
+    const results = data?.web?.results ?? []
+    return results
+      .map((r) => `${r.title ?? ''}: ${r.description ?? ''}`)
+      .join('\n')
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Build the prompt for digest narrative generation.
+ */
+function buildDigestPrompt(wordCloudData: string, stats: string, webContext: string): string {
+  const webSection = webContext
+    ? `\n## Recent Web Context\n${webContext}`
+    : ''
+  return `You are an AI assistant summarizing a user's notes for a period digest.
+
+## Word Cloud Data (tag frequencies)
+${wordCloudData}
+
+## Stats
+${stats}
+${webSection}
+
+Write a narrative digest paragraph summarizing what topics and ideas dominated this period. Be specific and concrete. Focus on patterns and connections. 2-4 sentences.
+
+Respond with ONLY a JSON object: {"narrative": "..."}`
+}
+
+/**
+ * Call AI with an arbitrary prompt string (no buildPrompt, no grammar enforcement).
+ * Used for digest narrative generation.
+ */
+async function callAIWithPrompt(prompt: string): Promise<string> {
+  if (provider === 'local') {
+    if (!localModelReady && localModelInitPromise) {
+      await localModelInitPromise
+    }
+    if (!localModelReady) {
+      throw new Error('[aiWorker] Local model not ready for digest generation')
+    }
+    return llamaSession.prompt(prompt)
+  }
+  if (provider === 'ollama') {
+    const client = new OpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollama' })
+    const resp = await client.chat.completions.create({
+      model: ollamaModel,
+      max_tokens: 512,
+      messages: [{ role: 'user', content: prompt }],
+    })
+    return resp.choices[0].message.content ?? ''
+  }
+  if (!apiKey) throw new Error('No API key configured')
+  if (provider === 'openai') {
+    const client = new OpenAI({ apiKey })
+    const resp = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      max_tokens: 512,
+      response_format: { type: 'json_object' },
+      messages: [{ role: 'user', content: prompt }],
+    })
+    return resp.choices[0].message.content ?? ''
+  }
+  // Default: Claude
+  const client = new Anthropic({ apiKey })
+  const msg = await client.messages.create({
+    model: 'claude-haiku-4-5',
+    max_tokens: 512,
+    messages: [{ role: 'user', content: prompt }],
+  })
+  const block = msg.content.find((b) => b.type === 'text')
+  if (!block || block.type !== 'text') throw new Error('Unexpected Claude response: no text block')
+  return block.text
+}
+
+/**
+ * Handle a digest-task message. Fire-and-forget (not queued with note tasks).
+ * Generates narrative via AI, optionally enriched by Brave Search.
+ * Posts digest-result back to taskPort on success. Silent on failure.
+ */
+async function handleDigestTask({
+  period,
+  periodStart,
+  wordCloudData,
+  stats,
+  braveKey,
+}: {
+  period: string
+  periodStart: string
+  wordCloudData: string
+  stats: string
+  braveKey: string
+}): Promise<void> {
+  try {
+    let webContext = ''
+    if (braveKey && braveKey.length > 0) {
+      // Build search query from top 3 tags
+      let topTags: string[] = []
+      try {
+        const wc = JSON.parse(wordCloudData) as Array<{ text: string; value: number }>
+        topTags = wc.slice(0, 3).map((w) => w.text)
+      } catch {
+        // ignore parse error
+      }
+      if (topTags.length > 0) {
+        const query = `topics: ${topTags.join(' ')}`
+        webContext = await searchBrave(query, braveKey)
+      }
+    }
+
+    const prompt = buildDigestPrompt(wordCloudData, stats, webContext)
+    const raw = await callAIWithPrompt(prompt)
+    // Strip markdown code fences if present
+    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    let narrative = ''
+    try {
+      const parsed = JSON.parse(cleaned) as { narrative: string }
+      narrative = parsed.narrative ?? cleaned
+    } catch {
+      // If JSON parse fails, use raw output as narrative
+      narrative = cleaned
+    }
+
+    const generatedAt = new Date().toISOString()
+    if (taskPort) {
+      taskPort.postMessage({
+        type: 'digest-result',
+        period,
+        periodStart,
+        wordCloudData,
+        narrative,
+        stats,
+        generatedAt,
+      })
+      console.log('[aiWorker] digest-result posted for period', period)
+    }
+  } catch (err) {
+    console.error('[aiWorker] digest-task failed (best-effort, not propagating):', err)
+  }
+}
+
 function handleMessage(event: Electron.MessageEvent): void {
   const { type, noteId, rawText, contextMd, conceptSnippets, relatedNotes } = event.data
   if (type === 'task') {
@@ -96,11 +253,11 @@ function handleMessage(event: Electron.MessageEvent): void {
     apiKey = event.data.apiKey ?? apiKey
     ollamaModel = event.data.ollamaModel ?? ollamaModel
   }
-  // digest-task: full implementation in plan 04-04. Stub here so the message type
-  // is handled without crashing the worker.
+  // digest-task: full implementation (plan 04-04)
   if (type === 'digest-task') {
-    console.log('[aiWorker] TODO: digest-task handler not yet implemented (plan 04-04)')
-    taskPort?.postMessage({ type: 'digest-result', stub: true })
+    const { period, periodStart, wordCloudData, stats, braveKey } = event.data
+    // Fire and forget — do not block the main note queue
+    handleDigestTask({ period, periodStart, wordCloudData, stats, braveKey })
   }
 }
 
