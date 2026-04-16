@@ -2,8 +2,9 @@ import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeI
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { registerIpcHandlers, getDecryptedApiKey, getProvider } from './ipc'
+import { registerIpcHandlers, getDecryptedApiKey, getProvider, getOllamaModel } from './ipc'
 import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
+import { checkAndScheduleDigest } from './digestScheduler'
 
 let tray: Tray | null = null
 let isQuiting = false
@@ -124,8 +125,11 @@ app.whenReady().then(() => {
   // Start AI worker with the persisted provider + decrypted API key.
   // getDecryptedApiKey() reads from electron-conf + safeStorage — safe here
   // because we are inside app.whenReady().
-  startAiWorker(win, getProvider(), getDecryptedApiKey() ?? '')
+  const provider = getProvider()
+  const apiKey = provider === 'ollama' ? 'ollama' : (getDecryptedApiKey() ?? '')
+  startAiWorker(win, provider, apiKey, getOllamaModel())
   reQueuePendingNotes()
+  checkAndScheduleDigest()
 
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
   globalShortcut.register('CommandOrControl+Shift+Space', () => {

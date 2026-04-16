@@ -41,6 +41,12 @@ export function getOllamaModel(): string {
   return conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
 }
 
+// Stub — returns null in v1. Plan 04-05 replaces this with real safeStorage decrypt
+// for the Brave Search API key.
+export function getBraveKey(): string | null {
+  return null
+}
+
 export function registerIpcHandlers() {
   ipcMain.handle('notes:getAll', () => {
     const db = getDb()
