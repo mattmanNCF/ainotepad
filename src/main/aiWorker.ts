@@ -252,6 +252,11 @@ function handleMessage(event: Electron.MessageEvent): void {
     provider = event.data.provider ?? provider
     apiKey = event.data.apiKey ?? apiKey
     ollamaModel = event.data.ollamaModel ?? ollamaModel
+    if (provider === 'local' && event.data.modelPath) {
+      localModelPath = event.data.modelPath
+      localModelReady = false
+      localModelInitPromise = initLocalModel(localModelPath)
+    }
   }
   // digest-task: full implementation (plan 04-04)
   if (type === 'digest-task') {
