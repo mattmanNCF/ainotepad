@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: search
-current_plan: Not started
-status: planning
-stopped_at: Completed 03-karpathy-wiki-03-PLAN.md
-last_updated: "2026-04-16T05:01:47.346Z"
+current_plan: 2
+status: executing
+stopped_at: Completed 04-search-02-PLAN.md
+last_updated: "2026-04-16T07:13:43.416Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
-  percent: 92
+  total_plans: 21
+  completed_plans: 14
+  percent: 67
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 04
 - **Current Phase Name:** search
-- **Current Plan:** Not started
-- **Total Plans in Phase:** 4
+- **Current Plan:** 2
+- **Total Plans in Phase:** 8
 - **Total Phases:** 6
-- **Status:** Ready to plan
-- **Progress:** [█████████░] 92%
+- **Status:** Ready to execute
+- **Progress:** [███████░░░] 67%
 - **Last Activity:** 2026-04-16
-- **Stopped At:** Completed 03-karpathy-wiki-03-PLAN.md
+- **Stopped At:** Completed 04-search-02-PLAN.md
 
 ---
 
@@ -102,6 +102,8 @@ progress:
 - [Phase 03-karpathy-wiki]: notes:create ipcMain.handle made async to await enqueueNote; ipc.ts imports tagColors.ts directly, no getConf() export
 - [Phase 03-karpathy-wiki]: useRef (not useState) for WikiTab content cache — ref mutations don't invalidate useCallback deps, preventing infinite re-render loop
 - [Phase 03-karpathy-wiki]: remark-wiki-link permalinks derived from existingFiles — required to distinguish known vs new wiki links in rendered Markdown
+- [Phase 04-search]: FTS5 standalone non-content-table with raw_text + note_id UNINDEXED chosen to avoid better-sqlite3 trigger bugs
+- [Phase 04-search]: sqlite instance moved to module scope; getSqlite() accessor for raw-SQL FTS5 helpers
 
 ## Notes
 
