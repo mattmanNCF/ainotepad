@@ -1,10 +1,11 @@
 import { ipcMain } from 'electron'
 import { safeStorage } from 'electron'
 import { randomUUID } from 'crypto'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
+import { deleteNote, hideNote, insertNoteToFts } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
@@ -12,7 +13,7 @@ import { getTagColors, setTagColors } from './tagColors'
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
 // both of which run after app is ready.
-const conf = new Conf<{ apiKeyEncrypted: string; provider: string }>({ name: 'settings' })
+const conf = new Conf<{ apiKeyEncrypted: string; provider: string; ollamaModel: string }>({ name: 'settings' })
 
 // Real implementation replacing the 02-02 stub.
 // safeStorage is only called here — never at module load time.
@@ -36,17 +37,26 @@ export function getProvider(): string {
   return conf.get('provider', 'claude') as string
 }
 
+export function getOllamaModel(): string {
+  return conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
+}
+
 export function registerIpcHandlers() {
   ipcMain.handle('notes:getAll', () => {
     const db = getDb()
-    return db.select().from(notes).orderBy(desc(notes.submittedAt)).all()
+    return db.select().from(notes).where(eq(notes.hidden, 0)).orderBy(desc(notes.submittedAt)).all()
   })
+
+  ipcMain.handle('notes:delete', (_event, id: string) => deleteNote(id))
+
+  ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))
 
   ipcMain.handle('notes:create', async (_event, rawText: string) => {
     const db = getDb()
     const now = new Date().toISOString()
     const id = randomUUID()
     db.insert(notes).values({ id, rawText, submittedAt: now }).run()
+    insertNoteToFts(id, rawText)
     const record = {
       id,
       rawText,
@@ -65,25 +75,28 @@ export function registerIpcHandlers() {
   })
 
   // safeStorage is safe here — ipcMain.handle() callbacks only fire after app is ready
-  ipcMain.handle('settings:save', (_event, { key, provider }: { key: string; provider: string }) => {
-    const encrypted = safeStorage.encryptString(key)
-    conf.set('apiKeyEncrypted', encrypted.toString('base64'))
+  ipcMain.handle('settings:save', (_event, { key, provider, ollamaModel }: { key: string; provider: string; ollamaModel?: string }) => {
+    if (key) {
+      const encrypted = safeStorage.encryptString(key)
+      conf.set('apiKeyEncrypted', encrypted.toString('base64'))
+    }
     conf.set('provider', provider)
+    if (ollamaModel) conf.set('ollamaModel', ollamaModel)
 
-    // Notify the already-running worker so it refreshes its in-memory apiKey and provider.
-    // Without this, notes submitted in the same session after key entry would call callAI()
-    // with the stale empty apiKey and fail with "No API key configured".
+    const resolvedKey = provider === 'ollama' ? 'ollama' : (key || getDecryptedApiKey() || '')
+    const resolvedModel = ollamaModel || getOllamaModel()
     const workerPort = getWorkerPort()
     if (workerPort) {
-      workerPort.postMessage({ type: 'settings-update', provider, apiKey: key })
+      workerPort.postMessage({ type: 'settings-update', provider, apiKey: resolvedKey, ollamaModel: resolvedModel })
     }
   })
 
   ipcMain.handle('settings:get', () => {
     const provider = conf.get('provider', 'claude') as string
+    const ollamaModel = conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
     const encStr = conf.get('apiKeyEncrypted', '') as string
-    let hasKey = false
-    if (encStr) {
+    let hasKey = provider === 'ollama' ? true : false
+    if (encStr && provider !== 'ollama') {
       try {
         safeStorage.decryptString(Buffer.from(encStr, 'base64'))
         hasKey = true
@@ -91,7 +104,7 @@ export function registerIpcHandlers() {
         hasKey = false
       }
     }
-    return { provider, hasKey }
+    return { provider, hasKey, ollamaModel }
   })
 
   ipcMain.handle('kb:listFiles', async () => listKbFiles())
