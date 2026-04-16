@@ -1,4 +1,4 @@
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
 
 export const notes = sqliteTable('notes', {
   id: text('id').primaryKey(),
@@ -8,6 +8,8 @@ export const notes = sqliteTable('notes', {
   aiAnnotation: text('ai_annotation'),
   organizedText: text('organized_text'),
   tags: text('tags').notNull().default('[]'),
+  aiInsights: text('ai_insights'),
+  hidden: integer('hidden').notNull().default(0),
 })
 
 export type Note = typeof notes.$inferSelect
@@ -24,3 +26,16 @@ export const kbPages = sqliteTable('kb_pages', {
 
 export type KbPage = typeof kbPages.$inferSelect
 export type NewKbPage = typeof kbPages.$inferInsert
+
+export const digests = sqliteTable('digests', {
+  id: text('id').primaryKey(),
+  period: text('period').notNull(),
+  periodStart: text('period_start').notNull(),
+  wordCloudData: text('word_cloud_data').notNull(),
+  narrative: text('narrative').notNull(),
+  stats: text('stats').notNull(),
+  generatedAt: text('generated_at').notNull(),
+})
+
+export type Digest = typeof digests.$inferSelect
+export type NewDigest = typeof digests.$inferInsert
