@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: search
-current_plan: 6
+current_plan: 8
 status: executing
-stopped_at: Completed 04-search-04-05-PLAN.md
-last_updated: "2026-04-16T07:37:57.003Z"
+stopped_at: Completed 04-search-04-06-PLAN.md
+last_updated: "2026-04-16T07:40:21.436Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 21
-  completed_plans: 18
-  percent: 86
+  completed_plans: 20
+  percent: 95
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 04
 - **Current Phase Name:** search
-- **Current Plan:** 6
+- **Current Plan:** 8
 - **Total Plans in Phase:** 8
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [█████████░] 86%
+- **Progress:** [██████████] 95%
 - **Last Activity:** 2026-04-16
-- **Stopped At:** Completed 04-search-04-05-PLAN.md
+- **Stopped At:** Completed 04-search-04-06-PLAN.md
 
 ---
 
@@ -115,6 +115,9 @@ progress:
 - [Phase 04-search]: preload/index.d.ts must be kept in sync with preload/index.ts — renderer TypeScript resolves Window.api types from .d.ts
 - [Phase 04-search]: settings:get returns hasKey=true for both ollama and local providers (no API key needed)
 - [Phase 04-search]: settings:save posts modelPath in settings-update worker message when provider=local
+- [Phase 04-search]: NoteRecord interface uses aiInsights (Drizzle camelCase) while onAiUpdate handler reads data.insights (live-push field name)
+- [Phase 04-search]: SearchTab.tsx replaced with single-line re-export alias for PatternsTab to preserve App.tsx import without changes
+- [Phase 04-search]: Tab id 'search' kept unchanged; only label changed to 'Patterns' to avoid App.tsx activeTab state changes
 
 ## Notes
 
