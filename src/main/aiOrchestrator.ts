@@ -1,5 +1,6 @@
 import { utilityProcess, MessageChannelMain, BrowserWindow } from 'electron'
 import path from 'path'
+import { randomUUID } from 'crypto'
 import { updateNoteAiResult, getDb, getSqlite } from './db'
 import { notes, kbPages } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
@@ -32,6 +33,25 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
 
   port1.on('message', async (event) => {
     const { type, noteId, aiState, aiAnnotation, organizedText, wikiUpdates, tags, insights, errorMsg } = event.data
+
+    if (type === 'digest-result') {
+      const { period, periodStart, wordCloudData, narrative, stats, generatedAt } = event.data
+      const id = randomUUID()
+      try {
+        getSqlite().prepare(
+          `INSERT INTO digests (id, period, period_start, word_cloud_data, narrative, stats, generated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
+        ).run(id, period, periodStart, wordCloudData, narrative, stats, generatedAt)
+        if (mainWin && !mainWin.webContents.isDestroyed()) {
+          mainWin.webContents.send('digest:updated', { period, periodStart, narrative, stats, wordCloudData })
+        }
+        console.log('[aiOrchestrator] digest stored and renderer notified, id:', id)
+      } catch (err) {
+        console.error('[aiOrchestrator] Failed to store digest:', err)
+      }
+      return
+    }
+
     if (type === 'result') {
       if (aiState === 'failed') console.error('[aiOrchestrator] worker failed for note', noteId, '—', errorMsg)
       const tagsJson = JSON.stringify(tags ?? [])
