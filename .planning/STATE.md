@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: search
-current_plan: 5
+current_plan: 6
 status: executing
-stopped_at: Completed 04-search-04-04-PLAN.md
-last_updated: "2026-04-16T07:32:25.019Z"
+stopped_at: Completed 04-search-04-05-PLAN.md
+last_updated: "2026-04-16T07:37:57.003Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 21
-  completed_plans: 17
-  percent: 81
+  completed_plans: 18
+  percent: 86
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 04
 - **Current Phase Name:** search
-- **Current Plan:** 5
+- **Current Plan:** 6
 - **Total Plans in Phase:** 8
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [████████░░] 81%
+- **Progress:** [█████████░] 86%
 - **Last Activity:** 2026-04-16
-- **Stopped At:** Completed 04-search-04-04-PLAN.md
+- **Stopped At:** Completed 04-search-04-05-PLAN.md
 
 ---
 
@@ -112,6 +112,9 @@ progress:
 - [Phase 04-search]: queryRelatedNotes returns empty string on error (safe before FTS5 migration)
 - [Phase 04-search]: Word cloud built in main process (digestScheduler) not worker — data aggregation stays with DB access
 - [Phase 04-search]: callAIWithPrompt() added as separate function for digest narrative — skips buildPrompt/grammar enforcement
+- [Phase 04-search]: preload/index.d.ts must be kept in sync with preload/index.ts — renderer TypeScript resolves Window.api types from .d.ts
+- [Phase 04-search]: settings:get returns hasKey=true for both ollama and local providers (no API key needed)
+- [Phase 04-search]: settings:save posts modelPath in settings-update worker message when provider=local
 
 ## Notes
 
