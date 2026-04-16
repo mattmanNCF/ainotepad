@@ -1,6 +1,6 @@
 import { utilityProcess, MessageChannelMain, BrowserWindow } from 'electron'
 import path from 'path'
-import { updateNoteAiResult, getDb } from './db'
+import { updateNoteAiResult, getDb, getSqlite } from './db'
 import { notes, kbPages } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import { writeKbFile, readKbFile, listKbFiles } from './kb'
@@ -16,23 +16,26 @@ export function getWorkerPort(): Electron.MessagePortMain | null {
   return workerPort
 }
 
-export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string): void {
+export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string, ollamaModel: string): void {
   mainWin = win
 
-  const child = utilityProcess.fork(path.join(__dirname, 'aiWorker.js'))
+  const child = utilityProcess.fork(path.join(__dirname, 'aiWorker.js'), [], { stdio: 'pipe' })
+  child.stdout?.on('data', (d: Buffer) => console.log('[aiWorker stdout]', d.toString()))
+  child.stderr?.on('data', (d: Buffer) => console.error('[aiWorker stderr]', d.toString()))
   const { port1, port2 } = new MessageChannelMain()
 
   // Transfer port2 to the worker in the init message
-  child.postMessage({ type: 'init', provider, apiKey }, [port2])
+  child.postMessage({ type: 'init', provider, apiKey, ollamaModel }, [port2])
 
   workerPort = port1
   port1.start() // REQUIRED: port is paused until start() is called
 
   port1.on('message', async (event) => {
-    const { type, noteId, aiState, aiAnnotation, organizedText, wikiUpdates, tags } = event.data
+    const { type, noteId, aiState, aiAnnotation, organizedText, wikiUpdates, tags, insights, errorMsg } = event.data
     if (type === 'result') {
+      if (aiState === 'failed') console.error('[aiOrchestrator] worker failed for note', noteId, '—', errorMsg)
       const tagsJson = JSON.stringify(tags ?? [])
-      updateNoteAiResult(noteId, aiState as 'complete' | 'failed', aiAnnotation ?? null, organizedText ?? null, tagsJson)
+      updateNoteAiResult(noteId, aiState as 'complete' | 'failed', aiAnnotation ?? null, organizedText ?? null, tagsJson, insights ?? null)
 
       // Write wiki files to kb/
       if (wikiUpdates && wikiUpdates.length > 0) {
@@ -86,10 +89,40 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
 
       // Always push note AI update to renderer — include tags so NoteCard can display colored indicators
       if (mainWin && !mainWin.webContents.isDestroyed()) {
-        mainWin.webContents.send('note:aiUpdate', { noteId, aiState, aiAnnotation, organizedText, tags: tags ?? [] })
+        mainWin.webContents.send('note:aiUpdate', { noteId, aiState, aiAnnotation, organizedText, tags: tags ?? [], insights: insights ?? null })
       }
     }
   })
+}
+
+/**
+ * Query the FTS5 index for notes semantically related to the given raw text.
+ * Extracts up to 10 words from rawText as query terms (OR-joined).
+ * Returns a formatted string of snippets, or '' on any error.
+ */
+function queryRelatedNotes(rawText: string): string {
+  try {
+    const words = rawText
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2)
+      .slice(0, 10)
+    if (words.length === 0) return ''
+    const ftsQuery = words.join(' OR ')
+    const rows = getSqlite()
+      .prepare(
+        `SELECT note_id, snippet(notes_fts, 0, '', '', '...', 20) as snip
+         FROM notes_fts
+         WHERE notes_fts MATCH ?
+         ORDER BY rank
+         LIMIT 5`
+      )
+      .all(ftsQuery) as Array<{ note_id: string; snip: string }>
+    return rows.map(r => r.snip).join('\n---\n')
+  } catch {
+    // FTS5 may not exist on first launch before migration — safe to return empty
+    return ''
+  }
 }
 
 export async function enqueueNote(noteId: string, rawText: string): Promise<void> {
@@ -117,7 +150,10 @@ export async function enqueueNote(noteId: string, rawText: string): Promise<void
   )
   const conceptSnippets = snippets.join('\n\n')
 
-  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets })
+  // FTS5 retrieval: find related notes from the user's history to ground AI insights
+  const relatedNotes = queryRelatedNotes(rawText)
+
+  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes })
 }
 
 export function reQueuePendingNotes(): void {
