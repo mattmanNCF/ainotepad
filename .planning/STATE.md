@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: search
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 04-search-02-PLAN.md
-last_updated: "2026-04-16T07:13:43.416Z"
+stopped_at: Completed 04-search-04-01-PLAN.md
+last_updated: "2026-04-16T07:21:09.536Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 21
-  completed_plans: 14
-  percent: 67
+  completed_plans: 15
+  percent: 71
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 04
 - **Current Phase Name:** search
-- **Current Plan:** 2
+- **Current Plan:** 3
 - **Total Plans in Phase:** 8
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [███████░░░] 67%
+- **Progress:** [███████░░░] 71%
 - **Last Activity:** 2026-04-16
-- **Stopped At:** Completed 04-search-02-PLAN.md
+- **Stopped At:** Completed 04-search-04-01-PLAN.md
 
 ---
 
@@ -104,6 +104,9 @@ progress:
 - [Phase 03-karpathy-wiki]: remark-wiki-link permalinks derived from existingFiles — required to distinguish known vs new wiki links in rendered Markdown
 - [Phase 04-search]: FTS5 standalone non-content-table with raw_text + note_id UNINDEXED chosen to avoid better-sqlite3 trigger bugs
 - [Phase 04-search]: sqlite instance moved to module scope; getSqlite() accessor for raw-SQL FTS5 helpers
+- [Phase 04-search]: react-d3-cloud installed with --legacy-peer-deps due to React 19 peer dep conflict; works at runtime
+- [Phase 04-search]: node-llama-cpp externalized in both main and preload rollup builds; asarUnpack configured for native binaries
+- [Phase 04-search]: Windows EPERM on unlink for better_sqlite3.node resolved by pre-deleting with bash rm before electron-rebuild
 
 ## Notes
 
