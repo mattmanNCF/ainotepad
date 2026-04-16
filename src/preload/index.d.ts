@@ -12,11 +12,20 @@ interface Window {
     notes: {
       getAll: () => Promise<NoteRecord[]>
       create: (rawText: string) => Promise<NoteRecord>
+      delete: (id: string) => Promise<void>
+      hide: (id: string) => Promise<void>
     }
-    onAiUpdate: (cb: (data: { noteId: string; aiState: string; aiAnnotation: string | null; organizedText: string | null; tags: string[] }) => void) => () => void
+    onAiUpdate: (cb: (data: {
+      noteId: string
+      aiState: string
+      aiAnnotation: string | null
+      organizedText: string | null
+      tags: string[]
+      insights: string | null
+    }) => void) => () => void
     settings: {
-      save: (key: string, provider: string) => Promise<void>
-      get: () => Promise<{ provider: string; hasKey: boolean }>
+      save: (key: string, provider: string, ollamaModel?: string, braveKey?: string) => Promise<void>
+      get: () => Promise<{ provider: string; hasKey: boolean; ollamaModel: string; hasBraveKey: boolean; modelTier: string }>
     }
     kb: {
       listFiles: () => Promise<string[]>
@@ -24,6 +33,13 @@ interface Window {
       getTagColors: () => Promise<Record<string, string>>
       setTagColor: (tag: string, color: string) => Promise<void>
       onUpdated: (cb: () => void) => () => void
+    }
+    localModel: {
+      getStatus: () => Promise<{ tier: string; modelPath: string | null; ready: boolean }>
+    }
+    digest: {
+      getLatest: (period: string) => Promise<any>
+      onUpdated: (cb: (data: { period: string; periodStart: string; narrative: string; stats: string; wordCloudData: string }) => void) => () => void
     }
   }
 }

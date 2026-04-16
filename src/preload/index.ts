@@ -4,6 +4,8 @@ contextBridge.exposeInMainWorld('api', {
   notes: {
     getAll: () => ipcRenderer.invoke('notes:getAll'),
     create: (rawText: string) => ipcRenderer.invoke('notes:create', rawText),
+    delete: (id: string) => ipcRenderer.invoke('notes:delete', id),
+    hide: (id: string) => ipcRenderer.invoke('notes:hide', id),
   },
   onAiUpdate: (
     cb: (data: {
@@ -12,6 +14,7 @@ contextBridge.exposeInMainWorld('api', {
       aiAnnotation: string | null
       organizedText: string | null
       tags: string[]
+      insights: string | null
     }) => void
   ) => {
     const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
@@ -19,9 +22,9 @@ contextBridge.exposeInMainWorld('api', {
     return () => ipcRenderer.removeListener('note:aiUpdate', handler)
   },
   settings: {
-    save: (key: string, provider: string) =>
-      ipcRenderer.invoke('settings:save', { key, provider }),
-    get: (): Promise<{ provider: string; hasKey: boolean }> =>
+    save: (key: string, provider: string, ollamaModel?: string, braveKey?: string) =>
+      ipcRenderer.invoke('settings:save', { key, provider, ollamaModel, braveKey }),
+    get: (): Promise<{ provider: string; hasKey: boolean; ollamaModel: string; hasBraveKey: boolean; modelTier: string }> =>
       ipcRenderer.invoke('settings:get'),
   },
   kb: {
@@ -33,6 +36,18 @@ contextBridge.exposeInMainWorld('api', {
       const handler = (_event: Electron.IpcRendererEvent) => cb()
       ipcRenderer.on('kb:updated', handler)
       return () => ipcRenderer.removeListener('kb:updated', handler)
+    },
+  },
+  localModel: {
+    getStatus: (): Promise<{ tier: string; modelPath: string | null; ready: boolean }> =>
+      ipcRenderer.invoke('localModel:getStatus'),
+  },
+  digest: {
+    getLatest: (period: string): Promise<any> => ipcRenderer.invoke('digests:getLatest', period),
+    onUpdated: (cb: (data: { period: string; periodStart: string; narrative: string; stats: string; wordCloudData: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('digest:updated', handler)
+      return () => ipcRenderer.removeListener('digest:updated', handler)
     },
   },
 })
