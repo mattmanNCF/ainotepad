@@ -7,7 +7,7 @@ export default defineConfig({
   main: {
     build: {
       rollupOptions: {
-        external: ['better-sqlite3', 'sqlite-vec'],
+        external: ['better-sqlite3', 'sqlite-vec', 'node-llama-cpp'],
         input: {
           index: resolve(__dirname, 'src/main/index.ts'),
           aiWorker: resolve(__dirname, 'src/main/aiWorker.ts'),
@@ -18,7 +18,7 @@ export default defineConfig({
   preload: {
     build: {
       rollupOptions: {
-        external: ['better-sqlite3', 'sqlite-vec']
+        external: ['better-sqlite3', 'sqlite-vec', 'node-llama-cpp']
       }
     }
   },
