@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 04
 current_phase_name: search
-current_plan: 4
+current_plan: 5
 status: executing
-stopped_at: Completed 04-search-04-03-PLAN.md
-last_updated: "2026-04-16T07:27:14.296Z"
+stopped_at: Completed 04-search-04-04-PLAN.md
+last_updated: "2026-04-16T07:32:25.019Z"
 last_activity: 2026-04-16
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 21
-  completed_plans: 16
-  percent: 76
+  completed_plans: 17
+  percent: 81
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 04
 - **Current Phase Name:** search
-- **Current Plan:** 4
+- **Current Plan:** 5
 - **Total Plans in Phase:** 8
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [████████░░] 76%
+- **Progress:** [████████░░] 81%
 - **Last Activity:** 2026-04-16
-- **Stopped At:** Completed 04-search-04-03-PLAN.md
+- **Stopped At:** Completed 04-search-04-04-PLAN.md
 
 ---
 
@@ -110,6 +110,8 @@ progress:
 - [Phase 04-search]: onProgress receives totalSize/downloadedSize; percent computed as ratio*100
 - [Phase 04-search]: InsufficientMemoryError caught in initLocalModel; CPU fallback via gpuLayers=0
 - [Phase 04-search]: queryRelatedNotes returns empty string on error (safe before FTS5 migration)
+- [Phase 04-search]: Word cloud built in main process (digestScheduler) not worker — data aggregation stays with DB access
+- [Phase 04-search]: callAIWithPrompt() added as separate function for digest narrative — skips buildPrompt/grammar enforcement
 
 ## Notes
 
