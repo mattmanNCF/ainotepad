@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('api', {
     create: (rawText: string) => ipcRenderer.invoke('notes:create', rawText),
     delete: (id: string) => ipcRenderer.invoke('notes:delete', id),
     hide: (id: string) => ipcRenderer.invoke('notes:hide', id),
+    reprocess: (id: string) => ipcRenderer.invoke('notes:reprocess', id),
   },
   onAiUpdate: (
     cb: (data: {

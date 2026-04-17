@@ -15,6 +15,7 @@ interface NoteCardProps {
   note: NoteRecord
   onDelete: (id: string) => void
   onHide: (id: string) => void
+  onReprocess: (id: string) => void
 }
 
 function formatTime(iso: string): string {
@@ -33,9 +34,9 @@ const aiStateStyle: Record<NoteRecord['aiState'], { border: string; badge: strin
 }
 
 const MENU_W = 130
-const MENU_H = 68
+const MENU_H = 96
 
-export function NoteCard({ note, onDelete, onHide }: NoteCardProps) {
+export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps) {
   const style = aiStateStyle[note.aiState]
   const [tags, setTags] = useState<string[]>([])
   const [tagColors, setTagColors] = useState<Record<string, string>>({})
@@ -120,6 +121,12 @@ export function NoteCard({ note, onDelete, onHide }: NoteCardProps) {
           style={{ position: 'fixed', left: menu.x, top: menu.y, zIndex: 9999 }}
           className="bg-[#1a1a14] border border-white/10 rounded shadow-xl py-1 min-w-[120px]"
         >
+          <button
+            onClick={() => { onReprocess(note.id); setMenu(null) }}
+            className="w-full text-left px-3 py-1.5 text-xs text-blue-400 hover:bg-white/5 hover:text-blue-300"
+          >
+            Reprocess
+          </button>
           <button
             onClick={() => { onHide(note.id); setMenu(null) }}
             className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-white/5 hover:text-white"

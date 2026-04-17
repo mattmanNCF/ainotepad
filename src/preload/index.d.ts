@@ -14,6 +14,7 @@ interface Window {
       create: (rawText: string) => Promise<NoteRecord>
       delete: (id: string) => Promise<void>
       hide: (id: string) => Promise<void>
+      reprocess: (id: string) => Promise<void>
     }
     onAiUpdate: (cb: (data: {
       noteId: string

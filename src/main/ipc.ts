@@ -5,7 +5,7 @@ import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
-import { deleteNote, hideNote, insertNoteToFts, getSqlite } from './db'
+import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
@@ -70,6 +70,19 @@ export function registerIpcHandlers() {
   ipcMain.handle('notes:delete', (_event, id: string) => deleteNote(id))
 
   ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))
+
+  ipcMain.handle('notes:reprocess', async (_event, id: string) => {
+    reprocessNote(id)
+    // Re-queue for AI processing
+    const db = getDb()
+    const record = db.select().from(notes).where(eq(notes.id, id)).get()
+    if (record) {
+      const apiKey = getDecryptedApiKey()
+      if (apiKey) {
+        await enqueueNote(id, record.rawText)
+      }
+    }
+  })
 
   ipcMain.handle('notes:create', async (_event, rawText: string) => {
     const db = getDb()

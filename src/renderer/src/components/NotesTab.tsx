@@ -82,7 +82,28 @@ export function NotesTab() {
         )}
         <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
           {notes.map((note) => (
-            <NoteCard key={note.id} note={note} />
+            <NoteCard
+              key={note.id}
+              note={note}
+              onDelete={(id) => {
+                window.api.notes.delete(id)
+                setNotes((prev) => prev.filter((n) => n.id !== id))
+              }}
+              onHide={(id) => {
+                window.api.notes.hide(id)
+                setNotes((prev) => prev.filter((n) => n.id !== id))
+              }}
+              onReprocess={(id) => {
+                window.api.notes.reprocess(id)
+                setNotes((prev) =>
+                  prev.map((n) =>
+                    n.id === id
+                      ? { ...n, aiState: 'pending' as const, aiAnnotation: null, organizedText: null }
+                      : n
+                  )
+                )
+              }}
+            />
           ))}
         </div>
       </div>
