@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 06
 current_phase_name: polish-and-ship
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-04-17T08:13:17.031Z"
+stopped_at: Completed 06-03-PLAN.md
+last_updated: "2026-04-17T08:15:41.718Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 26
-  completed_plans: 20
-  percent: 77
+  completed_plans: 21
+  percent: 81
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 06
 - **Current Phase Name:** polish-and-ship
-- **Current Plan:** 3
+- **Current Plan:** 4
 - **Total Plans in Phase:** 6
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [████████░░] 77%
+- **Progress:** [████████░░] 81%
 - **Last Activity:** 2026-04-17
-- **Stopped At:** Completed 06-02-PLAN.md
+- **Stopped At:** Completed 06-03-PLAN.md
 
 ---
 
@@ -124,6 +124,7 @@ progress:
 - [Phase 06]: zip target added alongside NSIS for portable Windows distribution in v0.1.0
 - [Phase 06]: artifactName uses ${productName} not ${name} so Notal-prefixed artifacts regardless of npm name
 - [Phase 06-polish-and-ship]: sharp installed with --legacy-peer-deps due to react-d3-cloud peer dep conflict; SVG inlined in script as Buffer to avoid Windows librsvg dependency
+- [Phase 06-03]: Used existing conf instance (not a new Conf) to preserve single-source-of-truth for onboarding settings
 
 ## Notes
 
