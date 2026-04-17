@@ -3,31 +3,31 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 06
-current_phase_name: polish & ship
-current_plan: Not started
-status: planning
-stopped_at: Phase 06 context gathered
-last_updated: "2026-04-17T07:22:59.662Z"
+current_phase_name: polish-and-ship
+current_plan: 2
+status: executing
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-17T08:09:48.702Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 24
-  completed_plans: 22
-  percent: 92
+  total_plans: 30
+  completed_plans: 23
+  percent: 77
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 06
-- **Current Phase Name:** polish & ship
-- **Current Plan:** Not started
-- **Total Plans in Phase:** 3
+- **Current Phase Name:** polish-and-ship
+- **Current Plan:** 2
+- **Total Plans in Phase:** 6
 - **Total Phases:** 6
-- **Status:** Ready to plan
-- **Progress:** [█████████░] 92%
+- **Status:** Ready to execute
+- **Progress:** [████████░░] 77%
 - **Last Activity:** 2026-04-17
-- **Stopped At:** Phase 06 context gathered
+- **Stopped At:** Completed 06-01-PLAN.md
 
 ---
 
@@ -121,6 +121,8 @@ progress:
 - [Phase 05-agent-layer]: @modelcontextprotocol/sdk bundled into ASAR (not externalized) — pure JS, no native binaries
 - [Phase 05-agent-layer]: StreamableHTTPServerTransport per request (stateless mode) — correct for read-only tools with no session state
 - [Phase 05-agent-layer]: isCleaningUp guard in before-quit prevents infinite loop when app.quit() re-triggers before-quit event
+- [Phase 06]: zip target added alongside NSIS for portable Windows distribution in v0.1.0
+- [Phase 06]: artifactName uses ${productName} not ${name} so Notal-prefixed artifacts regardless of npm name
 
 ## Notes
 
