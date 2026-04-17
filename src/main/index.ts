@@ -2,9 +2,10 @@ import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeI
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { registerIpcHandlers, getDecryptedApiKey, getProvider, getOllamaModel } from './ipc'
+import { registerIpcHandlers, getDecryptedApiKey, getProvider, getOllamaModel, getStartupModelPath } from './ipc'
 import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
 import { checkAndScheduleDigest } from './digestScheduler'
+import { startMcpServer } from './mcpServer'
 
 let tray: Tray | null = null
 let isQuiting = false
@@ -126,10 +127,24 @@ app.whenReady().then(() => {
   // getDecryptedApiKey() reads from electron-conf + safeStorage — safe here
   // because we are inside app.whenReady().
   const provider = getProvider()
-  const apiKey = provider === 'ollama' ? 'ollama' : (getDecryptedApiKey() ?? '')
-  startAiWorker(win, provider, apiKey, getOllamaModel())
+  const apiKey = provider === 'ollama' || provider === 'local' ? provider : (getDecryptedApiKey() ?? '')
+  const modelPath = getStartupModelPath(provider)
+  startAiWorker(win, provider, apiKey, getOllamaModel(), modelPath)
   reQueuePendingNotes()
   checkAndScheduleDigest()
+
+  // Start MCP server for external agent connectivity (http://127.0.0.1:7723/mcp)
+  const stopMcp = startMcpServer()
+  if (stopMcp) {
+    let isCleaningUp = false
+    app.on('before-quit', async (event) => {
+      if (isCleaningUp) return          // guard against double-fire loop
+      isCleaningUp = true
+      event.preventDefault()
+      await stopMcp()
+      app.quit()
+    })
+  }
 
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
   globalShortcut.register('CommandOrControl+Shift+Space', () => {
