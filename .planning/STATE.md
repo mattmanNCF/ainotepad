@@ -4,30 +4,30 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 06
 current_phase_name: polish-and-ship
-current_plan: 5
+current_plan: 6
 status: executing
-stopped_at: Completed 06-04-PLAN.md
-last_updated: "2026-04-17T08:18:44.847Z"
+stopped_at: Completed 06-05-PLAN.md
+last_updated: "2026-04-17T08:20:52.117Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 26
-  completed_plans: 22
-  percent: 85
+  completed_plans: 23
+  percent: 88
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 06
 - **Current Phase Name:** polish-and-ship
-- **Current Plan:** 5
+- **Current Plan:** 6
 - **Total Plans in Phase:** 6
 - **Total Phases:** 6
 - **Status:** Ready to execute
-- **Progress:** [█████████░] 85%
+- **Progress:** [█████████░] 88%
 - **Last Activity:** 2026-04-17
-- **Stopped At:** Completed 06-04-PLAN.md
+- **Stopped At:** Completed 06-05-PLAN.md
 
 ---
 
@@ -127,6 +127,7 @@ progress:
 - [Phase 06-03]: Used existing conf instance (not a new Conf) to preserve single-source-of-truth for onboarding settings
 - [Phase 06-04]: showOnboarding initialized false to prevent modal flash before IPC resolves on every launch
 - [Phase 06-04]: OnboardingModal overlay clicks handleSkip to mark onboarding done — consistent with SettingsPanel behavior
+- [Phase 06-polish-and-ship]: Tool names in README use actual registered names from mcpServer.ts (get_recent_notes, get_wiki_page) — plan listed expected names that differed from source
 
 ## Notes
 
