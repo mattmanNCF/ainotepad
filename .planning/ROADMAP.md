@@ -9,7 +9,7 @@
 | 03 | 1/4 | Complete    | 2026-04-16 | Pending |
 | 04 | AI Intelligence + Local Model + Patterns | Complete    | 2026-04-16 | Pending |
 | 05 | 2/3 | Complete    | 2026-04-17 | Pending |
-| 06 | Polish & Ship | 6 plans | 6/6 | Complete   | 2026-04-17 | Plan | Name | Status |
+| 06 | Polish & Ship | Complete    | 2026-04-17 | Complete   | 2026-04-17 | Plan | Name | Status |
 |------|------|--------|
 | 01-01 | Scaffold + three-tab shell | ✓ Complete (2026-04-14) |
 | 01-02 | SQLite DB layer + IPC handlers | ✓ Complete (2026-04-14) |
@@ -82,7 +82,7 @@ Plans:
 
 **Goal:** Onboarding, packaging, and distribution of Notal v0.1.0.
 
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — App identity update (package.json name/version, electron-builder.yml productName/appId/targets, SettingsPanel MCP rename)
