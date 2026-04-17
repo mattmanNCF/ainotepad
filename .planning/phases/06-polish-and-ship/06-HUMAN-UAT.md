@@ -1,14 +1,14 @@
 ---
-status: partial
+status: passed
 phase: 06-polish-and-ship
 source: [06-VERIFICATION.md]
 started: 2026-04-17T00:00:00Z
-updated: 2026-04-17T11:00:00Z
+updated: 2026-04-17T12:00:00Z
 ---
 
 ## Current Test
 
-Portable zip test pending.
+All tests passed.
 
 ## Tests
 
@@ -26,14 +26,14 @@ result: pass
 
 ### 4. Portable zip launches without install
 expected: Extracting dist/Notal-0.1.0-win-portable.zip and running the .exe inside launches Notal without any installation step required.
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 4
-passed: 3
+passed: 4
 issues: 0
-pending: 1
+pending: 0
 skipped: 0
 blocked: 0
 
