@@ -19,8 +19,41 @@ function stripFrontmatter(md: string): string {
   return md.replace(/^---[ \t]*[\r\n][\s\S]*?(?:[\r\n][ \t]*|[ \t])---[ \t]*(?:[\r\n]|$)/, '').trimStart()
 }
 
+// Normalize a name for fuzzy matching: lowercase, collapse spaces/underscores to hyphens.
+function normalize(s: string): string {
+  return s.toLowerCase().replace(/[\s_]+/g, '-')
+}
+
+// Build a map from normalized basename → full relative slug (without .md).
+// e.g. "concepts/Theory of Everything" → key "theory-of-everything" → value "concepts/Theory of Everything"
+// This lets [[Theory of Everything]] resolve to the correct subdir file.
+function buildPermalinkMap(existingFiles: string[]): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const f of existingFiles) {
+    const slug = f.replace(/\.md$/, '')                     // "concepts/Theory of Everything"
+    const basename = slug.split('/').pop()!                  // "Theory of Everything"
+    map.set(normalize(basename), slug)                       // "theory-of-everything" → full slug
+    map.set(normalize(slug), slug)                           // "concepts/theory-of-everything" → full slug
+    map.set(basename.toLowerCase(), slug)                    // "theory of everything" → full slug
+  }
+  return map
+}
+
 export function WikiMarkdown({ content, existingFiles, onNavigate, insights }: WikiMarkdownProps) {
-  const permalinks = existingFiles.map(f => f.replace(/\.md$/, ''))
+  const permalinkMap = buildPermalinkMap(existingFiles)
+  const permalinks = Array.from(new Set(permalinkMap.values()))
+
+  // Custom resolver: normalize the [[link text]] and look it up in the map.
+  // Returns the full slug if found (so hrefTemplate gets the real path),
+  // or falls back to the normalized name (renders as a "new page" link).
+  const pageResolver = (name: string): string[] => {
+    const byNorm = permalinkMap.get(normalize(name))
+    if (byNorm) return [byNorm]
+    const byLower = permalinkMap.get(name.toLowerCase())
+    if (byLower) return [byLower]
+    return [normalize(name)]
+  }
+
   const body = stripFrontmatter(content)
 
   return (
@@ -30,6 +63,7 @@ export function WikiMarkdown({ content, existingFiles, onNavigate, insights }: W
           remarkMath,
           [remarkWikiLink, {
             permalinks,
+            pageResolver,
             hrefTemplate: (permalink: string) => permalink,
             wikiLinkClassName: 'wiki-link',
             newClassName: 'wiki-link-new',
