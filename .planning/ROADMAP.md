@@ -8,7 +8,7 @@
 | 02 | AI Pipeline | Complete    | 2026-04-15 | Pending |
 | 03 | 1/4 | Complete    | 2026-04-16 | Pending |
 | 04 | AI Intelligence + Local Model + Patterns | Complete    | 2026-04-16 | Pending |
-| 05 | 2/3 | In Progress|  | Pending |
+| 05 | 2/3 | Complete    | 2026-04-17 | Pending |
 | 06 | Polish & Ship | TBD | 0 | Pending |
 
 ---
@@ -77,7 +77,7 @@ Plans:
 
 **Goal:** Expose AInotepad note and wiki data to external AI agents via a bundled MCP server. Read-only. HTTP transport on localhost:7723. 4 tools. Runs in Electron main process. No auth.
 
-**Plans:** 2/3 plans executed
+**Plans:** 2/3 plans complete
 
 Plans:
 - [x] 05-01-PLAN.md — MCP server core: install SDK, create mcpServer.ts with 4 tools, wire into index.ts
