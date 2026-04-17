@@ -30,11 +30,19 @@ function normalize(s: string): string {
 function buildPermalinkMap(existingFiles: string[]): Map<string, string> {
   const map = new Map<string, string>()
   for (const f of existingFiles) {
-    const slug = f.replace(/\.md$/, '')                     // "concepts/Theory of Everything"
-    const basename = slug.split('/').pop()!                  // "Theory of Everything"
-    map.set(normalize(basename), slug)                       // "theory-of-everything" → full slug
-    map.set(normalize(slug), slug)                           // "concepts/theory-of-everything" → full slug
-    map.set(basename.toLowerCase(), slug)                    // "theory of everything" → full slug
+    const slug = f.replace(/\.md$/, '')                     // "Theory of Everything (ToE)"
+    const basename = slug.split('/').pop()!                  // "Theory of Everything (ToE)"
+    map.set(normalize(basename), slug)                       // "theory-of-everything-(toe)" → slug
+    map.set(normalize(slug), slug)                           // same, full path variant
+    map.set(basename.toLowerCase(), slug)                    // exact lowercase
+
+    // Also index without trailing parenthetical: "Theory of Everything (ToE)" → "theory-of-everything"
+    // so [[Theory of Everything]] resolves when the file has an acronym suffix.
+    const withoutParen = basename.replace(/\s*\([^)]+\)\s*$/, '')
+    if (withoutParen !== basename) {
+      map.set(normalize(withoutParen), slug)
+      map.set(withoutParen.toLowerCase(), slug)
+    }
   }
   return map
 }
