@@ -27,6 +27,8 @@ export async function writeKbFile(filename: string, content: string): Promise<vo
   const normalized = normalizeFrontmatter(content)
   // Write to .tmp then rename — avoids Windows partial-write / file lock (STATE.md risk)
   const target = path.join(kbDir(), filename)
+  // Ensure subdirectory exists (AI may write to nested paths like concepts/physics/foo.md)
+  await fs.mkdir(path.dirname(target), { recursive: true })
   const tmp = target + '.tmp'
   await fs.writeFile(tmp, normalized, 'utf8')
   await fs.rename(tmp, target)

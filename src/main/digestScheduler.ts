@@ -1,6 +1,5 @@
 import { getSqlite } from './db'
 import { getWorkerPort } from './aiOrchestrator'
-import { getBraveKey } from './ipc'
 
 /**
  * Build word cloud data from notes submitted since the given ISO date string.
@@ -66,35 +65,52 @@ export function buildStats(
 }
 
 /**
- * Check if a new digest is due (>= 20 hours since last) and dispatch a digest-task
- * to the AI worker if so. Called once on app launch after startAiWorker().
+ * Dispatch a digest-task for a given period if it's due.
+ * Daily: >= 20h since last. Weekly: >= 6 days since last.
  */
-export function checkAndScheduleDigest(): void {
-  console.log('[digestScheduler] checkAndScheduleDigest called')
-
-  // Query the most recent digest for the 'daily' period
+function maybeDispatchDigest(
+  period: 'daily' | 'weekly',
+  windowHours: number,
+  thresholdHours: number,
+  workerPort: Electron.MessagePortMain
+): void {
   const lastDigest = getSqlite()
-    .prepare(
-      `SELECT generated_at FROM digests WHERE period='daily' ORDER BY generated_at DESC LIMIT 1`
-    )
-    .get() as { generated_at: string } | undefined
+    .prepare(`SELECT generated_at, word_cloud_data FROM digests WHERE period=? ORDER BY generated_at DESC LIMIT 1`)
+    .get(period) as { generated_at: string; word_cloud_data: string } | undefined
 
   const lastTime = lastDigest ? new Date(lastDigest.generated_at).getTime() : 0
   const hoursElapsed = (Date.now() - lastTime) / (1000 * 60 * 60)
 
-  if (hoursElapsed < 20) {
-    console.log(`[digestScheduler] Digest current (${hoursElapsed.toFixed(1)}h elapsed) — skipping`)
+  const periodStart = new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString()
+  const wordCloud = buildWordCloudData(periodStart)
+  const stats = buildStats(periodStart, wordCloud)
+
+  // Bypass threshold if last digest was empty but now has data (e.g. first note processed after startup digest)
+  const lastWasEmpty = !lastDigest || lastDigest.word_cloud_data === '[]'
+  const nowHasData = wordCloud.length > 0
+  if (hoursElapsed < thresholdHours && !(lastWasEmpty && nowHasData)) {
+    console.log(`[digestScheduler] ${period} digest current (${hoursElapsed.toFixed(1)}h elapsed) — skipping`)
     return
   }
 
-  console.log(`[digestScheduler] Digest due (${hoursElapsed.toFixed(1)}h elapsed) — dispatching digest-task`)
+  workerPort.postMessage({
+    type: 'digest-task',
+    period,
+    periodStart,
+    wordCloudData: JSON.stringify(wordCloud),
+    stats: JSON.stringify(stats),
+    braveKey: '',
+  })
+  console.log(`[digestScheduler] ${period} digest-task dispatched`)
+}
 
-  // Period: last 24 hours
-  const periodStart = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-
-  const wordCloud = buildWordCloudData(periodStart)
-  const stats = buildStats(periodStart, wordCloud)
-  const braveKey = getBraveKey()
+/**
+ * Check if digests are due and dispatch them. Called once on app launch.
+ * Generates daily (last 24h) and weekly (last 7 days) digests independently.
+ * Both are available from day 1 — weekly just covers a wider window.
+ */
+export function checkAndScheduleDigest(): void {
+  console.log('[digestScheduler] checkAndScheduleDigest called')
 
   const workerPort = getWorkerPort()
   if (!workerPort) {
@@ -102,14 +118,6 @@ export function checkAndScheduleDigest(): void {
     return
   }
 
-  workerPort.postMessage({
-    type: 'digest-task',
-    period: 'daily',
-    periodStart,
-    wordCloudData: JSON.stringify(wordCloud),
-    stats: JSON.stringify(stats),
-    braveKey: braveKey ?? '',
-  })
-
-  console.log('[digestScheduler] digest-task dispatched to worker')
+  maybeDispatchDigest('daily', 24, 20, workerPort)
+  maybeDispatchDigest('weekly', 168, 144, workerPort) // 7-day window, refresh every 6 days
 }
