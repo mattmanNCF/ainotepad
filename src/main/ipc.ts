@@ -25,6 +25,7 @@ const conf = new Conf<{
   llamaCppPath: string          // user-specified GGUF path for llama.cpp
   modelTier: string
   modelPath: string             // auto-downloaded GGUF path
+  onboardingDone: boolean
 }>({ name: 'settings' })
 
 // Real implementation replacing the 02-02 stub.
@@ -256,5 +257,13 @@ export function registerIpcHandlers() {
       `SELECT * FROM digests WHERE period=? ORDER BY generated_at DESC LIMIT 1`
     ).get(period) as any
     return row ?? null
+  })
+
+  ipcMain.handle('onboarding:getStatus', () => {
+    return { done: conf.get('onboardingDone', false) as boolean }
+  })
+
+  ipcMain.handle('onboarding:complete', () => {
+    conf.set('onboardingDone', true)
   })
 }
