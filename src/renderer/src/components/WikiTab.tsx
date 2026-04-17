@@ -159,6 +159,12 @@ export function WikiTab() {
     return buildCooccurrenceLinks(allNoteTags, nodeIds)
   }, [graphNodes, allNoteTags])
 
+  // Stable key that changes only when tag colors change — forces WikiGraph remount
+  const colorKey = useMemo(
+    () => Object.entries(tagColors).sort().map(([k, v]) => `${k}:${v}`).join(','),
+    [tagColors]
+  )
+
   return (
     <div className="flex h-full bg-gray-900">
       <WikiSidebar
@@ -173,6 +179,8 @@ export function WikiTab() {
         existingFiles={existingFilenames}
         graphNodes={graphNodes}
         graphLinks={graphLinks}
+        tagColors={tagColors}
+        colorKey={colorKey}
         canBack={canBack}
         canForward={canForward}
         showGraph={showGraph}

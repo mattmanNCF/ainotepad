@@ -11,6 +11,7 @@ import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
 import { detectModelTier, findExistingModel, downloadModel } from './localModel'
 import { forceScheduleDigest } from './digestScheduler'
+import { readHarnessFiles, writeHarnessFiles, updateUserProfile } from './agentHarness'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
@@ -295,5 +296,22 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('onboarding:complete', () => {
     conf.set('onboardingDone', true)
+  })
+
+  ipcMain.handle('agent:readHarness', async () => {
+    return readHarnessFiles()
+  })
+
+  ipcMain.handle('agent:writeHarness', async (_e, files: Partial<{ agentMd: string; userMd: string; memoryMd: string }>) => {
+    await writeHarnessFiles(files)
+  })
+
+  ipcMain.handle('agent:updateUserProfile', async (_e, observation: string) => {
+    await updateUserProfile(observation)
+  })
+
+  ipcMain.handle('agent:runDailyImprovement', async () => {
+    // Improvement runs asynchronously via the harness cron; return status
+    return { status: 'queued' }
   })
 }

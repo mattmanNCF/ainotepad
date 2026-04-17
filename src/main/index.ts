@@ -6,6 +6,7 @@ import { registerIpcHandlers, getDecryptedApiKey, getProvider, getOllamaModel, g
 import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
 import { checkAndScheduleDigest } from './digestScheduler'
 import { startMcpServer } from './mcpServer'
+import { initHarnessFiles } from './agentHarness'
 
 let tray: Tray | null = null
 let isQuiting = false
@@ -146,6 +147,8 @@ app.whenReady().then(() => {
       app.quit()
     })
   }
+
+  initHarnessFiles().catch(err => console.error('[agentHarness] init failed:', err))
 
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
   globalShortcut.register('CommandOrControl+Shift+Space', () => {

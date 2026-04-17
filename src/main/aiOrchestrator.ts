@@ -6,6 +6,7 @@ import { notes, kbPages } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import { writeKbFile, readKbFile, listKbFiles } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
+import { readHarnessContext } from './agentHarness'
 
 let workerPort: Electron.MessagePortMain | null = null
 let mainWin: BrowserWindow | null = null
@@ -17,7 +18,7 @@ export function getWorkerPort(): Electron.MessagePortMain | null {
   return workerPort
 }
 
-export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string, ollamaModel: string): void {
+export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string, ollamaModel: string, modelPath = ''): void {
   mainWin = win
 
   const child = utilityProcess.fork(path.join(__dirname, 'aiWorker.js'), [], { stdio: 'pipe' })
@@ -26,7 +27,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
   const { port1, port2 } = new MessageChannelMain()
 
   // Transfer port2 to the worker in the init message
-  child.postMessage({ type: 'init', provider, apiKey, ollamaModel }, [port2])
+  child.postMessage({ type: 'init', provider, apiKey, ollamaModel, modelPath }, [port2])
 
   workerPort = port1
   port1.start() // REQUIRED: port is paused until start() is called
@@ -173,7 +174,9 @@ export async function enqueueNote(noteId: string, rawText: string): Promise<void
   // FTS5 retrieval: find related notes from the user's history to ground AI insights
   const relatedNotes = queryRelatedNotes(rawText)
 
-  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes })
+  const harnessContext = await readHarnessContext()
+
+  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes, harnessContext })
 }
 
 export function reQueuePendingNotes(): void {

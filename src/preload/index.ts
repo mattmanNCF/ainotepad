@@ -75,4 +75,14 @@ contextBridge.exposeInMainWorld('api', {
     complete: (): Promise<void> =>
       ipcRenderer.invoke('onboarding:complete'),
   },
+  agent: {
+    readHarness: (): Promise<{ agentMd: string; userMd: string; memoryMd: string }> =>
+      ipcRenderer.invoke('agent:readHarness'),
+    writeHarness: (files: Partial<{ agentMd: string; userMd: string; memoryMd: string }>): Promise<void> =>
+      ipcRenderer.invoke('agent:writeHarness', files),
+    updateUserProfile: (observation: string): Promise<void> =>
+      ipcRenderer.invoke('agent:updateUserProfile', observation),
+    runDailyImprovement: (): Promise<{ status: string }> =>
+      ipcRenderer.invoke('agent:runDailyImprovement'),
+  },
 })

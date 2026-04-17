@@ -60,5 +60,11 @@ interface Window {
       getStatus: () => Promise<{ done: boolean }>
       complete: () => Promise<void>
     }
+    agent: {
+      readHarness: () => Promise<{ agentMd: string; userMd: string; memoryMd: string }>
+      writeHarness: (files: Partial<{ agentMd: string; userMd: string; memoryMd: string }>) => Promise<void>
+      updateUserProfile: (observation: string) => Promise<void>
+      runDailyImprovement: () => Promise<{ status: string }>
+    }
   }
 }
