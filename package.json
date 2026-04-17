@@ -1,6 +1,6 @@
 {
-  "name": "ainotepad",
-  "version": "1.0.0",
+  "name": "notal",
+  "version": "0.1.0",
   "description": "AI-augmented desktop notepad — silent, automatic, local-first",
   "main": "./out/main/index.js",
   "author": "Matthew Mancini",
