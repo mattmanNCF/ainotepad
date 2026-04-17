@@ -431,7 +431,8 @@ async function callOllama(rawText: string, contextMd: string, conceptSnippets: s
   const client = new OpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollama' })
   const resp = await client.chat.completions.create({
     model,
-    max_tokens: 4096,
+    max_tokens: 16384,
+    response_format: { type: 'json_object' },
     messages: [{ role: 'user', content: buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes) }],
   })
   return resp.choices[0].message.content ?? ''
