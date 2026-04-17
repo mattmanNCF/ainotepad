@@ -1,10 +1,19 @@
 // aiWorker.ts — Electron utilityProcess entry point
 // NOTE: This file is built as a SEPARATE Rollup entry (aiWorker in electron.vite.config.ts).
 // Static imports are resolved at bundle time — do NOT use dynamic import() for SDK calls.
+// EXCEPTION: node-llama-cpp uses top-level await (ESM), so it MUST be dynamically imported
+// or the CJS bundle will crash at require() time even when local model is never used.
 
 import Anthropic from '@anthropic-ai/sdk'
 import OpenAI from 'openai'
-import { getLlama, LlamaChatSession, InsufficientMemoryError } from 'node-llama-cpp'
+
+// Lazily resolved when initLocalModel() is called — avoids CJS require() crash at startup
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _llamaModule: any = null
+async function getLlamaModule() {
+  if (!_llamaModule) _llamaModule = await import('node-llama-cpp')
+  return _llamaModule
+}
 
 let taskPort: Electron.MessagePortMain | null = null
 let provider: string = 'ollama'
@@ -53,6 +62,7 @@ process.parentPort.on('message', (e) => {
  */
 async function initLocalModel(modelPath: string): Promise<void> {
   try {
+    const { getLlama, LlamaChatSession, InsufficientMemoryError } = await getLlamaModule()
     try {
       llamaInstance = await getLlama()
       llamaModel = await llamaInstance.loadModel({ modelPath })

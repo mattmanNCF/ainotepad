@@ -17,6 +17,7 @@ interface Window {
       hide: (id: string) => Promise<void>
       reprocess: (id: string) => Promise<void>
       recentInsights: () => Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>>
+      allTags: () => Promise<string[][]>
     }
     onAiUpdate: (cb: (data: {
       noteId: string

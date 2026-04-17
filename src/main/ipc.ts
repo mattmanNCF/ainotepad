@@ -73,6 +73,16 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))
 
+  // All note-tag co-occurrences for semantic wiki graph edges
+  ipcMain.handle('notes:allTags', () => {
+    const rows = getSqlite().prepare(
+      `SELECT tags FROM notes WHERE hidden=0 AND ai_state='complete' AND tags IS NOT NULL AND tags != '[]'`
+    ).all() as Array<{ tags: string }>
+    return rows.map(r => {
+      try { return JSON.parse(r.tags) as string[] } catch { return [] }
+    }).filter((t: string[]) => t.length > 1)  // only notes tagged with 2+ topics create edges
+  })
+
   ipcMain.handle('notes:recentInsights', () => {
     const rows = getSqlite().prepare(
       `SELECT id, tags, ai_insights as aiInsights, submitted_at as submittedAt

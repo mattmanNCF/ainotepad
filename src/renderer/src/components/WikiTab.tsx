@@ -15,9 +15,28 @@ function filenameToTitle(filename: string): string {
     .replace(/\b\w/g, c => c.toUpperCase())
 }
 
-function extractWikiLinks(content: string): string[] {
-  const matches = content.matchAll(/\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g)
-  return Array.from(matches, m => m[1].trim())
+// Build graph edges from note tag co-occurrence:
+// if a note is tagged [topicA, topicB], that creates an implicit edge topicA↔topicB.
+// Aggregate across all notes; edge weight = co-occurrence count.
+// Only emit edges where both topics have a corresponding wiki page (node).
+function buildCooccurrenceLinks(
+  allNoteTags: string[][],
+  nodeIds: Set<string>
+): Array<{ source: string; target: string; weight: number }> {
+  const counts = new Map<string, number>()
+  for (const tags of allNoteTags) {
+    const topics = tags.filter(t => nodeIds.has(t))
+    for (let i = 0; i < topics.length; i++) {
+      for (let j = i + 1; j < topics.length; j++) {
+        const key = [topics[i], topics[j]].sort().join('\0')
+        counts.set(key, (counts.get(key) ?? 0) + 1)
+      }
+    }
+  }
+  return Array.from(counts.entries()).map(([key, weight]) => {
+    const [source, target] = key.split('\0')
+    return { source, target, weight }
+  })
 }
 
 interface InsightRecord {
@@ -35,7 +54,7 @@ export function WikiTab() {
   const [activeContent, setActiveContent] = useState<string | null>(null)
   const [showGraph, setShowGraph] = useState(false)
   const [insights, setInsights] = useState<InsightRecord[]>([])
-  const [graphLinks, setGraphLinks] = useState<Array<{ source: string; target: string }>>([])
+  const [allNoteTags, setAllNoteTags] = useState<string[][]>([])
 
   // useRef for content cache — mutations do NOT trigger re-renders.
   // If this were useState, the cache update would invalidate useCallback deps,
@@ -54,26 +73,7 @@ export function WikiTab() {
     return { filename, title: filenameToTitle(filename), tags }
   }, [])
 
-  // Build graph links from the current content cache.
-  // Called after cache mutations so links stay in sync with cached content.
-  const buildGraphLinks = useCallback((existingFilenames: string[]): Array<{ source: string; target: string }> => {
-    const links: Array<{ source: string; target: string }> = []
-    for (const [filename, content] of Object.entries(contentCacheRef.current)) {
-      if (filename.startsWith('_')) continue
-      const sourceId = filename.replace(/\.md$/, '')
-      const linkedSlugs = extractWikiLinks(content)
-      for (const slug of linkedSlugs) {
-        const targetFilename = slug + '.md'
-        if (existingFilenames.includes(targetFilename)) {
-          links.push({ source: sourceId, target: slug })
-        }
-      }
-    }
-    return links
-  }, [])
-
-  // Load all files with their tags for the sidebar (reads cached content where available).
-  // Does NOT include contentCacheRef in deps — ref mutations are transparent to React.
+  // Load all files for the sidebar. Content cache populated as side-effect.
   const loadFilesWithTags = useCallback(async () => {
     const filenames = await window.api.kb.listFiles()
     const colors = await window.api.kb.getTagColors()
@@ -94,8 +94,7 @@ export function WikiTab() {
         })
     )
     setFiles(entries)
-    setGraphLinks(buildGraphLinks(visibleFilenames))
-  }, [getFileEntry, buildGraphLinks])
+  }, [getFileEntry])
   // Note: contentCacheRef intentionally omitted from deps — ref.current reads are always fresh
 
   useEffect(() => {
@@ -103,6 +102,16 @@ export function WikiTab() {
     const cleanup = window.api.kb.onUpdated(() => loadFilesWithTags())
     return cleanup
   }, [loadFilesWithTags])
+
+  // Load all note tags for co-occurrence graph; refresh when new notes are processed.
+  useEffect(() => {
+    function loadAllTags() {
+      window.api.notes.allTags().then(setAllNoteTags)
+    }
+    loadAllTags()
+    const unsub = window.api.onAiUpdate(() => loadAllTags())
+    return unsub
+  }, [])
 
   // Load recent insights; refresh when a new note is processed
   useEffect(() => {
@@ -174,11 +183,21 @@ export function WikiTab() {
   )
 
   // Derive graph nodes from files state
+  const existingFilenames = files.map(f => f.filename)
+
   const graphNodes = files.map(f => ({
     id: f.filename.replace(/\.md$/, ''),
     name: f.title,
     color: tagColors[f.tags[0] ?? 'Untagged'] ?? '#6b7280',
   }))
+
+  // Derive semantic graph edges from note tag co-occurrence.
+  // Two wiki topics are connected when the same note is tagged with both.
+  // graphLinks updates whenever files or allNoteTags change.
+  const semanticGraphLinks = useMemo(() => {
+    const nodeIds = new Set(graphNodes.map(n => n.id))
+    return buildCooccurrenceLinks(allNoteTags, nodeIds)
+  }, [graphNodes, allNoteTags])
 
   return (
     <div className="flex h-full bg-gray-900">
@@ -194,7 +213,7 @@ export function WikiTab() {
         insights={currentPageInsight}
         existingFiles={existingFilenames}
         graphNodes={graphNodes}
-        graphLinks={graphLinks}
+        graphLinks={semanticGraphLinks}
         tagColors={tagColors}
         colorKey={colorKey}
         canBack={canBack}

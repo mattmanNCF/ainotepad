@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('api', {
     reprocess: (id: string) => ipcRenderer.invoke('notes:reprocess', id),
     recentInsights: (): Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>> =>
       ipcRenderer.invoke('notes:recentInsights'),
+    allTags: (): Promise<string[][]> => ipcRenderer.invoke('notes:allTags'),
   },
   onAiUpdate: (
     cb: (data: {
