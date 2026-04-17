@@ -1,10 +1,9 @@
 // aiWorker.ts — Electron utilityProcess entry point
-// NOTE: This file is built as a SEPARATE Rollup entry (aiWorker in electron.vite.config.ts).
-// Static imports are resolved at bundle time — do NOT use dynamic import() for SDK calls.
+// NOTE: node-llama-cpp is ESM-only (top-level await) — must be loaded via dynamic import().
+// Other SDKs use static imports; only node-llama-cpp requires the dynamic pattern.
 
 import Anthropic from '@anthropic-ai/sdk'
 import OpenAI from 'openai'
-import { getLlama, LlamaChatSession, InsufficientMemoryError } from 'node-llama-cpp'
 
 let taskPort: Electron.MessagePortMain | null = null
 let provider: string = 'ollama'
@@ -39,65 +38,86 @@ process.parentPort.on('message', (e) => {
     taskPort.on('message', handleMessage)
     taskPort.start() // REQUIRED: port is paused until start() is called
 
-    // If local provider configured, start model init asynchronously (fire-and-forget).
+    // If llama.cpp provider configured with a model path, start init asynchronously.
     // Tasks arriving while init is in progress are queued and drained once ready.
-    if (provider === 'local' && localModelPath) {
+    if (provider === 'llamacpp' && localModelPath) {
       localModelInitPromise = initLocalModel(localModelPath)
     }
   }
 })
 
 /**
- * Initialize the node-llama-cpp model stack.
- * Attempts GPU acceleration first; falls back to CPU if InsufficientMemoryError.
+ * Detect GPU vendor from the available Vulkan/GPU devices.
+ * Returns 'amd', 'nvidia', or 'unknown'.
+ */
+async function detectGpuVendor(): Promise<'amd' | 'nvidia' | 'unknown'> {
+  try {
+    const { getLlama } = await import('node-llama-cpp')
+    // Use Vulkan just for device enumeration
+    const probe = await getLlama({ gpu: 'vulkan', logLevel: 'warn' })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const devices = (probe as any).gpu?.devices ?? []
+    await probe.dispose?.()
+    const names = devices.map((d: { name?: string }) => (d.name ?? '').toLowerCase()).join(' ')
+    if (names.includes('amd') || names.includes('radeon')) return 'amd'
+    if (names.includes('nvidia') || names.includes('geforce') || names.includes('rtx')) return 'nvidia'
+  } catch {
+    // Device enumeration failed — can't determine vendor
+  }
+  return 'unknown'
+}
+
+/**
+ * Initialize the node-llama-cpp model stack with hardware-appropriate GPU backend.
+ * Priority: CUDA (NVIDIA/AMD-HIP) → Vulkan → CPU
+ * Uses dynamic import() because node-llama-cpp is ESM-only (top-level await).
  */
 async function initLocalModel(modelPath: string): Promise<void> {
+  const { getLlama, LlamaChatSession, InsufficientMemoryError } = await import('node-llama-cpp')
+
+  // getLlama() is a process-level singleton. Specifying gpu:'cuda' loads our custom HIP build
+  // from localBuilds/win-x64-cuda (per lastBuild.json). We NEVER dispose the instance across
+  // attempts — instead we reload the model with different gpuLayers on the same instance.
   try {
+    console.log('[aiWorker] Initializing llama with gpu=cuda (HIP/ROCm build)')
+    llamaInstance = await getLlama({ gpu: 'cuda', logLevel: 'debug' })
+
+    // First try: full GPU offload
+    llamaModel = await llamaInstance.loadModel({ modelPath, gpuLayers: -1 })
+    const offloaded = llamaModel.gpuLayers
+    let label = `GPU (${offloaded} layers)`
+
+    if (offloaded === 0) {
+      // GPU architecture incompatible (e.g. Gemma 4 SWA on ROCm) — reload as CPU on same instance
+      console.warn('[aiWorker] 0 GPU layers — reloading with gpuLayers=0 (CPU-only)')
+      llamaModel = await llamaInstance.loadModel({ modelPath, gpuLayers: 0 })
+      label = 'CPU (via HIP instance)'
+    }
+
+    // Flash attention required for Gemma 4 SWA architecture.
+    // batchSize=1: 5 graph splits vs 718 at bs=65 — avoids ROCm sched_alloc_splits crash.
     try {
-      llamaInstance = await getLlama()
-      llamaModel = await llamaInstance.loadModel({ modelPath })
-    } catch (err) {
-      if (err instanceof InsufficientMemoryError) {
-        console.warn('[aiWorker] GPU memory insufficient — falling back to CPU (gpuLayers: 0)')
-        llamaInstance = await getLlama()
-        llamaModel = await llamaInstance.loadModel({ modelPath, gpuLayers: 0 })
+      llamaContext = await llamaModel.createContext({ flashAttention: true, batchSize: 1 })
+    } catch (ctxErr) {
+      if (ctxErr instanceof InsufficientMemoryError && offloaded > 0) {
+        console.warn('[aiWorker] VRAM full — trying 20-layer partial offload')
+        llamaModel = await llamaInstance.loadModel({ modelPath, gpuLayers: 20 })
+        llamaContext = await llamaModel.createContext({ flashAttention: true, batchSize: 1 })
+        label = 'GPU partial (20 layers)'
       } else {
-        throw err
+        throw ctxErr
       }
     }
-    llamaContext = await llamaModel.createContext()
+
     llamaSession = new LlamaChatSession({ contextSequence: llamaContext.getSequence() })
     localModelReady = true
-    console.log('[aiWorker] Local model ready:', modelPath)
+    console.log(`[aiWorker] Local model ready via ${label}:`, modelPath)
   } catch (err) {
-    console.error('[aiWorker] Local model init failed:', err)
+    console.error('[aiWorker] Model init failed:', String((err as any)?.message ?? err))
     // localModelReady stays false — callLocal() will throw
   }
 }
 
-/**
- * Call Brave Search API and return a concatenated string of results.
- * Returns empty string on any error — never throws.
- */
-async function searchBrave(query: string, apiKey: string): Promise<string> {
-  try {
-    const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=5`
-    const res = await fetch(url, {
-      headers: {
-        'X-Subscription-Token': apiKey,
-        'Accept': 'application/json',
-      },
-    })
-    if (!res.ok) return ''
-    const data = await res.json() as { web?: { results?: Array<{ title?: string; description?: string }> } }
-    const results = data?.web?.results ?? []
-    return results
-      .map((r) => `${r.title ?? ''}: ${r.description ?? ''}`)
-      .join('\n')
-  } catch {
-    return ''
-  }
-}
 
 /**
  * Build the prompt for digest narrative generation.
@@ -125,7 +145,7 @@ Respond with ONLY a JSON object: {"narrative": "..."}`
  * Used for digest narrative generation.
  */
 async function callAIWithPrompt(prompt: string): Promise<string> {
-  if (provider === 'local') {
+  if (provider === 'llamacpp') {
     if (!localModelReady && localModelInitPromise) {
       await localModelInitPromise
     }
@@ -176,32 +196,14 @@ async function handleDigestTask({
   periodStart,
   wordCloudData,
   stats,
-  braveKey,
 }: {
   period: string
   periodStart: string
   wordCloudData: string
   stats: string
-  braveKey: string
 }): Promise<void> {
   try {
-    let webContext = ''
-    if (braveKey && braveKey.length > 0) {
-      // Build search query from top 3 tags
-      let topTags: string[] = []
-      try {
-        const wc = JSON.parse(wordCloudData) as Array<{ text: string; value: number }>
-        topTags = wc.slice(0, 3).map((w) => w.text)
-      } catch {
-        // ignore parse error
-      }
-      if (topTags.length > 0) {
-        const query = `topics: ${topTags.join(' ')}`
-        webContext = await searchBrave(query, braveKey)
-      }
-    }
-
-    const prompt = buildDigestPrompt(wordCloudData, stats, webContext)
+    const prompt = buildDigestPrompt(wordCloudData, stats, '')
     const raw = await callAIWithPrompt(prompt)
     // Strip markdown code fences if present
     const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
@@ -252,7 +254,7 @@ function handleMessage(event: Electron.MessageEvent): void {
     provider = event.data.provider ?? provider
     apiKey = event.data.apiKey ?? apiKey
     ollamaModel = event.data.ollamaModel ?? ollamaModel
-    if (provider === 'local' && event.data.modelPath) {
+    if (provider === 'llamacpp' && event.data.modelPath) {
       localModelPath = event.data.modelPath
       localModelReady = false
       localModelInitPromise = initLocalModel(localModelPath)
@@ -260,9 +262,9 @@ function handleMessage(event: Electron.MessageEvent): void {
   }
   // digest-task: full implementation (plan 04-04)
   if (type === 'digest-task') {
-    const { period, periodStart, wordCloudData, stats, braveKey } = event.data
+    const { period, periodStart, wordCloudData, stats } = event.data
     // Fire and forget — do not block the main note queue
-    handleDigestTask({ period, periodStart, wordCloudData, stats, braveKey })
+    handleDigestTask({ period, periodStart, wordCloudData, stats })
   }
 }
 
@@ -337,6 +339,7 @@ ${relatedSection}
 1. **organized**: Clean/organize the note. Fix typos, improve clarity. Keep the user's voice.
 2. **annotation**: 1-2 sentence insight or connection to consider.
 3. **wiki_updates**: Array of concept file writes. Each entry: {"file": "slug.md", "content": "...full file content..."}
+   - ALWAYS include "_context.md" as one of the entries — every note updates the rolling context
    - Create/update concept files for key ideas in this note
    - Each file: YAML frontmatter (tags, created, updated), then Markdown with [[wikilinks]] to related concepts
    - Rewrite files in full — do not patch
@@ -350,8 +353,8 @@ ${relatedSection}
      ## Recurring Concepts
      ## Recent Notes Summary
      Keep it bounded: max 5 recent notes, max 10 recurring concepts. Rewrite entire file each time.
-4. **tags**: Array of tag strings for this note (e.g. ["physics", "TOT", "math"])
-5. **insights**: Return a string ONLY if you have a specific, non-obvious observation the user might have missed — a genuine connection to past notes, a recurring pattern, or novelty finding from web context. If nothing stands out, return null. Do NOT generate generic observations.
+4. **tags**: Array of tag strings for this note (e.g. ["physics", "TOT", "math"]). If no meaningful tags apply, return ["Untagged"].
+5. **insights**: Return a concise string with a specific observation — a connection to past notes, a pattern across recurring concepts, or a non-obvious implication of this idea. Return null only if there is genuinely nothing interesting to say (rare).
 
 IMPORTANT: Respond with ONLY a JSON object. No markdown fences, no explanation.
 {"organized": "...", "annotation": "...", "wiki_updates": [{"file": "...", "content": "..."}], "tags": [...], "insights": null}
@@ -434,10 +437,30 @@ async function callOllama(rawText: string, contextMd: string, conceptSnippets: s
   return resp.choices[0].message.content ?? ''
 }
 
+// OpenAI-compatible providers — same call, different base URL and model
+const OPENAI_COMPAT_BASES: Record<string, { baseURL: string; model: string }> = {
+  gemini:      { baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.0-flash' },
+  openrouter:  { baseURL: 'https://openrouter.ai/api/v1', model: 'google/gemma-3-12b-it' },
+  groq:        { baseURL: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },
+  huggingface: { baseURL: 'https://api-inference.huggingface.co/v1', model: 'meta-llama/Llama-3.3-70B-Instruct' },
+}
+
+async function callOpenAICompat(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, key: string, baseURL: string, model: string): Promise<string> {
+  const client = new OpenAI({ apiKey: key, baseURL })
+  const resp = await client.chat.completions.create({
+    model,
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes) }],
+  })
+  return resp.choices[0].message.content ?? ''
+}
+
 async function callAI(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string): Promise<string> {
-  if (provider === 'local') return callLocal(rawText, contextMd, conceptSnippets, relatedNotes)
+  if (provider === 'llamacpp') return callLocal(rawText, contextMd, conceptSnippets, relatedNotes)
   if (provider === 'ollama') return callOllama(rawText, contextMd, conceptSnippets, relatedNotes, ollamaModel)
   if (!apiKey) throw new Error('No API key configured')
   if (provider === 'openai') return callOpenAI(rawText, contextMd, conceptSnippets, relatedNotes, apiKey)
+  const compat = OPENAI_COMPAT_BASES[provider]
+  if (compat) return callOpenAICompat(rawText, contextMd, conceptSnippets, relatedNotes, apiKey, compat.baseURL, compat.model)
   return callClaude(rawText, contextMd, conceptSnippets, relatedNotes, apiKey)
 }

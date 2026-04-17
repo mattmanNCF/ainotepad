@@ -14,6 +14,7 @@ interface Window {
       create: (rawText: string) => Promise<NoteRecord>
       delete: (id: string) => Promise<void>
       hide: (id: string) => Promise<void>
+      recentInsights: () => Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>>
     }
     onAiUpdate: (cb: (data: {
       noteId: string
@@ -24,8 +25,16 @@ interface Window {
       insights: string | null
     }) => void) => () => void
     settings: {
-      save: (key: string, provider: string, ollamaModel?: string, braveKey?: string) => Promise<void>
-      get: () => Promise<{ provider: string; hasKey: boolean; ollamaModel: string; hasBraveKey: boolean; modelTier: string }>
+      save: (key: string, provider: string, ollamaModel?: string, llamaCppPath?: string) => Promise<void>
+      get: () => Promise<{
+        provider: string
+        hasKey: boolean
+        ollamaModel: string
+        modelTier: string
+        llamaCppPath: string
+        keyStatus: Record<string, boolean>
+      }>
+      listOllamaModels: () => Promise<string[]>
     }
     kb: {
       listFiles: () => Promise<string[]>
@@ -36,6 +45,8 @@ interface Window {
     }
     localModel: {
       getStatus: () => Promise<{ tier: string; modelPath: string | null; ready: boolean }>
+      download: (tier?: string) => Promise<{ ok: boolean; modelPath?: string; error?: string }>
+      onProgress: (cb: (data: { percent: number; done?: boolean; error?: string; modelPath?: string }) => void) => () => void
     }
     digest: {
       getLatest: (period: string) => Promise<any>

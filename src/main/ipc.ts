@@ -9,18 +9,22 @@ import { deleteNote, hideNote, insertNoteToFts, getSqlite } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
-import { detectModelTier, findExistingModel, getModelStoragePath } from './localModel'
+import { detectModelTier, findExistingModel, getModelStoragePath, downloadModel } from './localModel'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
 // both of which run after app is ready.
 const conf = new Conf<{
-  apiKeyEncrypted: string
   provider: string
+  apiKeyEncrypted: string       // Claude key (backward compat)
+  geminiKeyEncrypted: string
+  openrouterKeyEncrypted: string
+  groqKeyEncrypted: string
+  hfKeyEncrypted: string
   ollamaModel: string
-  braveKeyEncrypted: string
+  llamaCppPath: string          // user-specified GGUF path for llama.cpp
   modelTier: string
-  modelPath: string
+  modelPath: string             // auto-downloaded GGUF path
 }>({ name: 'settings' })
 
 // Real implementation replacing the 02-02 stub.
@@ -39,20 +43,29 @@ export function getDecryptedApiKey(): string | null {
   }
 }
 
-// Read the stored provider preference (defaults to 'claude').
+// Read the stored provider preference (defaults to 'ollama').
 // Used by index.ts at startup to pass the correct provider to startAiWorker().
 export function getProvider(): string {
-  return conf.get('provider', 'claude') as string
+  return conf.get('provider', 'ollama') as string
 }
 
 export function getOllamaModel(): string {
-  return conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
+  return conf.get('ollamaModel', 'gemma4:e4b') as string
 }
 
-// Returns the decrypted Brave Search API key, or null if not configured.
-// safeStorage is only called here inside app-ready context.
-export function getBraveKey(): string | null {
-  const encStr = conf.get('braveKeyEncrypted', '') as string
+// Returns the GGUF path for llama.cpp provider at startup.
+// Checks user-specified path first, then auto-downloaded path, then filesystem scan.
+export function getStartupModelPath(provider: string): string {
+  if (provider !== 'llamacpp') return ''
+  const explicit = conf.get('llamaCppPath', '') as string
+  if (explicit) return explicit
+  const tier = (conf.get('modelTier', detectModelTier())) as import('./localModel').ModelTier
+  return (findExistingModel(tier) ?? (conf.get('modelPath', '') as string)) || ''
+}
+
+// Decrypt a named key slot from conf.
+function decryptKey(slot: string): string | null {
+  const encStr = conf.get(slot, '') as string
   if (!encStr) return null
   try {
     return safeStorage.decryptString(Buffer.from(encStr, 'base64'))
@@ -60,6 +73,15 @@ export function getBraveKey(): string | null {
     return null
   }
 }
+
+// Providers that use OpenAI-compatible APIs with just a base URL + key
+const OPENAI_COMPAT_PROVIDERS: Record<string, { baseURL: string; keySlot: string }> = {
+  gemini: { baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai', keySlot: 'geminiKeyEncrypted' },
+  openrouter: { baseURL: 'https://openrouter.ai/api/v1', keySlot: 'openrouterKeyEncrypted' },
+  groq: { baseURL: 'https://api.groq.com/openai/v1', keySlot: 'groqKeyEncrypted' },
+  huggingface: { baseURL: 'https://api-inference.huggingface.co/v1', keySlot: 'hfKeyEncrypted' },
+}
+export { OPENAI_COMPAT_PROVIDERS }
 
 export function registerIpcHandlers() {
   ipcMain.handle('notes:getAll', () => {
@@ -85,37 +107,55 @@ export function registerIpcHandlers() {
       aiAnnotation: null,
       organizedText: null,
     }
-    // Enqueue for AI if key is configured
+    // Enqueue for AI processing. Ollama and local providers don't need an API key.
+    const provider = getProvider()
     const apiKey = getDecryptedApiKey()
-    if (apiKey) {
+    if (provider === 'ollama' || provider === 'llamacpp' || apiKey ||
+        (OPENAI_COMPAT_PROVIDERS[provider] && !!decryptKey(OPENAI_COMPAT_PROVIDERS[provider].keySlot))) {
       await enqueueNote(id, rawText)
     }
-    // If no key: leave aiState='pending'; startup re-queue handles it once key is set
     return record
   })
 
   // safeStorage is safe here — ipcMain.handle() callbacks only fire after app is ready
-  ipcMain.handle('settings:save', (_event, { key, provider, ollamaModel, braveKey }: { key: string; provider: string; ollamaModel?: string; braveKey?: string }) => {
-    if (key) {
-      const encrypted = safeStorage.encryptString(key)
-      conf.set('apiKeyEncrypted', encrypted.toString('base64'))
-    }
+  ipcMain.handle('settings:save', (_event, {
+    key, provider, ollamaModel, llamaCppPath
+  }: { key: string; provider: string; ollamaModel?: string; llamaCppPath?: string }) => {
     conf.set('provider', provider)
     if (ollamaModel) conf.set('ollamaModel', ollamaModel)
+    if (llamaCppPath !== undefined) conf.set('llamaCppPath', llamaCppPath)
 
-    if (braveKey) {
-      const encryptedBrave = safeStorage.encryptString(braveKey)
-      conf.set('braveKeyEncrypted', encryptedBrave.toString('base64'))
+    // Store API key in the correct provider slot
+    if (key) {
+      const encrypted = safeStorage.encryptString(key)
+      if (provider === 'claude') conf.set('apiKeyEncrypted', encrypted.toString('base64'))
+      else if (provider === 'openai') conf.set('apiKeyEncrypted', encrypted.toString('base64'))
+      else if (OPENAI_COMPAT_PROVIDERS[provider]) {
+        conf.set(OPENAI_COMPAT_PROVIDERS[provider].keySlot, encrypted.toString('base64'))
+      }
     }
 
+    // Resolve model path for llama.cpp
     let resolvedModelPath = ''
-    if (provider === 'local') {
-      const tier = detectModelTier()
-      conf.set('modelTier', tier)
-      resolvedModelPath = findExistingModel(tier) ?? getModelStoragePath()
+    if (provider === 'llamacpp') {
+      resolvedModelPath = llamaCppPath || (conf.get('llamaCppPath', '') as string)
+      if (!resolvedModelPath) {
+        const tier = detectModelTier()
+        conf.set('modelTier', tier)
+        resolvedModelPath = (findExistingModel(tier) ?? (conf.get('modelPath', '') as string)) || ''
+      }
     }
 
-    const resolvedKey = (provider === 'ollama' || provider === 'local') ? provider : (key || getDecryptedApiKey() || '')
+    // Resolve API key for worker
+    let resolvedKey = ''
+    if (provider === 'ollama') resolvedKey = 'ollama'
+    else if (provider === 'llamacpp') resolvedKey = 'llamacpp'
+    else if (OPENAI_COMPAT_PROVIDERS[provider]) {
+      resolvedKey = key || decryptKey(OPENAI_COMPAT_PROVIDERS[provider].keySlot) || ''
+    } else {
+      resolvedKey = key || getDecryptedApiKey() || ''
+    }
+
     const resolvedModel = ollamaModel || getOllamaModel()
     const workerPort = getWorkerPort()
     if (workerPort) {
@@ -126,30 +166,38 @@ export function registerIpcHandlers() {
   ipcMain.handle('settings:get', () => {
     const provider = conf.get('provider', 'claude') as string
     const ollamaModel = conf.get('ollamaModel', 'qwen2.5-coder:14b') as string
-    const encStr = conf.get('apiKeyEncrypted', '') as string
-    let hasKey = (provider === 'ollama' || provider === 'local') ? true : false
-    if (encStr && provider !== 'ollama' && provider !== 'local') {
-      try {
-        safeStorage.decryptString(Buffer.from(encStr, 'base64'))
-        hasKey = true
-      } catch {
-        hasKey = false
-      }
-    }
-
-    const braveEncStr = conf.get('braveKeyEncrypted', '') as string
-    let hasBraveKey = false
-    if (braveEncStr) {
-      try {
-        safeStorage.decryptString(Buffer.from(braveEncStr, 'base64'))
-        hasBraveKey = true
-      } catch {
-        hasBraveKey = false
-      }
-    }
-
+    const llamaCppPath = conf.get('llamaCppPath', '') as string
     const modelTier = conf.get('modelTier', detectModelTier()) as string
-    return { provider, hasKey, ollamaModel, hasBraveKey, modelTier }
+
+    // Determine if a key is configured for the current provider
+    let hasKey = provider === 'ollama' || provider === 'llamacpp'
+    if (!hasKey) {
+      const slot = OPENAI_COMPAT_PROVIDERS[provider]?.keySlot ?? 'apiKeyEncrypted'
+      hasKey = !!decryptKey(slot)
+    }
+
+    // Report configured status for all providers
+    const keyStatus: Record<string, boolean> = {
+      claude: !!decryptKey('apiKeyEncrypted'),
+      openai: !!decryptKey('apiKeyEncrypted'),
+      gemini: !!decryptKey('geminiKeyEncrypted'),
+      openrouter: !!decryptKey('openrouterKeyEncrypted'),
+      groq: !!decryptKey('groqKeyEncrypted'),
+      huggingface: !!decryptKey('hfKeyEncrypted'),
+    }
+
+    return { provider, hasKey, ollamaModel, modelTier, llamaCppPath, keyStatus }
+  })
+
+  ipcMain.handle('settings:list-ollama-models', async (): Promise<string[]> => {
+    try {
+      const res = await fetch('http://localhost:11434/api/tags')
+      if (!res.ok) return []
+      const data = await res.json() as { models?: Array<{ name: string }> }
+      return (data.models ?? []).map(m => m.name)
+    } catch {
+      return []
+    }
   })
 
   ipcMain.handle('kb:listFiles', async () => listKbFiles())
@@ -166,8 +214,41 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('localModel:getStatus', () => {
     const tier = conf.get('modelTier', detectModelTier()) as string
-    const modelPath = findExistingModel(tier as import('./localModel').ModelTier) ?? null
+    const modelPath = (findExistingModel(tier as import('./localModel').ModelTier)
+      ?? (conf.get('modelPath', '') as string)) || null
     return { tier, modelPath, ready: !!modelPath }
+  })
+
+  ipcMain.handle('localModel:download', async (event, tier?: string) => {
+    const resolvedTier = (tier ?? conf.get('modelTier', detectModelTier())) as import('./localModel').ModelTier
+    try {
+      const modelPath = await downloadModel(resolvedTier, (percent) => {
+        event.sender.send('localModel:progress', { percent })
+      })
+      // Persist the resolved tier and path so restarts find the file
+      conf.set('modelTier', resolvedTier)
+      conf.set('modelPath', modelPath)
+      const workerPort = getWorkerPort()
+      if (workerPort) {
+        workerPort.postMessage({ type: 'settings-update', provider: 'local', apiKey: 'local', ollamaModel: getOllamaModel(), modelPath })
+      }
+      event.sender.send('localModel:progress', { percent: 100, done: true, modelPath })
+      return { ok: true, modelPath }
+    } catch (err) {
+      event.sender.send('localModel:progress', { percent: 0, error: String((err as any)?.message ?? err) })
+      return { ok: false, error: String((err as any)?.message ?? err) }
+    }
+  })
+
+  // Returns recent notes that have AI insights, for display in the wiki tab
+  ipcMain.handle('notes:recentInsights', () => {
+    return getSqlite()
+      .prepare(
+        `SELECT id, tags, ai_insights as aiInsights, submitted_at as submittedAt
+         FROM notes WHERE hidden=0 AND ai_insights IS NOT NULL
+         ORDER BY submitted_at DESC LIMIT 50`
+      )
+      .all() as Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>
   })
 
   ipcMain.handle('digests:getLatest', (_e, period: string) => {

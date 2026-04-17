@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('api', {
     create: (rawText: string) => ipcRenderer.invoke('notes:create', rawText),
     delete: (id: string) => ipcRenderer.invoke('notes:delete', id),
     hide: (id: string) => ipcRenderer.invoke('notes:hide', id),
+    recentInsights: (): Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>> =>
+      ipcRenderer.invoke('notes:recentInsights'),
   },
   onAiUpdate: (
     cb: (data: {
@@ -22,10 +24,17 @@ contextBridge.exposeInMainWorld('api', {
     return () => ipcRenderer.removeListener('note:aiUpdate', handler)
   },
   settings: {
-    save: (key: string, provider: string, ollamaModel?: string, braveKey?: string) =>
-      ipcRenderer.invoke('settings:save', { key, provider, ollamaModel, braveKey }),
-    get: (): Promise<{ provider: string; hasKey: boolean; ollamaModel: string; hasBraveKey: boolean; modelTier: string }> =>
-      ipcRenderer.invoke('settings:get'),
+    save: (key: string, provider: string, ollamaModel?: string, llamaCppPath?: string) =>
+      ipcRenderer.invoke('settings:save', { key, provider, ollamaModel, llamaCppPath }),
+    get: (): Promise<{
+      provider: string
+      hasKey: boolean
+      ollamaModel: string
+      modelTier: string
+      llamaCppPath: string
+      keyStatus: Record<string, boolean>
+    }> => ipcRenderer.invoke('settings:get'),
+    listOllamaModels: (): Promise<string[]> => ipcRenderer.invoke('settings:list-ollama-models'),
   },
   kb: {
     listFiles: (): Promise<string[]> => ipcRenderer.invoke('kb:listFiles'),
@@ -41,6 +50,13 @@ contextBridge.exposeInMainWorld('api', {
   localModel: {
     getStatus: (): Promise<{ tier: string; modelPath: string | null; ready: boolean }> =>
       ipcRenderer.invoke('localModel:getStatus'),
+    download: (tier?: string): Promise<{ ok: boolean; modelPath?: string; error?: string }> =>
+      ipcRenderer.invoke('localModel:download', tier),
+    onProgress: (cb: (data: { percent: number; done?: boolean; error?: string; modelPath?: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('localModel:progress', handler)
+      return () => ipcRenderer.removeListener('localModel:progress', handler)
+    },
   },
   digest: {
     getLatest: (period: string): Promise<any> => ipcRenderer.invoke('digests:getLatest', period),
