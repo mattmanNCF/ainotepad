@@ -268,7 +268,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
           <pre className="text-xs text-gray-600 bg-black/20 border border-white/5 rounded p-2 overflow-x-auto leading-relaxed">
 {`{
   "mcpServers": {
-    "ainotepad": {
+    "notal": {
       "type": "http",
       "url": "http://127.0.0.1:7723/mcp"
     }
