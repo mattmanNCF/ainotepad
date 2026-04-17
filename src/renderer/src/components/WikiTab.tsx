@@ -132,11 +132,6 @@ export function WikiTab() {
       if (fetched === null) return
       contentCacheRef.current[filename] = fetched  // mutate ref
       content = fetched
-      // Rebuild graph links now that cache has new content
-      setFiles(prev => {
-        setGraphLinks(buildGraphLinks(prev.map(f => f.filename)))
-        return prev
-      })
     }
     setActiveContent(content)
     setHistory(prev => {
@@ -145,7 +140,7 @@ export function WikiTab() {
       return newHistory
     })
     setShowGraph(false)  // switch to Markdown view on navigation
-  }, [cursor, buildGraphLinks])
+  }, [cursor])
 
   const goBack = useCallback(() => {
     if (!canBack) return
