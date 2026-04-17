@@ -66,6 +66,31 @@ export function buildStats(
 }
 
 /**
+ * Force dispatch a digest-task to the AI worker regardless of time elapsed.
+ * Used by the "Generate Now" button in PatternsTab.
+ */
+export function forceScheduleDigest(): void {
+  const periodStart = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const wordCloud = buildWordCloudData(periodStart)
+  const stats = buildStats(periodStart, wordCloud)
+  const braveKey = getBraveKey()
+  const workerPort = getWorkerPort()
+  if (!workerPort) {
+    console.warn('[digestScheduler] Worker not ready — skipping forced digest dispatch')
+    return
+  }
+  workerPort.postMessage({
+    type: 'digest-task',
+    period: 'daily',
+    periodStart,
+    wordCloudData: JSON.stringify(wordCloud),
+    stats: JSON.stringify(stats),
+    braveKey: braveKey ?? '',
+  })
+  console.log('[digestScheduler] forced digest-task dispatched')
+}
+
+/**
  * Check if a new digest is due (>= 20 hours since last) and dispatch a digest-task
  * to the AI worker if so. Called once on app launch after startAiWorker().
  */

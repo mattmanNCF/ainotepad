@@ -8,6 +8,7 @@ interface DigestData {
   stats: DigestStats
   words: WordDatum[]
   generatedAt: string
+  period: string
 }
 
 function StatPill({ label, value }: { label: string; value: string }) {
@@ -23,17 +24,23 @@ export function PatternsTab() {
   const [period, setPeriod] = useState<'daily' | 'weekly'>('daily')
   const [digest, setDigest] = useState<DigestData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [generating, setGenerating] = useState(false)
 
   async function loadDigest(p: 'daily' | 'weekly') {
     setLoading(true)
     try {
-      const result = await window.api.digest.getLatest(p)
+      let result = await window.api.digest.getLatest(p)
+      // Day 1: weekly digest may not exist yet — fall back to daily data
+      if (!result && p === 'weekly') {
+        result = await window.api.digest.getLatest('daily')
+      }
       if (result) {
         setDigest({
           narrative: result.narrative,
           stats: JSON.parse(result.stats) as DigestStats,
           words: JSON.parse(result.word_cloud_data) as WordDatum[],
           generatedAt: result.generated_at,
+          period: p,
         })
       } else {
         setDigest(null)
@@ -71,7 +78,7 @@ export function PatternsTab() {
               period === p ? 'bg-blue-500/30 text-blue-300' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
+            {p === 'daily' ? 'Today' : 'This Week'}
           </button>
         ))}
       </div>
@@ -79,10 +86,25 @@ export function PatternsTab() {
       {loading && <p className="text-gray-500 text-sm">Loading...</p>}
 
       {!loading && !digest && (
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
           <p className="text-gray-500 text-sm text-center max-w-xs">
-            Patterns will appear here after AI processes your notes. Check back after your first session.
+            Patterns will appear here after AI processes your notes.
           </p>
+          <button
+            onClick={async () => {
+              setGenerating(true)
+              await window.api.digest.generate(period)
+              // Wait for digest:updated event to reload, but also poll after a delay
+              setTimeout(() => {
+                loadDigest(period)
+                setGenerating(false)
+              }, 3000)
+            }}
+            disabled={generating}
+            className="px-4 py-2 text-xs rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            {generating ? 'Generating...' : 'Generate Now'}
+          </button>
         </div>
       )}
 

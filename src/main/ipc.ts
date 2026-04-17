@@ -9,6 +9,7 @@ import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite } from 
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
+import { forceScheduleDigest } from './digestScheduler'
 import { detectModelTier, findExistingModel, getModelStoragePath } from './localModel'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
@@ -188,5 +189,11 @@ export function registerIpcHandlers() {
       `SELECT * FROM digests WHERE period=? ORDER BY generated_at DESC LIMIT 1`
     ).get(period) as any
     return row ?? null
+  })
+
+  ipcMain.handle('digests:generate', (_e, _period: string) => {
+    // Force a digest generation regardless of time elapsed
+    forceScheduleDigest()
+    return { queued: true }
   })
 }
