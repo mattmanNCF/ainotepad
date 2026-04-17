@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { WikiSidebar } from './WikiSidebar'
 import { WikiPane } from './WikiPane'
 
@@ -20,6 +20,13 @@ function extractWikiLinks(content: string): string[] {
   return Array.from(matches, m => m[1].trim())
 }
 
+interface InsightRecord {
+  id: string
+  tags: string[]
+  aiInsights: string
+  submittedAt: string
+}
+
 export function WikiTab() {
   const [files, setFiles] = useState<KbFileEntry[]>([])
   const [tagColors, setTagColors] = useState<Record<string, string>>({})
@@ -27,6 +34,8 @@ export function WikiTab() {
   const [cursor, setCursor] = useState<number>(-1)
   const [activeContent, setActiveContent] = useState<string | null>(null)
   const [showGraph, setShowGraph] = useState(false)
+  const [insights, setInsights] = useState<InsightRecord[]>([])
+  const [graphLinks, setGraphLinks] = useState<Array<{ source: string; target: string }>>([])
 
   // useRef for content cache — mutations do NOT trigger re-renders.
   // If this were useState, the cache update would invalidate useCallback deps,
@@ -45,6 +54,24 @@ export function WikiTab() {
     return { filename, title: filenameToTitle(filename), tags }
   }, [])
 
+  // Build graph links from the current content cache.
+  // Called after cache mutations so links stay in sync with cached content.
+  const buildGraphLinks = useCallback((existingFilenames: string[]): Array<{ source: string; target: string }> => {
+    const links: Array<{ source: string; target: string }> = []
+    for (const [filename, content] of Object.entries(contentCacheRef.current)) {
+      if (filename.startsWith('_')) continue
+      const sourceId = filename.replace(/\.md$/, '')
+      const linkedSlugs = extractWikiLinks(content)
+      for (const slug of linkedSlugs) {
+        const targetFilename = slug + '.md'
+        if (existingFilenames.includes(targetFilename)) {
+          links.push({ source: sourceId, target: slug })
+        }
+      }
+    }
+    return links
+  }, [])
+
   // Load all files with their tags for the sidebar (reads cached content where available).
   // Does NOT include contentCacheRef in deps — ref mutations are transparent to React.
   const loadFilesWithTags = useCallback(async () => {
@@ -52,9 +79,9 @@ export function WikiTab() {
     const colors = await window.api.kb.getTagColors()
     setTagColors(colors)
 
+    const visibleFilenames = filenames.filter(f => !f.startsWith('_'))
     const entries = await Promise.all(
-      filenames
-        .filter(f => !f.startsWith('_'))
+      visibleFilenames
         .map(async f => {
           const cached = contentCacheRef.current[f]
           if (cached) return getFileEntry(f, cached)
@@ -67,7 +94,8 @@ export function WikiTab() {
         })
     )
     setFiles(entries)
-  }, [getFileEntry])
+    setGraphLinks(buildGraphLinks(visibleFilenames))
+  }, [getFileEntry, buildGraphLinks])
   // Note: contentCacheRef intentionally omitted from deps — ref.current reads are always fresh
 
   useEffect(() => {
@@ -76,6 +104,18 @@ export function WikiTab() {
     return cleanup
   }, [loadFilesWithTags])
 
+  // Load recent insights; refresh when a new note is processed
+  useEffect(() => {
+    function loadInsights() {
+      window.api.notes.recentInsights().then(rows =>
+        setInsights(rows.map(r => ({ ...r, tags: JSON.parse(r.tags) as string[] })))
+      )
+    }
+    loadInsights()
+    const unsub = window.api.onAiUpdate(() => loadInsights())
+    return unsub
+  }, [])
+
   const navigate = useCallback(async (filename: string) => {
     let content = contentCacheRef.current[filename]
     if (!content) {
@@ -83,6 +123,11 @@ export function WikiTab() {
       if (fetched === null) return
       contentCacheRef.current[filename] = fetched  // mutate ref
       content = fetched
+      // Rebuild graph links now that cache has new content
+      setFiles(prev => {
+        setGraphLinks(buildGraphLinks(prev.map(f => f.filename)))
+        return prev
+      })
     }
     setActiveContent(content)
     setHistory(prev => {
@@ -91,7 +136,7 @@ export function WikiTab() {
       return newHistory
     })
     setShowGraph(false)  // switch to Markdown view on navigation
-  }, [cursor])
+  }, [cursor, buildGraphLinks])
 
   const goBack = useCallback(() => {
     if (!canBack) return
@@ -114,27 +159,26 @@ export function WikiTab() {
     setTagColors(prev => ({ ...prev, [tag]: color }))
   }, [])
 
-  // Derive graph data from cached file contents
-  const existingFilenames = files.map(f => f.filename)
+  // Find the most recent insight from notes tagged with the current page's topic
+  const currentPageInsight = useMemo(() => {
+    if (!currentFile) return null
+    const slug = currentFile.replace(/\.md$/, '')
+    const match = insights.find(r => r.tags.includes(slug) || r.tags.map(t => t.toLowerCase().replace(/\s+/g, '-')).includes(slug))
+    return match?.aiInsights ?? null
+  }, [currentFile, insights])
 
+  // Stable key that changes only when tag colors change — forces WikiGraph remount
+  const colorKey = useMemo(
+    () => Object.entries(tagColors).sort().map(([k, v]) => `${k}:${v}`).join(','),
+    [tagColors]
+  )
+
+  // Derive graph nodes from files state
   const graphNodes = files.map(f => ({
     id: f.filename.replace(/\.md$/, ''),
     name: f.title,
-    color: tagColors[f.tags[0] ?? ''] ?? '#6b7280',
+    color: tagColors[f.tags[0] ?? 'Untagged'] ?? '#6b7280',
   }))
-
-  const graphLinks: Array<{ source: string; target: string }> = []
-  for (const [filename, content] of Object.entries(contentCacheRef.current)) {
-    if (filename.startsWith('_')) continue
-    const sourceId = filename.replace(/\.md$/, '')
-    const linkedSlugs = extractWikiLinks(content)
-    for (const slug of linkedSlugs) {
-      const targetFilename = slug + '.md'
-      if (existingFilenames.includes(targetFilename)) {
-        graphLinks.push({ source: sourceId, target: slug })
-      }
-    }
-  }
 
   return (
     <div className="flex h-full bg-gray-900">
@@ -147,9 +191,12 @@ export function WikiTab() {
       />
       <WikiPane
         content={activeContent}
+        insights={currentPageInsight}
         existingFiles={existingFilenames}
         graphNodes={graphNodes}
         graphLinks={graphLinks}
+        tagColors={tagColors}
+        colorKey={colorKey}
         canBack={canBack}
         canForward={canForward}
         showGraph={showGraph}
