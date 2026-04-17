@@ -247,6 +247,35 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         >
           {saving ? 'Saving…' : saved ? 'Saved!' : 'Save'}
         </button>
+
+        {/* Agent API — MCP connection info. Static: URL is always http://127.0.0.1:7723/mcp */}
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Agent API (MCP)</p>
+          <p className="text-xs text-gray-500 mb-2">
+            Add to Claude Code config (<code className="font-mono text-gray-400">claude mcp add</code>) or Atlas:
+          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <code className="flex-1 text-xs bg-black/30 border border-white/10 px-2 py-1.5 rounded text-gray-200 font-mono truncate">
+              http://127.0.0.1:7723/mcp
+            </code>
+            <button
+              onClick={() => navigator.clipboard.writeText('http://127.0.0.1:7723/mcp')}
+              className="shrink-0 text-xs px-2 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              Copy
+            </button>
+          </div>
+          <pre className="text-xs text-gray-600 bg-black/20 border border-white/5 rounded p-2 overflow-x-auto leading-relaxed">
+{`{
+  "mcpServers": {
+    "ainotepad": {
+      "type": "http",
+      "url": "http://127.0.0.1:7723/mcp"
+    }
+  }
+}`}
+          </pre>
+        </div>
       </div>
     </div>
   )
