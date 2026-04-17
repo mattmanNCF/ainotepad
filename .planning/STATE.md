@@ -3,31 +3,31 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 05
-current_phase_name: agent layer
-current_plan: Not started
-status: planning
-stopped_at: Completed 04-search-04-07-PLAN.md
-last_updated: "2026-04-16T07:46:04.426Z"
-last_activity: 2026-04-16
+current_phase_name: agent-layer
+current_plan: 2
+status: executing
+stopped_at: Completed 05-agent-layer-05-01-PLAN.md
+last_updated: "2026-04-17T06:54:44.319Z"
+last_activity: 2026-04-17
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 21
-  completed_plans: 20
-  percent: 95
+  total_plans: 24
+  completed_plans: 21
+  percent: 88
 ---
 
 # AInotepad — Project State
 
 - **Current Phase:** 05
-- **Current Phase Name:** agent layer
-- **Current Plan:** Not started
-- **Total Plans in Phase:** 8
+- **Current Phase Name:** agent-layer
+- **Current Plan:** 2
+- **Total Plans in Phase:** 3
 - **Total Phases:** 6
-- **Status:** Ready to plan
-- **Progress:** [██████████] 95%
-- **Last Activity:** 2026-04-16
-- **Stopped At:** Completed 04-search-04-07-PLAN.md
+- **Status:** Ready to execute
+- **Progress:** [█████████░] 88%
+- **Last Activity:** 2026-04-17
+- **Stopped At:** Completed 05-agent-layer-05-01-PLAN.md
 
 ---
 
@@ -118,6 +118,9 @@ progress:
 - [Phase 04-search]: NoteRecord interface uses aiInsights (Drizzle camelCase) while onAiUpdate handler reads data.insights (live-push field name)
 - [Phase 04-search]: SearchTab.tsx replaced with single-line re-export alias for PatternsTab to preserve App.tsx import without changes
 - [Phase 04-search]: Tab id 'search' kept unchanged; only label changed to 'Patterns' to avoid App.tsx activeTab state changes
+- [Phase 05-agent-layer]: @modelcontextprotocol/sdk bundled into ASAR (not externalized) — pure JS, no native binaries
+- [Phase 05-agent-layer]: StreamableHTTPServerTransport per request (stateless mode) — correct for read-only tools with no session state
+- [Phase 05-agent-layer]: isCleaningUp guard in before-quit prevents infinite loop when app.quit() re-triggers before-quit event
 
 ## Notes
 
