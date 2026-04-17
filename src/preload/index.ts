@@ -66,4 +66,10 @@ contextBridge.exposeInMainWorld('api', {
       return () => ipcRenderer.removeListener('digest:updated', handler)
     },
   },
+  onboarding: {
+    getStatus: (): Promise<{ done: boolean }> =>
+      ipcRenderer.invoke('onboarding:getStatus'),
+    complete: (): Promise<void> =>
+      ipcRenderer.invoke('onboarding:complete'),
+  },
 })

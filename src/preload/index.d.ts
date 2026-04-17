@@ -52,5 +52,9 @@ interface Window {
       getLatest: (period: string) => Promise<any>
       onUpdated: (cb: (data: { period: string; periodStart: string; narrative: string; stats: string; wordCloudData: string }) => void) => () => void
     }
+    onboarding: {
+      getStatus: () => Promise<{ done: boolean }>
+      complete: () => Promise<void>
+    }
   }
 }
