@@ -6,6 +6,7 @@ interface WikiMarkdownProps {
   content: string
   existingFiles: string[]          // filenames like "quantum-entanglement.md"
   onNavigate: (filename: string) => void
+  insights?: string | null         // optional AI insight for this page
 }
 
 export function WikiMarkdown({ content, existingFiles, onNavigate }: WikiMarkdownProps) {

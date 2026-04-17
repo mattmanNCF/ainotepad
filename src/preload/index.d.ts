@@ -5,6 +5,7 @@ interface NoteRecord {
   aiState: 'pending' | 'complete' | 'failed'
   aiAnnotation: string | null
   organizedText: string | null
+  aiInsights: string | null
 }
 
 interface Window {
@@ -15,6 +16,7 @@ interface Window {
       delete: (id: string) => Promise<void>
       hide: (id: string) => Promise<void>
       reprocess: (id: string) => Promise<void>
+      recentInsights: () => Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>>
     }
     onAiUpdate: (cb: (data: {
       noteId: string
@@ -42,6 +44,12 @@ interface Window {
       getLatest: (period: string) => Promise<any>
       generate: (period: string) => Promise<{ queued: boolean }>
       onUpdated: (cb: (data: { period: string; periodStart: string; narrative: string; stats: string; wordCloudData: string }) => void) => () => void
+    }
+    agent: {
+      readHarness: () => Promise<{ agentMd: string; userMd: string; memoryMd: string }>
+      writeHarness: (files: Partial<{ agentMd: string; userMd: string; memoryMd: string }>) => Promise<void>
+      updateUserProfile: (observation: string) => Promise<void>
+      runDailyImprovement: () => Promise<{ status: string }>
     }
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 interface SettingsPanelProps {
   onClose: () => void
@@ -17,6 +17,13 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
   const [hasBraveKey, setHasBraveKey] = useState(false)
   const [modelTier, setModelTier] = useState('')
   const [modelStatus, setModelStatus] = useState<{ tier: string; modelPath: string | null; ready: boolean } | null>(null)
+  const [agentMd, setAgentMd] = useState('')
+  const [userMd, setUserMd] = useState('')
+  const [memoryMd, setMemoryMd] = useState('')
+  const [agentSaving, setAgentSaving] = useState(false)
+  const [agentSaved, setAgentSaved] = useState(false)
+  const [runningImprovement, setRunningImprovement] = useState(false)
+  const [showAgent, setShowAgent] = useState(false)
 
   useEffect(() => {
     window.api.settings.get().then(({ provider: p, hasKey: h, ollamaModel: m, hasBraveKey: bk, modelTier: mt }) => {
@@ -27,7 +34,23 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
       setModelTier(mt ?? '')
     })
     window.api.localModel.getStatus().then(setModelStatus)
+    if (window.api.agent) {
+      window.api.agent.readHarness().then(({ agentMd: a, userMd: u, memoryMd: mm }) => {
+        setAgentMd(a)
+        setUserMd(u)
+        setMemoryMd(mm)
+      })
+    }
   }, [])
+
+  const handleSaveAgent = useCallback(async () => {
+    if (!window.api.agent) return
+    setAgentSaving(true)
+    await window.api.agent.writeHarness({ agentMd, userMd, memoryMd })
+    setAgentSaving(false)
+    setAgentSaved(true)
+    setTimeout(() => setAgentSaved(false), 2000)
+  }, [agentMd, userMd, memoryMd])
 
   async function handleSave() {
     if (provider !== 'ollama' && provider !== 'local' && !apiKey.trim()) return
@@ -174,6 +197,76 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
         >
           {saving ? 'Saving\u2026' : saved ? 'Saved!' : 'Save'}
         </button>
+
+        {/* Agent harness section */}
+        {window.api.agent && (
+          <div className="mt-5 border-t border-white/10 pt-4">
+            <button
+              onClick={() => setShowAgent(v => !v)}
+              className="flex items-center justify-between w-full text-xs text-gray-400 hover:text-gray-200 uppercase tracking-wider mb-2"
+            >
+              <span>Agent Context</span>
+              <span>{showAgent ? '▲' : '▼'}</span>
+            </button>
+            {showAgent && (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">AGENT.md</p>
+                  <textarea
+                    value={agentMd}
+                    onChange={(e) => setAgentMd(e.target.value)}
+                    rows={6}
+                    className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-xs text-gray-300 font-mono focus:outline-none focus:border-blue-400/50 resize-y"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">USER.md</p>
+                  <textarea
+                    value={userMd}
+                    onChange={(e) => setUserMd(e.target.value)}
+                    rows={6}
+                    className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-xs text-gray-300 font-mono focus:outline-none focus:border-blue-400/50 resize-y"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 mb-1">MEMORY.md</p>
+                  <textarea
+                    value={memoryMd}
+                    onChange={(e) => setMemoryMd(e.target.value)}
+                    rows={6}
+                    className="w-full bg-black/30 border border-white/10 rounded px-2 py-1.5 text-xs text-gray-300 font-mono focus:outline-none focus:border-blue-400/50 resize-y"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveAgent}
+                    disabled={agentSaving}
+                    className="flex-1 py-1.5 rounded text-xs font-medium bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {agentSaving ? 'Saving...' : agentSaved ? 'Saved!' : 'Save Agent Files'}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      setRunningImprovement(true)
+                      await window.api.agent.runDailyImprovement()
+                      setTimeout(async () => {
+                        const updated = await window.api.agent.readHarness()
+                        setAgentMd(updated.agentMd)
+                        setUserMd(updated.userMd)
+                        setMemoryMd(updated.memoryMd)
+                        setRunningImprovement(false)
+                      }, 10_000)
+                    }}
+                    disabled={runningImprovement}
+                    className="flex-1 py-1.5 rounded text-xs font-medium bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {runningImprovement ? 'Running...' : 'Run Improvement'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

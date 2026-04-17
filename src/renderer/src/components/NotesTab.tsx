@@ -2,15 +2,6 @@ import { useEffect, useState } from 'react'
 import { CaptureBuffer } from './CaptureBuffer'
 import { NoteCard } from './NoteCard'
 
-interface NoteRecord {
-  id: string
-  rawText: string
-  submittedAt: string
-  aiState: 'pending' | 'complete' | 'failed'
-  aiAnnotation: string | null
-  organizedText: string | null
-}
-
 export function NotesTab() {
   const [notes, setNotes] = useState<NoteRecord[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,6 +47,7 @@ export function NotesTab() {
       aiState: 'pending',
       aiAnnotation: null,
       organizedText: null,
+      aiInsights: null,
     }
     setNotes((prev) => [optimistic, ...prev])
 

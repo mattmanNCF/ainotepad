@@ -1,6 +1,7 @@
 import { getSqlite } from './db'
 import { getWorkerPort } from './aiOrchestrator'
 import { getBraveKey } from './ipc'
+import { runDailyImprovement } from './agentHarness'
 
 /**
  * Build word cloud data from notes submitted since the given ISO date string.
@@ -137,4 +138,37 @@ export function checkAndScheduleDigest(): void {
   })
 
   console.log('[digestScheduler] digest-task dispatched to worker')
+}
+
+let _harnessCronHandle: ReturnType<typeof setInterval> | null = null
+
+/**
+ * Schedule the daily harness improvement cycle.
+ * Runs once at launch (if >20h elapsed) and every 24 hours thereafter.
+ * Default target: 3am local time approximated via interval.
+ */
+export function startHarnessCron(llmFn: (prompt: string) => Promise<string>): void {
+  if (_harnessCronHandle) return  // already running
+
+  async function maybeRunImprovement() {
+    const lastRun = getSqlite()
+      .prepare(`SELECT generated_at FROM digests WHERE period='daily' ORDER BY generated_at DESC LIMIT 1`)
+      .get() as { generated_at: string } | undefined
+    const lastTime = lastRun ? new Date(lastRun.generated_at).getTime() : 0
+    const hoursElapsed = (Date.now() - lastTime) / (1000 * 60 * 60)
+
+    if (hoursElapsed >= 20) {
+      console.log('[digestScheduler] Running daily harness improvement cycle')
+      await runDailyImprovement(llmFn).catch(err =>
+        console.error('[digestScheduler] Harness improvement failed:', err)
+      )
+    }
+  }
+
+  // Run on startup (with small delay to let worker initialize)
+  setTimeout(maybeRunImprovement, 30_000)
+
+  // Run every 24 hours
+  _harnessCronHandle = setInterval(maybeRunImprovement, 24 * 60 * 60 * 1000)
+  console.log('[digestScheduler] Harness improvement cron started (24h interval)')
 }

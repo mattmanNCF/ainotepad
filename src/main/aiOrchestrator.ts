@@ -6,6 +6,7 @@ import { notes, kbPages } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import { writeKbFile, readKbFile, listKbFiles } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
+import { readHarnessContext } from './agentHarness'
 
 let workerPort: Electron.MessagePortMain | null = null
 let mainWin: BrowserWindow | null = null
@@ -17,8 +18,16 @@ export function getWorkerPort(): Electron.MessagePortMain | null {
   return workerPort
 }
 
-export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string, ollamaModel: string): void {
+export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string, ollamaModel: string, modelPath = ''): void {
   mainWin = win
+
+  // Set rocBLAS kernel library path before forking — rocblas.dll reads this on first load.
+  // Avoids mixed-slash \\?\ path issue when rocBLAS computes path from DLL location.
+  const rocblasLibPath = path.join(
+    __dirname, '..', '..', 'node_modules', 'node-llama-cpp',
+    'llama', 'localBuilds', 'win-x64-cuda', 'Release', 'rocblas', 'library'
+  )
+  process.env.ROCBLAS_TENSILE_LIBPATH = rocblasLibPath
 
   const child = utilityProcess.fork(path.join(__dirname, 'aiWorker.js'), [], { stdio: 'pipe' })
   child.stdout?.on('data', (d: Buffer) => console.log('[aiWorker stdout]', d.toString()))
@@ -26,7 +35,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
   const { port1, port2 } = new MessageChannelMain()
 
   // Transfer port2 to the worker in the init message
-  child.postMessage({ type: 'init', provider, apiKey, ollamaModel }, [port2])
+  child.postMessage({ type: 'init', provider, apiKey, ollamaModel, modelPath }, [port2])
 
   workerPort = port1
   port1.start() // REQUIRED: port is paused until start() is called
@@ -54,7 +63,9 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
 
     if (type === 'result') {
       if (aiState === 'failed') console.error('[aiOrchestrator] worker failed for note', noteId, '—', errorMsg)
-      const tagsJson = JSON.stringify(tags ?? [])
+      // Use 'Untagged' when AI returns no tags so the note appears in the sidebar
+      const resolvedTags = (tags && tags.length > 0) ? tags : ['Untagged']
+      const tagsJson = JSON.stringify(resolvedTags)
       updateNoteAiResult(noteId, aiState as 'complete' | 'failed', aiAnnotation ?? null, organizedText ?? null, tagsJson, insights ?? null)
 
       // Write wiki files to kb/
@@ -91,7 +102,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
         const DEFAULT_PALETTE = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899']
         const currentColors = getTagColors()
         let changed = false
-        const allTags = (tags ?? []) as string[]
+        const allTags = resolvedTags
         for (const tag of allTags) {
           if (!currentColors[tag]) {
             const index = Object.keys(currentColors).length % DEFAULT_PALETTE.length
@@ -109,7 +120,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
 
       // Always push note AI update to renderer — include tags so NoteCard can display colored indicators
       if (mainWin && !mainWin.webContents.isDestroyed()) {
-        mainWin.webContents.send('note:aiUpdate', { noteId, aiState, aiAnnotation, organizedText, tags: tags ?? [], insights: insights ?? null })
+        mainWin.webContents.send('note:aiUpdate', { noteId, aiState, aiAnnotation, organizedText, tags: resolvedTags, insights: insights ?? null })
       }
     }
   })
@@ -173,7 +184,10 @@ export async function enqueueNote(noteId: string, rawText: string): Promise<void
   // FTS5 retrieval: find related notes from the user's history to ground AI insights
   const relatedNotes = queryRelatedNotes(rawText)
 
-  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes })
+  // Inject harness context (AGENT.md + USER.md + MEMORY.md) into the AI prompt
+  const harnessContext = await readHarnessContext()
+
+  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes, harnessContext })
 }
 
 export function reQueuePendingNotes(): void {

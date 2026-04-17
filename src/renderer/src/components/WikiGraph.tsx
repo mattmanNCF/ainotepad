@@ -15,6 +15,7 @@ interface GraphLink {
 interface WikiGraphProps {
   nodes: GraphNode[]
   links: GraphLink[]
+  tagColors?: Record<string, string>  // accepted but unused — node.color already encodes color
   onNodeClick: (filename: string) => void  // called with filename.md
 }
 

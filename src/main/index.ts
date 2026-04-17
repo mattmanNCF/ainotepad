@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers, getDecryptedApiKey, getProvider, getOllamaModel } from './ipc'
 import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
 import { checkAndScheduleDigest } from './digestScheduler'
+import { initHarnessFiles } from './agentHarness'
 
 let tray: Tray | null = null
 let isQuiting = false
@@ -130,6 +131,7 @@ app.whenReady().then(() => {
   startAiWorker(win, provider, apiKey, getOllamaModel())
   reQueuePendingNotes()
   checkAndScheduleDigest()
+  initHarnessFiles().catch(err => console.error('[agentHarness] init failed:', err))
 
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
   globalShortcut.register('CommandOrControl+Shift+Space', () => {

@@ -11,6 +11,7 @@ import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
 import { forceScheduleDigest } from './digestScheduler'
 import { detectModelTier, findExistingModel, getModelStoragePath } from './localModel'
+import { readHarnessFiles, writeHarnessFiles, updateUserProfile, runDailyImprovement } from './agentHarness'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
@@ -71,6 +72,17 @@ export function registerIpcHandlers() {
   ipcMain.handle('notes:delete', (_event, id: string) => deleteNote(id))
 
   ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))
+
+  ipcMain.handle('notes:recentInsights', () => {
+    const rows = getSqlite().prepare(
+      `SELECT id, tags, ai_insights as aiInsights, submitted_at as submittedAt
+       FROM notes
+       WHERE hidden=0 AND ai_state='complete' AND ai_insights IS NOT NULL
+       ORDER BY submitted_at DESC
+       LIMIT 50`
+    ).all() as Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>
+    return rows
+  })
 
   ipcMain.handle('notes:reprocess', async (_event, id: string) => {
     reprocessNote(id)
@@ -195,5 +207,44 @@ export function registerIpcHandlers() {
     // Force a digest generation regardless of time elapsed
     forceScheduleDigest()
     return { queued: true }
+  })
+
+  ipcMain.handle('agent:readHarness', async () => {
+    return readHarnessFiles()
+  })
+
+  ipcMain.handle('agent:writeHarness', async (_e, files: Partial<{ agentMd: string; userMd: string; memoryMd: string }>) => {
+    await writeHarnessFiles(files)
+  })
+
+  ipcMain.handle('agent:updateUserProfile', async (_e, observation: string) => {
+    await updateUserProfile(observation)
+  })
+
+  ipcMain.handle('agent:runDailyImprovement', async () => {
+    // Build an llmFn using the worker port via a one-shot message
+    // For now, pass a no-op until the worker protocol supports agent:improvement tasks
+    // (the improvement loop runs as a background task and logs results)
+    const workerPort = getWorkerPort()
+    if (!workerPort) {
+      console.warn('[agent] runDailyImprovement: worker not ready')
+      return { status: 'worker-not-ready' }
+    }
+    const llmFn = async (prompt: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const timeout = setTimeout(() => resolve(''), 60_000)
+        const handler = (event: Electron.MessageEvent) => {
+          if (event.data?.type === 'agent-improvement-result') {
+            clearTimeout(timeout)
+            workerPort.off('message', handler)
+            resolve(event.data.result ?? '')
+          }
+        }
+        workerPort.on('message', handler)
+        workerPort.postMessage({ type: 'agent-improvement', prompt })
+      })
+    }
+    runDailyImprovement(llmFn).catch(err => console.error('[agent] runDailyImprovement error:', err))
+    return { status: 'started' }
   })
 }

@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('api', {
     delete: (id: string) => ipcRenderer.invoke('notes:delete', id),
     hide: (id: string) => ipcRenderer.invoke('notes:hide', id),
     reprocess: (id: string) => ipcRenderer.invoke('notes:reprocess', id),
+    recentInsights: (): Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>> =>
+      ipcRenderer.invoke('notes:recentInsights'),
   },
   onAiUpdate: (
     cb: (data: {
@@ -51,5 +53,15 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on('digest:updated', handler)
       return () => ipcRenderer.removeListener('digest:updated', handler)
     },
+  },
+  agent: {
+    readHarness: (): Promise<{ agentMd: string; userMd: string; memoryMd: string }> =>
+      ipcRenderer.invoke('agent:readHarness'),
+    writeHarness: (files: Partial<{ agentMd: string; userMd: string; memoryMd: string }>): Promise<void> =>
+      ipcRenderer.invoke('agent:writeHarness', files),
+    updateUserProfile: (observation: string): Promise<void> =>
+      ipcRenderer.invoke('agent:updateUserProfile', observation),
+    runDailyImprovement: (): Promise<{ status: string }> =>
+      ipcRenderer.invoke('agent:runDailyImprovement'),
   },
 })
