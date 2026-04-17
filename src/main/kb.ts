@@ -42,8 +42,21 @@ export async function readKbFile(filename: string): Promise<string | null> {
   }
 }
 
+async function listKbFilesRecursive(dir: string, base: string): Promise<string[]> {
+  const entries = await fs.readdir(dir, { withFileTypes: true })
+  const results: string[] = []
+  for (const entry of entries) {
+    const rel = base ? `${base}/${entry.name}` : entry.name
+    if (entry.isDirectory()) {
+      results.push(...await listKbFilesRecursive(path.join(dir, entry.name), rel))
+    } else if (entry.name.endsWith('.md')) {
+      results.push(rel)
+    }
+  }
+  return results
+}
+
 export async function listKbFiles(): Promise<string[]> {
   await ensureKbDir()
-  const files = await fs.readdir(kbDir())
-  return files.filter(f => f.endsWith('.md'))
+  return listKbFilesRecursive(kbDir(), '')
 }
