@@ -1,30 +1,43 @@
 import Markdown from 'react-markdown'
 import remarkWikiLink from 'remark-wiki-link'
+import remarkMath from 'remark-math'
 import rehypeRaw from 'rehype-raw'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 interface WikiMarkdownProps {
   content: string
-  existingFiles: string[]          // filenames like "quantum-entanglement.md"
+  existingFiles: string[]
   onNavigate: (filename: string) => void
+  insights?: string | null
 }
 
-export function WikiMarkdown({ content, existingFiles, onNavigate }: WikiMarkdownProps) {
-  // remark-wiki-link needs slugs (without .md) to distinguish known vs new links
+// Strip YAML frontmatter (--- ... ---) so it doesn't appear as raw text.
+// Handles: trailing spaces on delimiters, and AI-generated files where the closing
+// --- is appended to the last value line (e.g. `updated: 2026-01-01 ---`).
+function stripFrontmatter(md: string): string {
+  return md.replace(/^---[ \t]*[\r\n][\s\S]*?(?:[\r\n][ \t]*|[ \t])---[ \t]*(?:[\r\n]|$)/, '').trimStart()
+}
+
+export function WikiMarkdown({ content, existingFiles, onNavigate, insights }: WikiMarkdownProps) {
   const permalinks = existingFiles.map(f => f.replace(/\.md$/, ''))
+  const body = stripFrontmatter(content)
 
   return (
     <div className="prose prose-invert max-w-none p-4 overflow-y-auto h-full text-sm">
       <Markdown
-        remarkPlugins={[[remarkWikiLink, {
-          permalinks,
-          hrefTemplate: (permalink: string) => permalink,
-          wikiLinkClassName: 'wiki-link',
-          newClassName: 'wiki-link-new',
-        }]]}
-        rehypePlugins={[rehypeRaw]}
+        remarkPlugins={[
+          remarkMath,
+          [remarkWikiLink, {
+            permalinks,
+            hrefTemplate: (permalink: string) => permalink,
+            wikiLinkClassName: 'wiki-link',
+            newClassName: 'wiki-link-new',
+          }],
+        ]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           a: ({ href, children, className, ...props }) => {
-            // Intercept wiki-link clicks — class is set by remark-wiki-link
             const isWikiLink = typeof className === 'string' && className.includes('wiki-link')
             if (isWikiLink && href) {
               return (
@@ -41,7 +54,6 @@ export function WikiMarkdown({ content, existingFiles, onNavigate }: WikiMarkdow
                 </a>
               )
             }
-            // External links open in default browser
             return (
               <a
                 href={href}
@@ -56,8 +68,14 @@ export function WikiMarkdown({ content, existingFiles, onNavigate }: WikiMarkdow
           },
         }}
       >
-        {content}
+        {body}
       </Markdown>
+      {insights && (
+        <div className="mt-6 border-t border-white/10 pt-4 not-prose">
+          <p className="text-xs uppercase tracking-wider text-amber-500/60 mb-1">AI Insight</p>
+          <p className="text-xs italic text-amber-400/70 leading-relaxed">{insights}</p>
+        </div>
+      )}
     </div>
   )
 }
