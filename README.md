@@ -1,34 +1,55 @@
-# y
+# Notal
 
-An Electron application with React and TypeScript
+Write a note. AI organizes it. Your wiki grows automatically.
 
-## Recommended IDE Setup
+No prompts, no chatting. Every note is processed silently: tagged, annotated, and woven into a personal knowledge base. Built on Electron with local-first SQLite storage.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+## Download
 
-## Project Setup
+[Latest release →](https://github.com/mflma/ainotepad/releases/latest) — Windows installer (`.exe`) or portable zip.
 
-### Install
+## Quick start
 
+1. Download and run the installer
+2. Press `Ctrl+Shift+N` to capture a note from anywhere
+3. Open **Settings** (gear icon, top right) to configure an AI provider
+4. Write a note — AI processes it in the background
+
+## Provider setup
+
+**Ollama (free, local)** — install [Ollama](https://ollama.com), pull a model, select it in Settings.
 ```bash
-$ npm install
+ollama pull gemma4:e4b
 ```
 
-### Development
+**Claude** — get an API key from [console.anthropic.com](https://console.anthropic.com), paste into Settings.
 
-```bash
-$ npm run dev
+**OpenAI** — get an API key from [platform.openai.com](https://platform.openai.com), paste into Settings.
+
+Other supported providers: Gemini, OpenRouter, Groq, Hugging Face.
+
+## MCP agent connection
+
+Notal runs a local MCP server at `http://127.0.0.1:7723/mcp`.
+
+Add to Claude Code or any MCP-compatible agent:
+```json
+{
+  "mcpServers": {
+    "notal": {
+      "type": "http",
+      "url": "http://127.0.0.1:7723/mcp"
+    }
+  }
+}
 ```
 
-### Build
+Available tools:
+- `get_recent_notes` — fetch notes ordered by date, newest first; filter by `since` timestamp
+- `search_notes` — full-text search across all notes using SQLite FTS5
+- `get_wiki_page` — read a KB wiki page by name (without `.md` extension)
+- `list_wiki_pages` — list all wiki page filenames
 
-```bash
-# For windows
-$ npm run build:win
+## License
 
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```
+MIT — see [LICENSE](LICENSE). Source: [github.com/mflma/ainotepad](https://github.com/mflma/ainotepad).
