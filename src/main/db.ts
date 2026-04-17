@@ -120,6 +120,14 @@ export function hideNote(noteId: string): void {
   db.update(notes).set({ hidden: 1 }).where(eq(notes.id, noteId)).run()
 }
 
+export function reprocessNote(noteId: string): void {
+  const db = getDb()
+  db.update(notes)
+    .set({ aiState: 'pending', aiAnnotation: null, organizedText: null, tags: '[]', aiInsights: null })
+    .where(eq(notes.id, noteId))
+    .run()
+}
+
 export function updateNoteAiResult(
   noteId: string,
   aiState: 'complete' | 'failed',

@@ -58,6 +58,11 @@ export function NotesTab() {
     setNotes(prev => prev.filter(n => n.id !== id))
   }, [])
 
+  const handleReprocess = useCallback((id: string) => {
+    window.api.notes.reprocess(id)
+    setNotes(prev => prev.map(n => n.id === id ? { ...n, aiState: 'pending' as const, aiAnnotation: null, organizedText: null, aiInsights: null } : n))
+  }, [])
+
   async function handleSubmit(rawText: string) {
     // Optimistic prepend
     const optimistic: NoteRecord = {
@@ -94,7 +99,7 @@ export function NotesTab() {
         )}
         <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
           {notes.map((note) => (
-            <NoteCard key={note.id} note={note} onDelete={handleDelete} onHide={handleHide} />
+            <NoteCard key={note.id} note={note} onDelete={handleDelete} onHide={handleHide} onReprocess={handleReprocess} />
           ))}
         </div>
       </div>

@@ -5,7 +5,7 @@ import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
-import { deleteNote, hideNote, insertNoteToFts, getSqlite } from './db'
+import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
@@ -93,6 +93,30 @@ export function registerIpcHandlers() {
   ipcMain.handle('notes:delete', (_event, id: string) => deleteNote(id))
 
   ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))
+
+  ipcMain.handle('notes:reprocess', async (_event, id: string) => {
+    reprocessNote(id)
+    // Re-queue for AI processing using same provider check as notes:create
+    const db = getDb()
+    const record = db.select().from(notes).where(eq(notes.id, id)).get()
+    if (record) {
+      const provider = getProvider()
+      const apiKey = getDecryptedApiKey()
+      if (provider === 'ollama' || provider === 'llamacpp' || apiKey ||
+          (OPENAI_COMPAT_PROVIDERS[provider] && !!decryptKey(OPENAI_COMPAT_PROVIDERS[provider].keySlot))) {
+        await enqueueNote(id, record.rawText)
+      }
+    }
+  })
+
+  ipcMain.handle('notes:allTags', () => {
+    const rows = getSqlite().prepare(
+      `SELECT tags FROM notes WHERE hidden=0 AND ai_state='complete' AND tags IS NOT NULL AND tags != '[]'`
+    ).all() as Array<{ tags: string }>
+    return rows.map(r => {
+      try { return JSON.parse(r.tags) as string[] } catch { return [] }
+    }).filter((t: string[]) => t.length > 1)
+  })
 
   ipcMain.handle('notes:create', async (_event, rawText: string) => {
     const db = getDb()

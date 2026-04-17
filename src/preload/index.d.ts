@@ -15,6 +15,8 @@ interface Window {
       create: (rawText: string) => Promise<NoteRecord>
       delete: (id: string) => Promise<void>
       hide: (id: string) => Promise<void>
+      reprocess: (id: string) => Promise<void>
+      allTags: () => Promise<string[][]>
       recentInsights: () => Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>>
     }
     onAiUpdate: (cb: (data: {
