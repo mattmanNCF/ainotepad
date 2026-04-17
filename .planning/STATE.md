@@ -4,16 +4,16 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 06
 current_phase_name: polish-and-ship
-current_plan: 2
+current_plan: 3
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-17T08:09:48.702Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-04-17T08:13:17.031Z"
 last_activity: 2026-04-17
 progress:
-  total_phases: 6
-  completed_phases: 3
-  total_plans: 30
-  completed_plans: 23
+  total_phases: 5
+  completed_phases: 2
+  total_plans: 26
+  completed_plans: 20
   percent: 77
 ---
 
@@ -21,13 +21,13 @@ progress:
 
 - **Current Phase:** 06
 - **Current Phase Name:** polish-and-ship
-- **Current Plan:** 2
+- **Current Plan:** 3
 - **Total Plans in Phase:** 6
 - **Total Phases:** 6
 - **Status:** Ready to execute
 - **Progress:** [████████░░] 77%
 - **Last Activity:** 2026-04-17
-- **Stopped At:** Completed 06-01-PLAN.md
+- **Stopped At:** Completed 06-02-PLAN.md
 
 ---
 
@@ -123,6 +123,7 @@ progress:
 - [Phase 05-agent-layer]: isCleaningUp guard in before-quit prevents infinite loop when app.quit() re-triggers before-quit event
 - [Phase 06]: zip target added alongside NSIS for portable Windows distribution in v0.1.0
 - [Phase 06]: artifactName uses ${productName} not ${name} so Notal-prefixed artifacts regardless of npm name
+- [Phase 06-polish-and-ship]: sharp installed with --legacy-peer-deps due to react-d3-cloud peer dep conflict; SVG inlined in script as Buffer to avoid Windows librsvg dependency
 
 ## Notes
 
