@@ -10,6 +10,7 @@ import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
 import { detectModelTier, findExistingModel, downloadModel } from './localModel'
+import { forceScheduleDigest } from './digestScheduler'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
@@ -274,6 +275,11 @@ export function registerIpcHandlers() {
          ORDER BY submitted_at DESC LIMIT 50`
       )
       .all() as Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>
+  })
+
+  ipcMain.handle('digests:generate', () => {
+    forceScheduleDigest()
+    return { queued: true }
   })
 
   ipcMain.handle('digests:getLatest', (_e, period: string) => {

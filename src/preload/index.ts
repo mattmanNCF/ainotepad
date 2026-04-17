@@ -62,6 +62,7 @@ contextBridge.exposeInMainWorld('api', {
   },
   digest: {
     getLatest: (period: string): Promise<any> => ipcRenderer.invoke('digests:getLatest', period),
+    generate: (period: string): Promise<{ queued: boolean }> => ipcRenderer.invoke('digests:generate', period),
     onUpdated: (cb: (data: { period: string; periodStart: string; narrative: string; stats: string; wordCloudData: string }) => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
       ipcRenderer.on('digest:updated', handler)
