@@ -9,7 +9,7 @@
 | 03 | 1/4 | Complete    | 2026-04-16 | Pending |
 | 04 | AI Intelligence + Local Model + Patterns | Complete    | 2026-04-16 | Pending |
 | 05 | 2/3 | Complete    | 2026-04-17 | Pending |
-| 06 | Polish & Ship | 6 plans | 5/6 | In Progress|  | Plan | Name | Status |
+| 06 | Polish & Ship | 6 plans | 6/6 | Complete   | 2026-04-17 | Plan | Name | Status |
 |------|------|--------|
 | 01-01 | Scaffold + three-tab shell | ✓ Complete (2026-04-14) |
 | 01-02 | SQLite DB layer + IPC handlers | ✓ Complete (2026-04-14) |
@@ -90,4 +90,4 @@ Plans:
 - [x] 06-03-PLAN.md — Onboarding IPC layer (ipc.ts handlers, preload bridge, TypeScript types)
 - [x] 06-04-PLAN.md — OnboardingModal component + App.tsx first-launch check
 - [x] 06-05-PLAN.md — README.md (developer-focused, 6 sections, under 100 lines)
-- [ ] 06-06-PLAN.md — Final build verification + human smoke test checkpoint
+- [x] 06-06-PLAN.md — Final build verification + human smoke test checkpoint

@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 06
 current_phase_name: polish-and-ship
 current_plan: 6
-status: executing
-stopped_at: Completed 06-05-PLAN.md
-last_updated: "2026-04-17T08:20:52.117Z"
+status: verifying
+stopped_at: Completed 06-06-PLAN.md — Phase 06 complete, Notal v0.1.0 artifacts built
+last_updated: "2026-04-17T08:54:03.776Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 26
-  completed_plans: 23
-  percent: 88
+  completed_plans: 24
+  percent: 92
 ---
 
 # AInotepad — Project State
@@ -24,10 +24,10 @@ progress:
 - **Current Plan:** 6
 - **Total Plans in Phase:** 6
 - **Total Phases:** 6
-- **Status:** Ready to execute
-- **Progress:** [█████████░] 88%
+- **Status:** Phase complete — ready for verification
+- **Progress:** [█████████░] 92%
 - **Last Activity:** 2026-04-17
-- **Stopped At:** Completed 06-05-PLAN.md
+- **Stopped At:** Completed 06-06-PLAN.md — Phase 06 complete, Notal v0.1.0 artifacts built
 
 ---
 
@@ -128,6 +128,8 @@ progress:
 - [Phase 06-04]: showOnboarding initialized false to prevent modal flash before IPC resolves on every launch
 - [Phase 06-04]: OnboardingModal overlay clicks handleSkip to mark onboarding done — consistent with SettingsPanel behavior
 - [Phase 06-polish-and-ship]: Tool names in README use actual registered names from mcpServer.ts (get_recent_notes, get_wiki_page) — plan listed expected names that differed from source
+- [Phase 06]: electron-builder zip target: win.artifactName fallback applies when nsis has own override; root zip: key invalid in v26+
+- [Phase 06]: winCodeSign symlink workaround: winPackager.js patched to use cached rcedit-x64.exe directly; re-patch needed after npm ci unless Windows Developer Mode enabled
 
 ## Notes
 
