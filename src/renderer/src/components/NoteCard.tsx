@@ -39,7 +39,6 @@ export function NoteCard({ note, onDelete, onHide }: NoteCardProps) {
   const style = aiStateStyle[note.aiState]
   const [tags, setTags] = useState<string[]>([])
   const [tagColors, setTagColors] = useState<Record<string, string>>({})
-  const [insights, setInsights] = useState<string | null>(note.aiInsights ?? null)
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -56,7 +55,6 @@ export function NoteCard({ note, onDelete, onHide }: NoteCardProps) {
     const unsub = window.api.onAiUpdate((data) => {
       if (data.noteId === note.id) {
         if (data.tags) setTags(data.tags)
-        if ('insights' in data) setInsights(data.insights ?? null)
       }
     })
     return unsub
@@ -91,9 +89,6 @@ export function NoteCard({ note, onDelete, onHide }: NoteCardProps) {
         <p className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed break-words">{note.rawText}</p>
         {note.aiAnnotation && (
           <p className="mt-2 text-xs text-blue-400/70 border-t border-white/5 pt-2 leading-relaxed">{note.aiAnnotation}</p>
-        )}
-        {insights && (
-          <p className="mt-2 text-xs italic text-amber-400/60 border-t border-white/5 pt-2 leading-relaxed">{insights}</p>
         )}
         {tags.length > 0 && (
           <div className="flex items-center gap-1 mt-1">

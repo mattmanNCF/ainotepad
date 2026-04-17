@@ -9,7 +9,7 @@ import { deleteNote, hideNote, insertNoteToFts, getSqlite } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
-import { detectModelTier, findExistingModel, getModelStoragePath, downloadModel } from './localModel'
+import { detectModelTier, findExistingModel, downloadModel } from './localModel'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),

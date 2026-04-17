@@ -5,6 +5,7 @@ interface NoteRecord {
   aiState: 'pending' | 'complete' | 'failed'
   aiAnnotation: string | null
   organizedText: string | null
+  aiInsights: string | null
 }
 
 interface Window {

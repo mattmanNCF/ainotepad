@@ -46,26 +46,6 @@ process.parentPort.on('message', (e) => {
   }
 })
 
-/**
- * Detect GPU vendor from the available Vulkan/GPU devices.
- * Returns 'amd', 'nvidia', or 'unknown'.
- */
-async function detectGpuVendor(): Promise<'amd' | 'nvidia' | 'unknown'> {
-  try {
-    const { getLlama } = await import('node-llama-cpp')
-    // Use Vulkan just for device enumeration
-    const probe = await getLlama({ gpu: 'vulkan', logLevel: 'warn' })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const devices = (probe as any).gpu?.devices ?? []
-    await probe.dispose?.()
-    const names = devices.map((d: { name?: string }) => (d.name ?? '').toLowerCase()).join(' ')
-    if (names.includes('amd') || names.includes('radeon')) return 'amd'
-    if (names.includes('nvidia') || names.includes('geforce') || names.includes('rtx')) return 'nvidia'
-  } catch {
-    // Device enumeration failed — can't determine vendor
-  }
-  return 'unknown'
-}
 
 /**
  * Initialize the node-llama-cpp model stack with hardware-appropriate GPU backend.
@@ -73,14 +53,14 @@ async function detectGpuVendor(): Promise<'amd' | 'nvidia' | 'unknown'> {
  * Uses dynamic import() because node-llama-cpp is ESM-only (top-level await).
  */
 async function initLocalModel(modelPath: string): Promise<void> {
-  const { getLlama, LlamaChatSession, InsufficientMemoryError } = await import('node-llama-cpp')
+  const { getLlama, LlamaChatSession, LlamaLogLevel, InsufficientMemoryError } = await import('node-llama-cpp')
 
   // getLlama() is a process-level singleton. Specifying gpu:'cuda' loads our custom HIP build
   // from localBuilds/win-x64-cuda (per lastBuild.json). We NEVER dispose the instance across
   // attempts — instead we reload the model with different gpuLayers on the same instance.
   try {
     console.log('[aiWorker] Initializing llama with gpu=cuda (HIP/ROCm build)')
-    llamaInstance = await getLlama({ gpu: 'cuda', logLevel: 'debug' })
+    llamaInstance = await getLlama({ gpu: 'cuda', logLevel: LlamaLogLevel.debug })
 
     // First try: full GPU offload
     llamaModel = await llamaInstance.loadModel({ modelPath, gpuLayers: -1 })

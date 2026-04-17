@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CaptureBuffer } from './CaptureBuffer'
 import { NoteCard } from './NoteCard'
 
@@ -9,6 +9,7 @@ interface NoteRecord {
   aiState: 'pending' | 'complete' | 'failed'
   aiAnnotation: string | null
   organizedText: string | null
+  aiInsights: string | null
 }
 
 export function NotesTab() {
@@ -47,6 +48,16 @@ export function NotesTab() {
     return unsub
   }, [])
 
+  const handleDelete = useCallback((id: string) => {
+    window.api.notes.delete(id)
+    setNotes(prev => prev.filter(n => n.id !== id))
+  }, [])
+
+  const handleHide = useCallback((id: string) => {
+    window.api.notes.hide(id)
+    setNotes(prev => prev.filter(n => n.id !== id))
+  }, [])
+
   async function handleSubmit(rawText: string) {
     // Optimistic prepend
     const optimistic: NoteRecord = {
@@ -56,6 +67,7 @@ export function NotesTab() {
       aiState: 'pending',
       aiAnnotation: null,
       organizedText: null,
+      aiInsights: null,
     }
     setNotes((prev) => [optimistic, ...prev])
 
@@ -82,7 +94,7 @@ export function NotesTab() {
         )}
         <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
           {notes.map((note) => (
-            <NoteCard key={note.id} note={note} />
+            <NoteCard key={note.id} note={note} onDelete={handleDelete} onHide={handleHide} />
           ))}
         </div>
       </div>
