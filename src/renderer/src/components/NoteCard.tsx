@@ -37,13 +37,24 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [cardRect, setCardRect] = useState<DOMRect | null>(null)
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const primaryTagColor = tags.length > 0 && tagColors[tags[0]]
     ? tagColors[tags[0]]
     : '#6b7280'
 
-  const handleMouseEnter = useCallback(() => {}, [])
-  const handleMouseLeave = useCallback(() => {}, [])
+  const handleMouseEnter = useCallback(() => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current)
+    const rect = cardRef.current?.getBoundingClientRect()
+    if (rect) setCardRect(rect)
+    setExpanded(true)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    leaveTimer.current = setTimeout(() => setExpanded(false), 120)
+  }, [])
 
   useEffect(() => {
     window.api.kb.getTagColors().then(setTagColors)
@@ -73,6 +84,10 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menu])
+
+  useEffect(() => () => {
+    if (leaveTimer.current) clearTimeout(leaveTimer.current)
+  }, [])
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -141,6 +156,53 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
           >
             Delete
           </button>
+        </div>,
+        document.body
+      )}
+
+      {/* Hover-expand overlay portal */}
+      {expanded && cardRect && createPortal(
+        <div
+          onMouseEnter={() => { if (leaveTimer.current) clearTimeout(leaveTimer.current) }}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            position: 'fixed',
+            left: cardRect.left,
+            top: cardRect.top,
+            width: 300,
+            maxHeight: 300,
+            zIndex: 9998,
+            overflowY: 'auto',
+          }}
+          className="rounded-sm bg-[#1f1f18] border border-white/10 shadow-2xl"
+        >
+          {/* User text — full, not truncated */}
+          <div className="p-3 pb-2">
+            <p className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed break-words">{note.rawText}</p>
+          </div>
+
+          {/* User/AI divider — only shown when AI content is present */}
+          {(note.aiAnnotation || note.aiInsights) && (
+            <div className="flex items-center gap-2 px-3 py-1">
+              <div className="flex-1 border-t border-white/10" />
+              <span className="text-[10px] text-gray-500">AI</span>
+              <div className="flex-1 border-t border-white/10" />
+            </div>
+          )}
+
+          {/* AI annotation */}
+          {note.aiAnnotation && (
+            <div className="px-3 pb-2">
+              <p className="text-xs text-blue-400/70 leading-relaxed">{note.aiAnnotation}</p>
+            </div>
+          )}
+
+          {/* AI insights — appended below annotation */}
+          {note.aiInsights && (
+            <div className="px-3 pb-3">
+              <p className="text-xs text-gray-400 leading-relaxed">{note.aiInsights}</p>
+            </div>
+          )}
         </div>,
         document.body
       )}
