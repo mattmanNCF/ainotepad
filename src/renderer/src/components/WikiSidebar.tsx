@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
 interface KbFileEntry {
@@ -13,6 +13,7 @@ interface WikiSidebarProps {
   activeFile: string | null
   onFileClick: (filename: string) => void
   onSetTagColor: (tag: string, color: string) => void
+  onDeleteFile: (filename: string) => void
 }
 
 const PICKER_W = 160
@@ -24,8 +25,10 @@ export function WikiSidebar({
   activeFile,
   onFileClick,
   onSetTagColor,
+  onDeleteFile,
 }: WikiSidebarProps) {
   const [colorPicker, setColorPicker] = useState<{ tag: string; x: number; y: number } | null>(null)
+  const [ctxMenu, setCtxMenu] = useState<{ filename: string; tag: string; x: number; y: number } | null>(null)
 
   const groups: Record<string, KbFileEntry[]> = {}
   for (const file of files) {
@@ -43,6 +46,25 @@ export function WikiSidebar({
     const y = Math.min(e.clientY, window.innerHeight - PICKER_H - 8)
     setColorPicker({ tag, x, y })
   }
+
+  function openCtxMenu(filename: string, tag: string, e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    setCtxMenu({ filename, tag, x: e.clientX, y: e.clientY })
+  }
+
+  // Dismiss context menu on outside click
+  useEffect(() => {
+    if (!ctxMenu) return
+    function handleMouseDown(e: MouseEvent) {
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-ctx-menu]')) {
+        setCtxMenu(null)
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown)
+    return () => document.removeEventListener('mousedown', handleMouseDown)
+  }, [ctxMenu])
 
   return (
     <div className="w-56 flex-shrink-0 border-r border-gray-700 overflow-y-auto bg-gray-900 relative">
@@ -64,12 +86,12 @@ export function WikiSidebar({
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide truncate">{tag}</span>
             </div>
 
-            {/* Files — left-click navigates, right-click opens color picker for this tag */}
+            {/* Files — left-click navigates, right-click shows context menu */}
             {groups[tag].map(file => (
               <button
                 key={file.filename}
                 onClick={() => onFileClick(file.filename)}
-                onContextMenu={(e) => openPicker(tag, e)}
+                onContextMenu={(e) => openCtxMenu(file.filename, tag, e)}
                 className={`w-full text-left px-4 py-1 text-xs truncate transition-colors ${
                   activeFile === file.filename
                     ? 'bg-indigo-600 text-white'
@@ -106,7 +128,39 @@ export function WikiSidebar({
             onClick={() => setColorPicker(null)}
             className="text-xs text-gray-500 hover:text-gray-300 ml-1"
           >
-            ×
+            x
+          </button>
+        </div>,
+        document.body
+      )}
+
+      {ctxMenu && createPortal(
+        <div
+          data-ctx-menu
+          style={{ position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999 }}
+          className="bg-gray-800 border border-gray-600 rounded shadow-xl overflow-hidden"
+        >
+          <button
+            className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 cursor-pointer"
+            onClick={(e) => {
+              const tag = ctxMenu.tag
+              const x = ctxMenu.x
+              const y = ctxMenu.y
+              setCtxMenu(null)
+              openPicker(tag, { ...e, clientX: x, clientY: y, preventDefault: () => {} } as React.MouseEvent)
+            }}
+          >
+            Change tag color
+          </button>
+          <button
+            className="block w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700 cursor-pointer"
+            onClick={() => {
+              const filename = ctxMenu.filename
+              setCtxMenu(null)
+              onDeleteFile(filename)
+            }}
+          >
+            Delete entry
           </button>
         </div>,
         document.body

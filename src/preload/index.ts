@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('api', {
     readFile: (filename: string): Promise<string | null> => ipcRenderer.invoke('kb:readFile', filename),
     getTagColors: (): Promise<Record<string, string>> => ipcRenderer.invoke('kb:getTagColors'),
     setTagColor: (tag: string, color: string): Promise<void> => ipcRenderer.invoke('kb:setTagColor', tag, color),
+    deleteFile: (filename: string): Promise<void> => ipcRenderer.invoke('kb:deleteFile', filename),
     onUpdated: (cb: () => void): (() => void) => {
       const handler = (_event: Electron.IpcRendererEvent) => cb()
       ipcRenderer.on('kb:updated', handler)

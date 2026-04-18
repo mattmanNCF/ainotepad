@@ -1,11 +1,11 @@
-import { ipcMain } from 'electron'
+import { ipcMain, BrowserWindow } from 'electron'
 import { safeStorage } from 'electron'
 import { randomUUID } from 'crypto'
 import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
-import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, countNotesReferencingWikiFile } from './db'
+import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, countNotesReferencingWikiFile, getNotesReferencingWikiFile } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile, deleteKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
@@ -303,6 +303,58 @@ export function registerIpcHandlers() {
     const colors = getTagColors()
     colors[tag] = color
     setTagColors(colors)
+  })
+
+  ipcMain.handle('kb:deleteFile', async (_e, filename: string) => {
+    const sqlite = getSqlite()
+
+    // Find all notes that reference this wiki file
+    const noteIds = getNotesReferencingWikiFile(filename)
+
+    for (const id of noteIds) {
+      // Get this note's wiki_files before deleting
+      const noteRow = sqlite
+        .prepare('SELECT wiki_files FROM notes WHERE id = ?')
+        .get(id) as { wiki_files: string } | undefined
+      let noteWikiFiles: string[] = []
+      if (noteRow) {
+        try { noteWikiFiles = JSON.parse(noteRow.wiki_files) } catch { /* empty */ }
+      }
+
+      // Delete the note
+      deleteNote(id)
+
+      // Clean up sibling wiki files from this note that are now orphaned
+      for (const wf of noteWikiFiles) {
+        if (wf === filename) continue  // handled separately below
+        if (countNotesReferencingWikiFile(wf, id) === 0) {
+          sqlite.prepare('DELETE FROM kb_pages WHERE filename = ?').run(wf)
+          await deleteKbFile(wf)
+        }
+      }
+    }
+
+    // Delete the target wiki file itself from kb_pages and disk
+    sqlite.prepare('DELETE FROM kb_pages WHERE filename = ?').run(filename)
+    await deleteKbFile(filename)
+
+    // Prune tag colors no longer used by any remaining complete note
+    const remaining = sqlite
+      .prepare("SELECT tags FROM notes WHERE hidden=0 AND ai_state='complete'")
+      .all() as Array<{ tags: string }>
+    const activeTags = new Set<string>()
+    for (const r of remaining) {
+      try { for (const t of JSON.parse(r.tags)) activeTags.add(t) } catch { /* skip */ }
+    }
+    const colors = getTagColors()
+    let colorChanged = false
+    for (const tag of Object.keys(colors)) {
+      if (!activeTags.has(tag)) { delete colors[tag]; colorChanged = true }
+    }
+    if (colorChanged) setTagColors(colors)
+
+    // Notify renderer
+    BrowserWindow.getAllWindows()[0]?.webContents.send('kb:updated')
   })
 
   ipcMain.handle('localModel:getStatus', () => {

@@ -45,6 +45,7 @@ interface Window {
       readFile: (filename: string) => Promise<string | null>
       getTagColors: () => Promise<Record<string, string>>
       setTagColor: (tag: string, color: string) => Promise<void>
+      deleteFile: (filename: string) => Promise<void>
       onUpdated: (cb: () => void) => () => void
     }
     localModel: {

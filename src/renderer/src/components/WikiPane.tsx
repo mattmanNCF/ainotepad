@@ -27,6 +27,7 @@ interface WikiPaneProps {
   onBack: () => void
   onForward: () => void
   onToggleGraph: () => void
+  onNodeRightClick?: (filename: string) => void
 }
 
 export function WikiPane({
@@ -44,6 +45,7 @@ export function WikiPane({
   onBack,
   onForward,
   onToggleGraph,
+  onNodeRightClick,
 }: WikiPaneProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
@@ -82,7 +84,7 @@ export function WikiPane({
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {showGraph ? (
-          <WikiGraph key={colorKey} nodes={graphNodes} links={graphLinks} tagColors={tagColors} onNodeClick={onNavigate} />
+          <WikiGraph key={colorKey} nodes={graphNodes} links={graphLinks} tagColors={tagColors} onNodeClick={onNavigate} onNodeRightClick={onNodeRightClick} />
         ) : content !== null ? (
           <WikiMarkdown content={content} existingFiles={existingFiles} onNavigate={onNavigate} insights={insights} />
         ) : (

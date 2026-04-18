@@ -145,6 +145,18 @@ export function countNotesReferencingWikiFile(filename: string, excludeNoteId: s
   return count
 }
 
+export function getNotesReferencingWikiFile(filename: string): string[] {
+  const rows = getSqlite()
+    .prepare("SELECT id, wiki_files FROM notes WHERE hidden=0")
+    .all() as Array<{ id: string; wiki_files: string }>
+  return rows
+    .filter(r => {
+      try { return (JSON.parse(r.wiki_files) as string[]).includes(filename) }
+      catch { return false }
+    })
+    .map(r => r.id)
+}
+
 export function deleteNote(noteId: string): void {
   const db = getDb()
   db.delete(notes).where(eq(notes.id, noteId)).run()

@@ -17,9 +17,10 @@ interface WikiGraphProps {
   links: GraphLink[]
   tagColors: Record<string, string>
   onNodeClick: (filename: string) => void
+  onNodeRightClick?: (filename: string) => void
 }
 
-export function WikiGraph({ nodes, links, onNodeClick }: WikiGraphProps) {
+export function WikiGraph({ nodes, links, onNodeClick, onNodeRightClick }: WikiGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const graphRef = useRef<any>(null)
   const [dims, setDims] = useState({ width: 600, height: 400 })
@@ -66,6 +67,7 @@ export function WikiGraph({ nodes, links, onNodeClick }: WikiGraphProps) {
         }}
         nodeCanvasObjectMode={() => 'replace'}
         onNodeClick={(node) => onNodeClick((node as GraphNode).id + '.md')}
+        onNodeRightClick={(node) => onNodeRightClick?.((node as GraphNode).id + '.md')}
         linkColor={() => '#4b5563'}
         backgroundColor="#111827"
         nodeRelSize={5}

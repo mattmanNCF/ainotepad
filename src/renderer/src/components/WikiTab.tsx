@@ -46,6 +46,7 @@ export function WikiTab() {
   const [activeContent, setActiveContent] = useState<string | null>(null)
   const [showGraph, setShowGraph] = useState(false)
   const [allNoteTags, setAllNoteTags] = useState<string[][]>([])
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   // useRef for content cache — mutations do NOT trigger re-renders.
   // If this were useState, the cache update would invalidate useCallback deps,
@@ -143,6 +144,28 @@ export function WikiTab() {
     setTagColors(prev => ({ ...prev, [tag]: color }))
   }, [])
 
+  const handleDeleteFile = useCallback((filename: string) => {
+    setDeleteTarget(filename)
+  }, [])
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteTarget) return
+    const target = deleteTarget
+    setDeleteTarget(null)
+    // Remove from cache
+    delete contentCacheRef.current[target]
+    // If this was the active file, clear navigation state
+    if (currentFile === target) {
+      setHistory([])
+      setCursor(-1)
+      setActiveContent(null)
+    }
+    await window.api.kb.deleteFile(target)
+    // sidebar refreshes via kb:updated event
+  }, [deleteTarget, currentFile])
+
+  const cancelDelete = useCallback(() => setDeleteTarget(null), [])
+
   // Derive graph data from files state
   const existingFilenames = files.map(f => f.filename)
 
@@ -173,6 +196,7 @@ export function WikiTab() {
         activeFile={currentFile}
         onFileClick={navigate}
         onSetTagColor={handleSetTagColor}
+        onDeleteFile={handleDeleteFile}
       />
       <WikiPane
         content={activeContent}
@@ -188,7 +212,23 @@ export function WikiTab() {
         onBack={goBack}
         onForward={goForward}
         onToggleGraph={() => setShowGraph(v => !v)}
+        onNodeRightClick={handleDeleteFile}
       />
+
+      {deleteTarget && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)' }}>
+          <div className="bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-2xl max-w-sm w-full mx-4">
+            <p className="text-sm text-gray-200 mb-1">Delete wiki entry?</p>
+            <p className="text-xs text-gray-400 mb-4">
+              This will also delete all notes that contributed to this entry.
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={cancelDelete} className="px-3 py-1.5 text-xs text-gray-300 hover:text-white border border-gray-600 rounded hover:bg-gray-700">Cancel</button>
+              <button onClick={confirmDelete} className="px-3 py-1.5 text-xs text-white bg-red-700 hover:bg-red-600 rounded">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
