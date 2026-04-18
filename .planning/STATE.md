@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: corkboard-polish
 current_phase: 07
-current_phase_name: not-started
+current_phase_name: note-card-visual-redesign
 current_plan: —
-status: defining-requirements
-stopped_at: Milestone v1.1 started — defining requirements
+status: roadmap-defined
+stopped_at: Roadmap defined — Phase 07 ready to plan
 last_updated: "2026-04-17T00:00:00.000Z"
 last_activity: 2026-04-17
 progress:
@@ -21,10 +21,14 @@ progress:
 
 ## Current Position
 
-Phase: Not started (Phase 07 next)
+Phase: 07 — Note Card Visual Redesign (next)
 Plan: —
-Status: Defining requirements for v1.1 Corkboard Polish
-Last activity: 2026-04-17 — Milestone v1.1 started
+Status: Roadmap defined, ready to plan Phase 07
+Last activity: 2026-04-17 — v1.1 roadmap created (3 phases, 9 requirements)
+
+```
+Milestone v1.1 progress: [░░░░░░░░░░] 0% (0/3 phases)
+```
 
 ## Project Reference
 
@@ -42,16 +46,13 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ---
 
-## Phase Status
+## Phase Status (v1.1)
 
 | Phase | Name | Status | Plans |
 |-------|------|--------|-------|
-| 1 | Shell & Capture | ✓ Complete | 01-01, 01-02, 01-03, 01-04 done |
-| 2 | AI Pipeline | ○ Pending | Not yet planned |
-| 3 | Karpathy Wiki | ○ Pending | Not yet planned |
-| 4 | Search | ○ Pending | Not yet planned |
-| 5 | Agent Layer | ○ Pending | Not yet planned |
-| 6 | Polish & Ship | ○ Pending | Not yet planned |
+| 07 | Note Card Visual Redesign | ○ Not started | TBD |
+| 08 | Connections + Digest Improvements | ○ Not started | TBD |
+| 09 | App Icon | ○ Not started | TBD |
 
 ---
 
@@ -70,10 +71,10 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Key Risks
 
-1. Cold-start wiki — mitigated by seed prompt in onboarding (Phase 6)
-2. LLM latency — mitigated by pulsing indicator + Stage 1 fast path
-3. ABI mismatch (better-sqlite3/node-llama-cpp) — @electron/rebuild in postinstall
-4. Windows temp file rename — write temp to same directory as target
+1. Hover-expand z-index management — cards must expand without layout reflow
+2. SVG edge rendering on corkboard — need canvas or SVG overlay layer
+3. sqlite-vec embedding similarity threshold tuning — too low = noisy edges, too high = no edges
+4. Rolling window digest pre-load — must not block tab open on slow AI response
 
 ---
 
@@ -147,3 +148,5 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - Local model (llama.cpp) is v2 scope; v1 is frontier API only
 - Agent write-back is v2; v1 agents are read-only
 - No analytics or telemetry in v1
+- Intra-tag edge connections (CORK-05) use existing sqlite-vec embeddings — no new AI calls
+- Rolling digest (PAT-03) must handle the case where fewer than 7 days of notes exist
