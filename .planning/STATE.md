@@ -136,6 +136,13 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 07-02]: Overlay zIndex 9998 vs context menu 9999 — context menu always appears above expand overlay
 - [Phase 07-02]: Leave delay 120ms via useRef timeout — cancels on overlay mouseEnter for safe card-to-overlay cursor transit
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260418-12o | Fix wiki graph right-click context menu, sidebar color picker UX, and weekly digest scheduler rewrite | 2026-04-18 | 4622074 | [260418-12o](./quick/260418-12o-fix-wiki-graph-right-click-context-menu-/) |
+| 260418-pue | Fix digest narrative max_tokens (512→4096 for Ollama/OpenAI) and add cleanup DELETE | 2026-04-18 | c788523 | [260418-pue](./quick/260418-pue-fix-digest-narrative-max-tokens-raise-ol/) |
+
 ## Notes
 
 - Local model (llama.cpp) is v2 scope; v1 is frontier API only
