@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface KbFileEntry {
-  filename: string   // e.g. "quantum-entanglement.md"
-  title: string      // e.g. "Quantum Entanglement"
-  tags: string[]     // ["physics", "TOT"]
+  filename: string
+  title: string
+  tags: string[]
 }
 
 interface WikiSidebarProps {
@@ -14,6 +15,9 @@ interface WikiSidebarProps {
   onSetTagColor: (tag: string, color: string) => void
 }
 
+const PICKER_W = 160
+const PICKER_H = 48
+
 export function WikiSidebar({
   files,
   tagColors,
@@ -23,16 +27,22 @@ export function WikiSidebar({
 }: WikiSidebarProps) {
   const [colorPicker, setColorPicker] = useState<{ tag: string; x: number; y: number } | null>(null)
 
-  // Group files by first tag; files with no tags go under "Untagged"
   const groups: Record<string, KbFileEntry[]> = {}
   for (const file of files) {
-    if (file.filename.startsWith('_')) continue  // exclude _context.md from sidebar
+    if (file.filename.startsWith('_')) continue
     const tag = file.tags[0] ?? 'Untagged'
     if (!groups[tag]) groups[tag] = []
     groups[tag].push(file)
   }
 
   const sortedTags = Object.keys(groups).sort()
+
+  function openPicker(tag: string, e: React.MouseEvent) {
+    e.preventDefault()
+    const x = Math.min(e.clientX, window.innerWidth - PICKER_W - 8)
+    const y = Math.min(e.clientY, window.innerHeight - PICKER_H - 8)
+    setColorPicker({ tag, x, y })
+  }
 
   return (
     <div className="w-56 flex-shrink-0 border-r border-gray-700 overflow-y-auto bg-gray-900 relative">
@@ -44,28 +54,22 @@ export function WikiSidebar({
         const color = tagColors[tag] ?? '#6b7280'
         return (
           <div key={tag} className="mb-1">
-            {/* Tag section header — right-click to change color */}
+            {/* Tag header — right-click to change color */}
             <div
               className="flex items-center gap-2 px-3 py-1.5 cursor-pointer select-none hover:bg-gray-800"
-              onContextMenu={(e) => {
-                e.preventDefault()
-                setColorPicker({ tag, x: e.clientX, y: e.clientY })
-              }}
+              title="Right-click to change color"
+              onContextMenu={(e) => openPicker(tag, e)}
             >
-              <div
-                className="w-2.5 h-2.5 rounded-sm flex-shrink-0"
-                style={{ backgroundColor: color }}
-              />
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide truncate">
-                {tag}
-              </span>
+              <div className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide truncate">{tag}</span>
             </div>
 
-            {/* Files under this tag */}
+            {/* Files — left-click navigates, right-click opens color picker for this tag */}
             {groups[tag].map(file => (
               <button
                 key={file.filename}
                 onClick={() => onFileClick(file.filename)}
+                onContextMenu={(e) => openPicker(tag, e)}
                 className={`w-full text-left px-4 py-1 text-xs truncate transition-colors ${
                   activeFile === file.filename
                     ? 'bg-indigo-600 text-white'
@@ -86,15 +90,14 @@ export function WikiSidebar({
         </p>
       )}
 
-      {/* Native color picker popover */}
-      {colorPicker && (
+      {colorPicker && createPortal(
         <div
-          style={{ position: 'fixed', left: colorPicker.x, top: colorPicker.y, zIndex: 50 }}
+          style={{ position: 'fixed', left: colorPicker.x, top: colorPicker.y, zIndex: 9999 }}
           className="bg-gray-800 border border-gray-600 rounded p-2 shadow-xl flex items-center gap-2"
         >
           <input
             type="color"
-            defaultValue={tagColors[colorPicker.tag] ?? '#6366f1'}
+            value={tagColors[colorPicker.tag] ?? '#6366f1'}
             onChange={(e) => onSetTagColor(colorPicker.tag, e.target.value)}
             className="w-8 h-8 cursor-pointer rounded border-0 bg-transparent"
           />
@@ -103,9 +106,10 @@ export function WikiSidebar({
             onClick={() => setColorPicker(null)}
             className="text-xs text-gray-500 hover:text-gray-300 ml-1"
           >
-            x
+            ×
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

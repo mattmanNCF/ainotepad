@@ -5,7 +5,7 @@ import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
-import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, getNoteWikiFiles, countNotesReferencingWikiFile } from './db'
+import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, countNotesReferencingWikiFile } from './db'
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile, deleteKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
@@ -93,48 +93,71 @@ export function registerIpcHandlers() {
   })
 
   ipcMain.handle('notes:delete', async (_event, id: string) => {
-    // Collect wiki files written by this note before deleting
-    const wikiFiles = getNoteWikiFiles(id)
+    const sqlite = getSqlite()
 
-    // Delete the note (also removes it from notes_fts via deleteNote)
+    // Get note metadata before deleting (tags + submitted_at for fallback heuristic)
+    const noteRow = sqlite
+      .prepare('SELECT tags, submitted_at, wiki_files FROM notes WHERE id = ?')
+      .get(id) as { tags: string; submitted_at: string; wiki_files: string } | undefined
+
+    let wikiFiles: string[] = []
+    if (noteRow) {
+      try { wikiFiles = JSON.parse(noteRow.wiki_files) } catch { /* empty */ }
+
+      // Fallback for historical notes with no wiki_files recorded:
+      // find kbPages updated within ±90s of this note's submitted_at
+      if (wikiFiles.length === 0 && noteRow.submitted_at) {
+        const noteTime = new Date(noteRow.submitted_at).getTime()
+        const kbRows = sqlite
+          .prepare('SELECT id, filename FROM kb_pages')
+          .all() as Array<{ id: string; filename: string }>
+        // Also check actual file mtimes for each page
+        const { kbDir } = await import('./kb')
+        const fs = await import('fs/promises')
+        for (const row of kbRows) {
+          try {
+            const stat = await fs.stat(require('path').join(kbDir(), row.filename))
+            const fileMtime = stat.mtimeMs
+            if (Math.abs(fileMtime - noteTime) < 90_000) {
+              wikiFiles.push(row.filename)
+            }
+          } catch { /* file missing — skip */ }
+        }
+      }
+    }
+
+    // Delete the note (+ notes_fts)
     deleteNote(id)
 
-    // Clean up orphaned wiki files: delete any file no other note references
+    // Clean up orphaned wiki pages (no other note references them)
     if (wikiFiles.length > 0) {
-      const sqlite = getSqlite()
       const orphaned: string[] = []
       for (const filename of wikiFiles) {
         if (countNotesReferencingWikiFile(filename, id) === 0) {
           orphaned.push(filename)
-          // Remove from kbPages index
-          const pageId = filename.replace(/\.md$/, '')
-          sqlite.prepare('DELETE FROM kb_pages WHERE id = ?').run(pageId)
-          // Delete the file from disk
+          sqlite.prepare('DELETE FROM kb_pages WHERE id = ?').run(filename.replace(/\.md$/, ''))
           await deleteKbFile(filename)
         }
       }
       if (orphaned.length > 0) {
         console.log('[notes:delete] removed orphaned wiki files:', orphaned)
       }
-
-      // Clean up tag colors for tags no longer used by any note
-      const remaining = getSqlite()
-        .prepare("SELECT tags FROM notes WHERE hidden=0 AND ai_state='complete'")
-        .all() as Array<{ tags: string }>
-      const activeTags = new Set<string>()
-      for (const r of remaining) {
-        try { for (const t of JSON.parse(r.tags)) activeTags.add(t) } catch { /* skip */ }
-      }
-      const colors = getTagColors()
-      let colorChanged = false
-      for (const tag of Object.keys(colors)) {
-        if (!activeTags.has(tag)) {
-          delete colors[tag]
-          colorChanged = true
-        }
-      }
-      if (colorChanged) setTagColors(colors)
     }
+
+    // Prune tag colors no longer used by any remaining complete note
+    const remaining = sqlite
+      .prepare("SELECT tags FROM notes WHERE hidden=0 AND ai_state='complete'")
+      .all() as Array<{ tags: string }>
+    const activeTags = new Set<string>()
+    for (const r of remaining) {
+      try { for (const t of JSON.parse(r.tags)) activeTags.add(t) } catch { /* skip */ }
+    }
+    const colors = getTagColors()
+    let colorChanged = false
+    for (const tag of Object.keys(colors)) {
+      if (!activeTags.has(tag)) { delete colors[tag]; colorChanged = true }
+    }
+    if (colorChanged) setTagColors(colors)
   })
 
   ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))

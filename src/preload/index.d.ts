@@ -56,6 +56,7 @@ interface Window {
       getLatest: (period: string) => Promise<any>
       generate: (period: string) => Promise<{ queued: boolean }>
       onUpdated: (cb: (data: { period: string; periodStart: string; narrative: string; stats: string; wordCloudData: string }) => void) => () => void
+      onError: (cb: (data: { period: string; error: string }) => void) => () => void
     }
     onboarding: {
       getStatus: () => Promise<{ done: boolean }>

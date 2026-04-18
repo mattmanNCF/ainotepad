@@ -78,6 +78,24 @@ function createWindow(): BrowserWindow {
     mainWindow.show()
   })
 
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc) => {
+    console.error('[main] did-fail-load', code, desc)
+    mainWindow.show()  // show window so user can see error
+  })
+
+  mainWindow.webContents.on('render-process-gone', (_e, details) => {
+    console.error('[main] render-process-gone', details.reason, details.exitCode)
+    mainWindow.show()
+  })
+
+  // Fallback: show window after 4s even if ready-to-show never fires
+  setTimeout(() => {
+    if (!mainWindow.isVisible()) {
+      console.warn('[main] ready-to-show never fired — forcing show')
+      mainWindow.show()
+    }
+  }, 4000)
+
   // Hide to tray on close instead of quitting
   mainWindow.on('close', (event) => {
     if (!isQuiting) {

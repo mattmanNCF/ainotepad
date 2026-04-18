@@ -139,6 +139,7 @@ async function callAIWithPrompt(prompt: string): Promise<string> {
     const resp = await client.chat.completions.create({
       model: ollamaModel,
       max_tokens: 512,
+      response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
     })
     return resp.choices[0].message.content ?? ''
@@ -210,7 +211,11 @@ async function handleDigestTask({
       console.log('[aiWorker] digest-result posted for period', period)
     }
   } catch (err) {
-    console.error('[aiWorker] digest-task failed (best-effort, not propagating):', err)
+    console.error('[aiWorker] digest-task failed:', err)
+    // Send error back so the renderer can surface it rather than silently hanging
+    if (taskPort) {
+      taskPort.postMessage({ type: 'digest-error', period, error: String((err as any)?.message ?? err) })
+    }
   }
 }
 

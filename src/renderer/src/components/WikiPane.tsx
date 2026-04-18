@@ -14,9 +14,12 @@ interface GraphLink {
 
 interface WikiPaneProps {
   content: string | null
+  insights?: string | null
   existingFiles: string[]
   graphNodes: GraphNode[]
   graphLinks: GraphLink[]
+  tagColors: Record<string, string>
+  colorKey: string
   canBack: boolean
   canForward: boolean
   showGraph: boolean
@@ -28,9 +31,12 @@ interface WikiPaneProps {
 
 export function WikiPane({
   content,
+  insights,
   existingFiles,
   graphNodes,
   graphLinks,
+  tagColors,
+  colorKey,
   canBack,
   canForward,
   showGraph,
@@ -76,9 +82,9 @@ export function WikiPane({
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {showGraph ? (
-          <WikiGraph nodes={graphNodes} links={graphLinks} onNodeClick={onNavigate} />
+          <WikiGraph key={colorKey} nodes={graphNodes} links={graphLinks} tagColors={tagColors} onNodeClick={onNavigate} />
         ) : content !== null ? (
-          <WikiMarkdown content={content} existingFiles={existingFiles} onNavigate={onNavigate} />
+          <WikiMarkdown content={content} existingFiles={existingFiles} onNavigate={onNavigate} insights={insights} />
         ) : (
           <div className="flex items-center justify-center h-full">
             <p className="text-xs text-gray-600">Select a concept file to read it.</p>

@@ -68,6 +68,11 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on('digest:updated', handler)
       return () => ipcRenderer.removeListener('digest:updated', handler)
     },
+    onError: (cb: (data: { period: string; error: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('digest:error', handler)
+      return () => ipcRenderer.removeListener('digest:error', handler)
+    },
   },
   onboarding: {
     getStatus: (): Promise<{ done: boolean }> =>

@@ -25,6 +25,7 @@ export function PatternsTab() {
   const [digest, setDigest] = useState<DigestData | null>(null)
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [digestError, setDigestError] = useState<string | null>(null)
 
   // Keep ref in sync with state so onUpdated closure always sees current period
   useEffect(() => { periodRef.current = period }, [period])
@@ -52,12 +53,20 @@ export function PatternsTab() {
 
   useEffect(() => {
     loadDigest('daily')
-    const unsub = window.api.digest.onUpdated((data) => {
+    const unsubUpdated = window.api.digest.onUpdated((data) => {
       if (data.period === periodRef.current) {
         loadDigest(periodRef.current)
+        setGenerating(false)
+        setDigestError(null)
       }
     })
-    return unsub
+    const unsubError = window.api.digest.onError((data) => {
+      if (data.period === periodRef.current) {
+        setGenerating(false)
+        setDigestError(data.error)
+      }
+    })
+    return () => { unsubUpdated(); unsubError() }
   }, [])
 
   useEffect(() => {
@@ -82,11 +91,11 @@ export function PatternsTab() {
         <button
           onClick={async () => {
             setGenerating(true)
+            setDigestError(null)
             await window.api.digest.generate(period)
-            setTimeout(() => {
-              loadDigest(period)
-              setGenerating(false)
-            }, 3000)
+            // Result arrives via onUpdated/onError listeners — they clear generating state.
+            // 30s safety fallback in case worker fails without sending digest-error.
+            setTimeout(() => setGenerating(false), 30000)
           }}
           disabled={generating}
           className="ml-auto px-3 py-1 text-xs rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -97,26 +106,18 @@ export function PatternsTab() {
 
       {loading && <p className="text-gray-500 text-sm">Loading...</p>}
 
-      {!loading && !digest && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-4">
-          <p className="text-gray-500 text-sm text-center max-w-xs">
-            Patterns will appear here after AI processes your notes.
-          </p>
-          <button
-            onClick={async () => {
-              setGenerating(true)
-              await window.api.digest.generate(period)
-              setTimeout(() => {
-                loadDigest(period)
-                setGenerating(false)
-              }, 3000)
-            }}
-            disabled={generating}
-            className="px-4 py-2 text-xs rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            {generating ? 'Generating...' : 'Generate Now'}
-          </button>
-        </div>
+      {digestError && (
+        <p className="text-xs text-red-400/80 bg-red-900/20 rounded px-2 py-1">{digestError}</p>
+      )}
+
+      {!loading && !digest && !generating && (
+        <p className="text-gray-500 text-sm text-center mt-4">
+          No digest yet — click ↻ to generate.
+        </p>
+      )}
+
+      {generating && (
+        <p className="text-gray-500 text-sm text-center mt-4">Generating…</p>
       )}
 
       {!loading && digest && (

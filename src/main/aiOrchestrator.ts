@@ -35,6 +35,15 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
   port1.on('message', async (event) => {
     const { type, noteId, aiState, aiAnnotation, organizedText, wikiUpdates, tags, insights, errorMsg } = event.data
 
+    if (type === 'digest-error') {
+      const { period, error } = event.data
+      console.error('[aiOrchestrator] digest-error from worker:', period, error)
+      if (mainWin && !mainWin.webContents.isDestroyed()) {
+        mainWin.webContents.send('digest:error', { period, error })
+      }
+      return
+    }
+
     if (type === 'digest-result') {
       const { period, periodStart, wordCloudData, narrative, stats, generatedAt } = event.data
       const id = randomUUID()

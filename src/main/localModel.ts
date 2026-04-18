@@ -6,7 +6,7 @@ import { app } from 'electron'
 import path from 'path'
 import os from 'os'
 import fs from 'fs'
-import { createModelDownloader } from 'node-llama-cpp'
+// node-llama-cpp is ESM-only — loaded via dynamic import() inside downloadModel()
 
 export const MODEL_URIS = {
   small: 'hf:unsloth/gemma-4-E4B-it-GGUF:Q3_K_M',
@@ -15,9 +15,9 @@ export const MODEL_URIS = {
 } as const
 
 export const MODEL_FILENAMES = {
-  small: 'gemma-4-E4B-it-Q3_K_M.gguf',
-  default: 'gemma-4-E4B-it-Q4_K_M.gguf',
-  large: 'gemma-4-E4B-it-Q5_K_M.gguf',
+  small: 'hf_unsloth_gemma-4-E4B-it.Q3_K_M.gguf',
+  default: 'hf_unsloth_gemma-4-E4B-it.Q4_K_M.gguf',
+  large: 'hf_unsloth_gemma-4-E4B-it.Q5_K_M.gguf',
 } as const
 
 export type ModelTier = 'small' | 'default' | 'large'
@@ -103,6 +103,7 @@ export async function downloadModel(
   tier: ModelTier,
   onProgress?: (percent: number) => void
 ): Promise<string> {
+  const { createModelDownloader } = await import('node-llama-cpp')
   try {
     const downloader = await createModelDownloader({
       modelUri: MODEL_URIS[tier],
