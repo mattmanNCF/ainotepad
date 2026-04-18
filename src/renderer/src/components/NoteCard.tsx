@@ -126,9 +126,15 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
         </div>
       )}
 
-      {/* Timestamp — bottom of card */}
-      <div className="absolute bottom-1 left-2 right-2">
+      {/* Timestamp + AI state indicator — bottom of card */}
+      <div className="absolute bottom-1 left-2 right-2 flex justify-between items-center">
         <span className="text-[9px] text-gray-600">{formatTime(note.submittedAt)}</span>
+        {note.aiState === 'pending' && (
+          <span className="text-[10px] text-amber-400/80" title="Processing…">⏳</span>
+        )}
+        {note.aiState === 'failed' && (
+          <span className="text-[10px] text-red-400/80" title="Processing failed">✗</span>
+        )}
       </div>
 
       {/* Portal: renders directly on document.body — escapes all stacking contexts */}
@@ -173,6 +179,7 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
             maxHeight: 300,
             zIndex: 9998,
             overflowY: 'auto',
+            borderLeft: `4px solid ${primaryTagColor}`,
           }}
           className="rounded-sm bg-[#1f1f18] border border-white/10 shadow-2xl"
         >

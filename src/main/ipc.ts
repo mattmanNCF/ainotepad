@@ -278,8 +278,8 @@ export function registerIpcHandlers() {
       .all() as Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>
   })
 
-  ipcMain.handle('digests:generate', () => {
-    forceScheduleDigest()
+  ipcMain.handle('digests:generate', (_e, period: 'daily' | 'weekly' = 'daily') => {
+    forceScheduleDigest(period)
     return { queued: true }
   })
 

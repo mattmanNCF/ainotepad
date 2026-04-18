@@ -108,24 +108,25 @@ function maybeDispatchDigest(
  * Force a digest generation immediately, regardless of time elapsed since last.
  * Used by the "Generate Now" button in the Patterns tab.
  */
-export function forceScheduleDigest(): void {
+export function forceScheduleDigest(period: 'daily' | 'weekly' = 'daily'): void {
   const workerPort = getWorkerPort()
   if (!workerPort) {
     console.warn('[digestScheduler] Worker not ready — skipping forced digest dispatch')
     return
   }
-  const periodStart = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const windowHours = period === 'weekly' ? 168 : 24
+  const periodStart = new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString()
   const wordCloud = buildWordCloudData(periodStart)
   const stats = buildStats(periodStart, wordCloud)
   workerPort.postMessage({
     type: 'digest-task',
-    period: 'daily',
+    period,
     periodStart,
     wordCloudData: JSON.stringify(wordCloud),
     stats: JSON.stringify(stats),
     braveKey: '',
   })
-  console.log('[digestScheduler] forced digest-task dispatched')
+  console.log(`[digestScheduler] forced ${period} digest-task dispatched`)
 }
 
 /**
