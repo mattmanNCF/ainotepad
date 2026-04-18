@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CaptureBuffer } from './CaptureBuffer'
 import { NoteCard } from './NoteCard'
 
@@ -17,6 +17,10 @@ export function NotesTab() {
   const [notes, setNotes] = useState<NoteRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [tagColors, setTagColors] = useState<Record<string, string>>({})
+  const gridRef = useRef<HTMLDivElement>(null)
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map())
+  const [similarPairs, setSimilarPairs] = useState<Array<{ a: string; b: string }>>([])
+  const [edgeLines, setEdgeLines] = useState<Array<{ key: string; x1: number; y1: number; x2: number; y2: number }>>([])
 
   // Load tag colors once and refresh when KB updates — shared across all cards (no per-card race)
   useEffect(() => {
@@ -65,6 +69,39 @@ export function NotesTab() {
     return unsub
   }, [])
 
+  useEffect(() => {
+    if (notes.length < 2) {
+      setSimilarPairs([])
+      return
+    }
+    window.api.notes.getSimilarPairs().then(setSimilarPairs).catch(() => setSimilarPairs([]))
+  }, [notes.length])
+
+  useLayoutEffect(() => {
+    const container = gridRef.current
+    if (!container || similarPairs.length === 0) {
+      setEdgeLines([])
+      return
+    }
+    const containerRect = container.getBoundingClientRect()
+    const lines: Array<{ key: string; x1: number; y1: number; x2: number; y2: number }> = []
+    for (const { a, b } of similarPairs) {
+      const elA = cardRefs.current.get(a)
+      const elB = cardRefs.current.get(b)
+      if (!elA || !elB) continue
+      const ra = elA.getBoundingClientRect()
+      const rb = elB.getBoundingClientRect()
+      lines.push({
+        key: `${a}|${b}`,
+        x1: ra.left + ra.width / 2 - containerRect.left,
+        y1: ra.top + ra.height / 2 - containerRect.top,
+        x2: rb.left + rb.width / 2 - containerRect.left,
+        y2: rb.top + rb.height / 2 - containerRect.top,
+      })
+    }
+    setEdgeLines(lines)
+  }, [similarPairs, notes])
+
   const handleDelete = useCallback((id: string) => {
     window.api.notes.delete(id)
     setNotes(prev => prev.filter(n => n.id !== id))
@@ -107,18 +144,47 @@ export function NotesTab() {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex-1 overflow-y-auto p-3">
-        {loading && (
-          <p className="text-center text-gray-600 text-sm mt-8">Loading notes…</p>
-        )}
-        {!loading && notes.length === 0 && (
-          <p className="text-center text-gray-600 text-sm mt-8">
-            No notes yet. Start typing below.
-          </p>
-        )}
-        <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
-          {notes.map((note) => (
-            <NoteCard key={note.id} note={note} tagColors={tagColors} onDelete={handleDelete} onHide={handleHide} onReprocess={handleReprocess} />
-          ))}
+        <div ref={gridRef} className="relative">
+          {similarPairs.length > 0 && (
+            <svg
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 10, width: '100%', height: '100%' }}
+            >
+              {edgeLines.map(({ key, x1, y1, x2, y2 }) => (
+                <line
+                  key={key}
+                  x1={x1} y1={y1} x2={x2} y2={y2}
+                  stroke="#6366f1"
+                  strokeOpacity={0.35}
+                  strokeWidth={1.5}
+                />
+              ))}
+            </svg>
+          )}
+          {loading && (
+            <p className="text-center text-gray-600 text-sm mt-8">Loading notes…</p>
+          )}
+          {!loading && notes.length === 0 && (
+            <p className="text-center text-gray-600 text-sm mt-8">
+              No notes yet. Start typing below.
+            </p>
+          )}
+          <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
+            {notes.map((note) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                tagColors={tagColors}
+                onDelete={handleDelete}
+                onHide={handleHide}
+                onReprocess={handleReprocess}
+                onRef={(el) => {
+                  if (el) cardRefs.current.set(note.id, el)
+                  else cardRefs.current.delete(note.id)
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
       <CaptureBuffer onSubmit={handleSubmit} />
