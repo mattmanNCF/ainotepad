@@ -18,6 +18,7 @@ interface NoteCardProps {
   onDelete: (id: string) => void
   onHide: (id: string) => void
   onReprocess: (id: string) => void
+  onRef?: (el: HTMLElement | null) => void
 }
 
 function formatTime(iso: string): string {
@@ -32,7 +33,7 @@ function formatTime(iso: string): string {
 const MENU_W = 130
 const MENU_H = 96
 
-export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess }: NoteCardProps) {
+export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess, onRef }: NoteCardProps) {
   const [tags, setTags] = useState<string[]>(note.tags)
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -40,6 +41,11 @@ export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess }: Not
   const [expanded, setExpanded] = useState(false)
   const [cardRect, setCardRect] = useState<DOMRect | null>(null)
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    onRef?.(cardRef.current)
+    return () => { onRef?.(null) }
+  }, [onRef])
 
   const primaryTagColor = tags.length > 0 && tagColors[tags[0]]
     ? tagColors[tags[0]]
