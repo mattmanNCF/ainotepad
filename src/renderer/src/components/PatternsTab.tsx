@@ -108,7 +108,7 @@ export function PatternsTab() {
             <WordCloud
               data={digest.words}
               width={500}
-              height={220}
+              height={140}
               font="sans-serif"
               fontSize={(w) => Math.log2(w.value + 1) * 10 + 10}
               rotate={0}
