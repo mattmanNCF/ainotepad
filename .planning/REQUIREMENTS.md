@@ -35,10 +35,10 @@
 
 ### Corkboard View
 
-- [ ] **CORK-01**: Notes display as small square post-it cards with text truncated to fit compact size
-- [ ] **CORK-02**: Hovering a note brings it to foreground and expands it — showing full user text and AI insights with user/AI bifurcation and scrollbar, without moving other cards
-- [ ] **CORK-03**: Note left border color reflects the primary tag's wiki color (replacing AI-state amber/emerald/red)
-- [ ] **CORK-04**: All notes display colored dot indicators for every assigned tag (currently only most recent note shows dots)
+- [x] **CORK-01**: Notes display as small square post-it cards with text truncated to fit compact size
+- [x] **CORK-02**: Hovering a note brings it to foreground and expands it — showing full user text and AI insights with user/AI bifurcation and scrollbar, without moving other cards
+- [x] **CORK-03**: Note left border color reflects the primary tag's wiki color (replacing AI-state amber/emerald/red)
+- [x] **CORK-04**: All notes display colored dot indicators for every assigned tag (currently only most recent note shows dots)
 - [ ] **CORK-05**: Notes sharing a tag that also discuss similar sub-topics are connected by visible edges on the corkboard (using existing sqlite-vec embeddings — no new AI calls)
 
 ### Patterns Page
@@ -82,10 +82,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CORK-01 | Phase 07 | Pending |
-| CORK-02 | Phase 07 | Pending |
-| CORK-03 | Phase 07 | Pending |
-| CORK-04 | Phase 07 | Pending |
+| CORK-01 | Phase 07 | Complete |
+| CORK-02 | Phase 07 | Complete |
+| CORK-03 | Phase 07 | Complete |
+| CORK-04 | Phase 07 | Complete |
 | CORK-05 | Phase 08 | Pending |
 | PAT-01 | Phase 07 | Pending |
 | PAT-02 | Phase 08 | Pending |

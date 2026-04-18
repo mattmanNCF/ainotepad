@@ -119,7 +119,7 @@
 **Plans**: 2 plans
 Plans:
 - [x] 07-01-PLAN.md — Tags DB fix, aiInsights propagation, word cloud height reduction
-- [ ] 07-02-PLAN.md — Compact card layout, tag-color border, hover-expand portal overlay
+- [x] 07-02-PLAN.md — Compact card layout, tag-color border, hover-expand portal overlay
 
 ---
 

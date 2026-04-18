@@ -3,20 +3,20 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Corkboard Polish
 status: unknown
-last_updated: "2026-04-17T00:00:00.000Z"
+last_updated: "2026-04-18T03:08:32.093Z"
 progress:
   total_phases: 9
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 32
-  completed_plans: 29
+  completed_plans: 30
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 07 (note-card-visual-redesign) — EXECUTING
-Plan: 2 of 2
+Phase: 07 (note-card-visual-redesign) — COMPLETE
+Plan: 2 of 2 (all complete)
 
 ## Project Reference
 
@@ -132,6 +132,9 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 06]: winCodeSign symlink workaround: winPackager.js patched to use cached rcedit-x64.exe directly; re-patch needed after npm ci unless Windows Developer Mode enabled
 - [Phase 07-01]: tags field typed as string[] in NoteRecord even though DB returns JSON text — parse site in NotesTab getAll() init
 - [Phase 07-01]: saved note from IPC create spread with explicit tags:[] and aiInsights:null since IPC handler predates tags field
+- [Phase 07-02]: getBoundingClientRect called inside handleMouseEnter (not useEffect) for fresh rect at hover time
+- [Phase 07-02]: Overlay zIndex 9998 vs context menu 9999 — context menu always appears above expand overlay
+- [Phase 07-02]: Leave delay 120ms via useRef timeout — cancels on overlay mouseEnter for safe card-to-overlay cursor transit
 
 ## Notes
 
