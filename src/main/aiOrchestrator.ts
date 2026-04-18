@@ -52,6 +52,11 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
           `INSERT INTO digests (id, period, period_start, word_cloud_data, narrative, stats, generated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?)`
         ).run(id, period, periodStart, wordCloudData, narrative, stats, generatedAt)
+        // Clean up stale rows for same period (keep only most recent; prevent growth from repeated Generate Now)
+        const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+        getSqlite().prepare(
+          `DELETE FROM digests WHERE period=? AND generated_at < ?`
+        ).run(period, cutoff)
         if (mainWin && !mainWin.webContents.isDestroyed()) {
           mainWin.webContents.send('digest:updated', { period, periodStart, narrative, stats, wordCloudData })
         }

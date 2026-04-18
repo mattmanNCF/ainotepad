@@ -138,7 +138,7 @@ async function callAIWithPrompt(prompt: string): Promise<string> {
     const client = new OpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollama' })
     const resp = await client.chat.completions.create({
       model: ollamaModel,
-      max_tokens: 512,
+      max_tokens: 4096,
       response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
     })
@@ -149,7 +149,7 @@ async function callAIWithPrompt(prompt: string): Promise<string> {
     const client = new OpenAI({ apiKey })
     const resp = await client.chat.completions.create({
       model: 'gpt-4o-mini',
-      max_tokens: 512,
+      max_tokens: 4096,
       response_format: { type: 'json_object' },
       messages: [{ role: 'user', content: prompt }],
     })
