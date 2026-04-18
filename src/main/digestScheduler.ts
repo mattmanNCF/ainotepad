@@ -144,5 +144,5 @@ export function checkAndScheduleDigest(): void {
   }
 
   maybeDispatchDigest('daily', 24, 20, workerPort)
-  maybeDispatchDigest('weekly', 168, 144, workerPort) // 7-day window, refresh every 6 days
+  maybeDispatchDigest('weekly', 168, 20, workerPort) // 7-day window, refresh once per day
 }
