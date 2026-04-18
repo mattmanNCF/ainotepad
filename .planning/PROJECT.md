@@ -101,3 +101,37 @@ An **optional open connectivity layer** allows external AI agents to read the kn
 - Cross-device sync (never, by design)
 - Mobile companion
 - Agent write-back (agents can read, not write to KB in v1)
+
+---
+
+## Current Milestone: v1.1 — Corkboard Polish
+
+**Goal:** Transform the notes view into a true corkboard experience — small post-it cards with hover-expand, tag-color coding, intra-tag connections, and a always-visible patterns footer with a reliable rolling weekly digest.
+
+**Target features:**
+- Note cards resized to small square post-its with truncated text; hover expands in-place with user/AI bifurcation
+- Left border color = primary tag color (matching wiki color system); colored dots for all assigned tags on every note
+- Intra-tag edge connections between notes discussing similar sub-topics (using existing sqlite-vec embeddings)
+- Patterns page layout fits at default window size — footer never clipped
+- Weekly digest pre-loads on open and uses a rolling 7-day window updated daily
+- App icon replaced with custom illustrated asset
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
+---
+*Last updated: 2026-04-17 — milestone v1.1 Corkboard Polish started*

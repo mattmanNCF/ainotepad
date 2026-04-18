@@ -1,33 +1,44 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 06
-current_phase_name: polish-and-ship
-current_plan: Not started
-status: completed
-stopped_at: Completed 06-06-PLAN.md — Phase 06 complete, Notal v0.1.0 artifacts built
-last_updated: "2026-04-17T08:57:19.291Z"
+milestone: v1.1
+milestone_name: corkboard-polish
+current_phase: 07
+current_phase_name: not-started
+current_plan: —
+status: defining-requirements
+stopped_at: Milestone v1.1 started — defining requirements
+last_updated: "2026-04-17T00:00:00.000Z"
 last_activity: 2026-04-17
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 26
-  completed_plans: 24
-  percent: 92
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
-# AInotepad — Project State
+# Notal — Project State
 
-- **Current Phase:** 06
-- **Current Phase Name:** polish-and-ship
-- **Current Plan:** Not started
-- **Total Plans in Phase:** 6
-- **Total Phases:** 6
-- **Status:** Milestone complete
-- **Progress:** [█████████░] 92%
-- **Last Activity:** 2026-04-17
-- **Stopped At:** Completed 06-06-PLAN.md — Phase 06 complete, Notal v0.1.0 artifacts built
+## Current Position
+
+Phase: Not started (Phase 07 next)
+Plan: —
+Status: Defining requirements for v1.1 Corkboard Polish
+Last activity: 2026-04-17 — Milestone v1.1 started
+
+## Project Reference
+
+See: .planning/PROJECT.md (updated 2026-04-17)
+
+**Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
+**Current focus:** v1.1 — Corkboard Polish (Phase 07 next)
+
+## Previous Milestone Summary (v1.0)
+
+- 6 phases complete, v0.1.0 shipped to GitHub Releases
+- Full AI pipeline: capture → tag → wiki → insights
+- Patterns tab, FTS5 + semantic search, MCP agent endpoint
+- Windows NSIS installer + portable ZIP
 
 ---
 
