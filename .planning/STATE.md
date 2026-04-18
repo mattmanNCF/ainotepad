@@ -1,41 +1,29 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: corkboard-polish
-current_phase: 07
-current_phase_name: note-card-visual-redesign
-current_plan: —
-status: roadmap-defined
-stopped_at: Roadmap defined — Phase 07 ready to plan
+milestone_name: — Corkboard Polish
+status: unknown
 last_updated: "2026-04-17T00:00:00.000Z"
-last_activity: 2026-04-17
 progress:
-  total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 9
+  completed_phases: 4
+  total_plans: 32
+  completed_plans: 29
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 07 — Note Card Visual Redesign (next)
-Plan: —
-Status: Roadmap defined, ready to plan Phase 07
-Last activity: 2026-04-17 — v1.1 roadmap created (3 phases, 9 requirements)
-
-```
-Milestone v1.1 progress: [░░░░░░░░░░] 0% (0/3 phases)
-```
+Phase: 07 (note-card-visual-redesign) — EXECUTING
+Plan: 2 of 2
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** v1.1 — Corkboard Polish (Phase 07 next)
+**Current focus:** Phase 07 — note-card-visual-redesign
 
 ## Previous Milestone Summary (v1.0)
 
@@ -142,6 +130,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 06-polish-and-ship]: Tool names in README use actual registered names from mcpServer.ts (get_recent_notes, get_wiki_page) — plan listed expected names that differed from source
 - [Phase 06]: electron-builder zip target: win.artifactName fallback applies when nsis has own override; root zip: key invalid in v26+
 - [Phase 06]: winCodeSign symlink workaround: winPackager.js patched to use cached rcedit-x64.exe directly; re-patch needed after npm ci unless Windows Developer Mode enabled
+- [Phase 07-01]: tags field typed as string[] in NoteRecord even though DB returns JSON text — parse site in NotesTab getAll() init
+- [Phase 07-01]: saved note from IPC create spread with explicit tags:[] and aiInsights:null since IPC handler predates tags field
 
 ## Notes
 

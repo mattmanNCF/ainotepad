@@ -26,7 +26,7 @@
 | 04. AI Intelligence + Local Model + Patterns | Complete | Complete | 2026-04-16 |
 | 05. Agent Layer | Complete | Complete | 2026-04-17 |
 | 06. Polish & Ship | Complete | Complete | 2026-04-17 |
-| 07. Note Card Visual Redesign | 0/2 | Not started | - |
+| 07. Note Card Visual Redesign | 1/2 | In progress | - |
 | 08. Connections + Digest Improvements | 0/? | Not started | - |
 | 09. App Icon | 0/? | Not started | - |
 
@@ -118,7 +118,7 @@
   5. The Patterns page footer (note count, top topics, most active day) is fully visible at default 800x600 window size without scrolling
 **Plans**: 2 plans
 Plans:
-- [ ] 07-01-PLAN.md — Tags DB fix, aiInsights propagation, word cloud height reduction
+- [x] 07-01-PLAN.md — Tags DB fix, aiInsights propagation, word cloud height reduction
 - [ ] 07-02-PLAN.md — Compact card layout, tag-color border, hover-expand portal overlay
 
 ---
