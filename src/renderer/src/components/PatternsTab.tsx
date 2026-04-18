@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import WordCloud from 'react-d3-cloud'
 
 interface WordDatum { text: string; value: number }
@@ -21,9 +21,13 @@ function StatPill({ label, value }: { label: string; value: string }) {
 
 export function PatternsTab() {
   const [period, setPeriod] = useState<'daily' | 'weekly'>('daily')
+  const periodRef = useRef<'daily' | 'weekly'>('daily')
   const [digest, setDigest] = useState<DigestData | null>(null)
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
+
+  // Keep ref in sync with state so onUpdated closure always sees current period
+  useEffect(() => { periodRef.current = period }, [period])
 
   async function loadDigest(p: 'daily' | 'weekly') {
     setLoading(true)
@@ -49,8 +53,8 @@ export function PatternsTab() {
   useEffect(() => {
     loadDigest('daily')
     const unsub = window.api.digest.onUpdated((data) => {
-      if (data.period === period) {
-        loadDigest(period)
+      if (data.period === periodRef.current) {
+        loadDigest(periodRef.current)
       }
     })
     return unsub
@@ -62,8 +66,8 @@ export function PatternsTab() {
 
   return (
     <div className="flex flex-col h-full p-4 gap-4 overflow-y-auto">
-      {/* Period toggle */}
-      <div className="flex gap-2 shrink-0">
+      {/* Period toggle + regenerate */}
+      <div className="flex gap-2 items-center shrink-0">
         {(['daily', 'weekly'] as const).map((p) => (
           <button
             key={p}
@@ -75,6 +79,20 @@ export function PatternsTab() {
             {p.charAt(0).toUpperCase() + p.slice(1)}
           </button>
         ))}
+        <button
+          onClick={async () => {
+            setGenerating(true)
+            await window.api.digest.generate(period)
+            setTimeout(() => {
+              loadDigest(period)
+              setGenerating(false)
+            }, 3000)
+          }}
+          disabled={generating}
+          className="ml-auto px-3 py-1 text-xs rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          {generating ? '…' : '↻'}
+        </button>
       </div>
 
       {loading && <p className="text-gray-500 text-sm">Loading...</p>}
