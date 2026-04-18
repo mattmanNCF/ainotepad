@@ -16,6 +16,16 @@ interface NoteRecord {
 export function NotesTab() {
   const [notes, setNotes] = useState<NoteRecord[]>([])
   const [loading, setLoading] = useState(true)
+  const [tagColors, setTagColors] = useState<Record<string, string>>({})
+
+  // Load tag colors once and refresh when KB updates — shared across all cards (no per-card race)
+  useEffect(() => {
+    window.api.kb.getTagColors().then(setTagColors)
+    const cleanup = window.api.kb.onUpdated(() => {
+      window.api.kb.getTagColors().then(setTagColors)
+    })
+    return cleanup
+  }, [])
 
   useEffect(() => {
     window.api.notes.getAll()
@@ -107,7 +117,7 @@ export function NotesTab() {
         )}
         <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
           {notes.map((note) => (
-            <NoteCard key={note.id} note={note} onDelete={handleDelete} onHide={handleHide} onReprocess={handleReprocess} />
+            <NoteCard key={note.id} note={note} tagColors={tagColors} onDelete={handleDelete} onHide={handleHide} onReprocess={handleReprocess} />
           ))}
         </div>
       </div>

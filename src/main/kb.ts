@@ -56,6 +56,14 @@ async function listKbFilesRecursive(dir: string, base: string): Promise<string[]
   return results
 }
 
+export async function deleteKbFile(filename: string): Promise<void> {
+  try {
+    await fs.unlink(path.join(kbDir(), filename))
+  } catch {
+    // File already gone — safe to ignore
+  }
+}
+
 export async function listKbFiles(): Promise<string[]> {
   await ensureKbDir()
   return listKbFilesRecursive(kbDir(), '')

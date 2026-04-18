@@ -5,9 +5,9 @@ import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
 import { notes } from '../../drizzle/schema'
 import { enqueueNote, getWorkerPort } from './aiOrchestrator'
-import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite } from './db'
+import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, getNoteWikiFiles, countNotesReferencingWikiFile } from './db'
 import { Conf } from 'electron-conf/main'
-import { listKbFiles, readKbFile } from './kb'
+import { listKbFiles, readKbFile, deleteKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
 import { detectModelTier, findExistingModel, downloadModel } from './localModel'
 import { forceScheduleDigest } from './digestScheduler'
@@ -92,7 +92,50 @@ export function registerIpcHandlers() {
     return db.select().from(notes).where(eq(notes.hidden, 0)).orderBy(desc(notes.submittedAt)).all()
   })
 
-  ipcMain.handle('notes:delete', (_event, id: string) => deleteNote(id))
+  ipcMain.handle('notes:delete', async (_event, id: string) => {
+    // Collect wiki files written by this note before deleting
+    const wikiFiles = getNoteWikiFiles(id)
+
+    // Delete the note (also removes it from notes_fts via deleteNote)
+    deleteNote(id)
+
+    // Clean up orphaned wiki files: delete any file no other note references
+    if (wikiFiles.length > 0) {
+      const sqlite = getSqlite()
+      const orphaned: string[] = []
+      for (const filename of wikiFiles) {
+        if (countNotesReferencingWikiFile(filename, id) === 0) {
+          orphaned.push(filename)
+          // Remove from kbPages index
+          const pageId = filename.replace(/\.md$/, '')
+          sqlite.prepare('DELETE FROM kb_pages WHERE id = ?').run(pageId)
+          // Delete the file from disk
+          await deleteKbFile(filename)
+        }
+      }
+      if (orphaned.length > 0) {
+        console.log('[notes:delete] removed orphaned wiki files:', orphaned)
+      }
+
+      // Clean up tag colors for tags no longer used by any note
+      const remaining = getSqlite()
+        .prepare("SELECT tags FROM notes WHERE hidden=0 AND ai_state='complete'")
+        .all() as Array<{ tags: string }>
+      const activeTags = new Set<string>()
+      for (const r of remaining) {
+        try { for (const t of JSON.parse(r.tags)) activeTags.add(t) } catch { /* skip */ }
+      }
+      const colors = getTagColors()
+      let colorChanged = false
+      for (const tag of Object.keys(colors)) {
+        if (!activeTags.has(tag)) {
+          delete colors[tag]
+          colorChanged = true
+        }
+      }
+      if (colorChanged) setTagColors(colors)
+    }
+  })
 
   ipcMain.handle('notes:hide', (_event, id: string) => hideNote(id))
 

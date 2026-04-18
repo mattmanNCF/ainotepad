@@ -1,7 +1,7 @@
 import { utilityProcess, MessageChannelMain, BrowserWindow } from 'electron'
 import path from 'path'
 import { randomUUID } from 'crypto'
-import { updateNoteAiResult, getDb, getSqlite } from './db'
+import { updateNoteAiResult, getDb, getSqlite, setNoteWikiFiles } from './db'
 import { notes, kbPages } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
 import { writeKbFile, readKbFile, listKbFiles } from './kb'
@@ -61,9 +61,11 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
       // Write wiki files to kb/
       if (wikiUpdates && wikiUpdates.length > 0) {
         const db = getDb()
+        const writtenFiles: string[] = []
         for (const update of wikiUpdates as Array<{ file: string; content: string }>) {
           try {
             await writeKbFile(update.file, update.content)
+            writtenFiles.push(update.file)
 
             // Upsert kbPages for concept files (skip _context.md and other _ prefixed files)
             if (!update.file.startsWith('_')) {
@@ -86,6 +88,9 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
             console.error('[aiOrchestrator] wiki file write failed:', update.file, err)
           }
         }
+
+        // Record which wiki files this note wrote — used for cleanup on delete
+        if (writtenFiles.length > 0) setNoteWikiFiles(noteId, writtenFiles)
 
         // Assign default colors for new tags (deterministic palette)
         // Uses tagColors.ts — NOT ipc.ts — to avoid circular import

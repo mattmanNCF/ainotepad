@@ -106,8 +106,43 @@ export function getDb() {
     ')'
   )
 
+  // Migration: add wiki_files column to notes (Phase 07 gap)
+  try {
+    sqlite.exec("ALTER TABLE notes ADD COLUMN wiki_files TEXT NOT NULL DEFAULT '[]'")
+  } catch {
+    // Column already exists — safe to ignore
+  }
+
   _db = drizzle(sqlite, { schema })
   return _db
+}
+
+export function getNoteWikiFiles(noteId: string): string[] {
+  const row = getSqlite()
+    .prepare('SELECT wiki_files FROM notes WHERE id = ?')
+    .get(noteId) as { wiki_files: string } | undefined
+  if (!row) return []
+  try { return JSON.parse(row.wiki_files) } catch { return [] }
+}
+
+export function setNoteWikiFiles(noteId: string, filenames: string[]): void {
+  getSqlite()
+    .prepare('UPDATE notes SET wiki_files = ? WHERE id = ?')
+    .run(JSON.stringify(filenames), noteId)
+}
+
+export function countNotesReferencingWikiFile(filename: string, excludeNoteId: string): number {
+  const rows = getSqlite()
+    .prepare("SELECT wiki_files FROM notes WHERE hidden=0 AND id != ?")
+    .all(excludeNoteId) as Array<{ wiki_files: string }>
+  let count = 0
+  for (const r of rows) {
+    try {
+      const files: string[] = JSON.parse(r.wiki_files)
+      if (files.includes(filename)) count++
+    } catch { /* skip */ }
+  }
+  return count
 }
 
 export function deleteNote(noteId: string): void {

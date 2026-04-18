@@ -14,6 +14,7 @@ interface NoteRecord {
 
 interface NoteCardProps {
   note: NoteRecord
+  tagColors: Record<string, string>
   onDelete: (id: string) => void
   onHide: (id: string) => void
   onReprocess: (id: string) => void
@@ -31,9 +32,8 @@ function formatTime(iso: string): string {
 const MENU_W = 130
 const MENU_H = 96
 
-export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps) {
+export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess }: NoteCardProps) {
   const [tags, setTags] = useState<string[]>(note.tags)
-  const [tagColors, setTagColors] = useState<Record<string, string>>({})
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -54,14 +54,6 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
 
   const handleMouseLeave = useCallback(() => {
     leaveTimer.current = setTimeout(() => setExpanded(false), 120)
-  }, [])
-
-  useEffect(() => {
-    window.api.kb.getTagColors().then(setTagColors)
-    const cleanup = window.api.kb.onUpdated(() => {
-      window.api.kb.getTagColors().then(setTagColors)
-    })
-    return cleanup
   }, [])
 
   useEffect(() => {
