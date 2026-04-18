@@ -53,6 +53,14 @@ export function PatternsTab() {
 
   useEffect(() => {
     loadDigest('daily')
+    // PAT-02: pre-load weekly or trigger generation if no weekly digest exists yet
+    window.api.digest.getLatest('weekly').then((result) => {
+      if (!result) {
+        // No weekly digest — trigger background generation silently
+        setGenerating(true)
+        window.api.digest.generate('weekly').catch(() => setGenerating(false))
+      }
+    }).catch(() => { /* ignore — digest IPC not critical path */ })
     const unsubUpdated = window.api.digest.onUpdated((data) => {
       if (data.period === periodRef.current) {
         loadDigest(periodRef.current)
