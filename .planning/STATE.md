@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Corkboard Polish
 status: unknown
-last_updated: "2026-04-18T23:07:01.076Z"
+last_updated: "2026-04-18T23:10:17.517Z"
 progress:
   total_phases: 9
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 35
-  completed_plans: 32
+  completed_plans: 33
 ---
 
 # Notal — Project State
@@ -138,6 +138,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 08]: noteTags parameter prefixed with _ in computeSimilarPairs — grouping by tag done via tagToNoteIds in IPC handler; function signature kept for API clarity
 - [Phase 08]: getRollingWeekStart uses local midnight via new Date(y,m,d-7,0,0,0,0) for calendar-day alignment avoiding UTC drift
 - [Phase 08]: Weekly pre-load in PatternsTab uses getLatest check before generate - avoids unnecessary regeneration if digest already exists
+- [Phase 08-02]: SVG placed inside overflow-y-auto container so edges scroll with content
+- [Phase 08-02]: useLayoutEffect for edge computation prevents flicker by measuring after DOM paint
 
 ### Quick Tasks Completed
 
