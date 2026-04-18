@@ -12,6 +12,7 @@ import { getTagColors, setTagColors } from './tagColors'
 import { detectModelTier, findExistingModel, downloadModel } from './localModel'
 import { forceScheduleDigest } from './digestScheduler'
 import { readHarnessFiles, writeHarnessFiles, updateUserProfile } from './agentHarness'
+import { computeSimilarPairs } from './similarity'
 
 // Initialize electron-conf at module scope — safe because Conf does NOT call safeStorage at init time.
 // safeStorage is only called inside ipcMain.handle() callbacks and getDecryptedApiKey(),
@@ -394,6 +395,35 @@ export function registerIpcHandlers() {
          ORDER BY submitted_at DESC LIMIT 50`
       )
       .all() as Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>
+  })
+
+  ipcMain.handle('notes:getSimilarPairs', () => {
+    // Cap at 100 most-recent complete notes to bound O(n^2) computation
+    const rows = getSqlite()
+      .prepare(
+        `SELECT id, raw_text, tags FROM notes
+         WHERE hidden=0 AND ai_state='complete'
+         ORDER BY submitted_at DESC
+         LIMIT 100`
+      )
+      .all() as Array<{ id: string; raw_text: string; tags: string }>
+
+    const noteTexts = new Map<string, string>()
+    const noteTags = new Map<string, string[]>()
+    const tagToNoteIds = new Map<string, string[]>()
+
+    for (const row of rows) {
+      noteTexts.set(row.id, row.raw_text)
+      let tags: string[] = []
+      try { tags = JSON.parse(row.tags) } catch { /* malformed tags — skip */ }
+      noteTags.set(row.id, tags)
+      for (const tag of tags) {
+        if (!tagToNoteIds.has(tag)) tagToNoteIds.set(tag, [])
+        tagToNoteIds.get(tag)!.push(row.id)
+      }
+    }
+
+    return computeSimilarPairs(noteTexts, noteTags, tagToNoteIds, 0.3)
   })
 
   ipcMain.handle('digests:generate', (_e, period: 'daily' | 'weekly' = 'daily') => {

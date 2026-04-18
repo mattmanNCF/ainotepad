@@ -42,7 +42,7 @@ function cosineSim(a: Record<string, number>, b: Record<string, number>): number
 
 export function computeSimilarPairs(
   noteTexts: Map<string, string>,
-  noteTags: Map<string, string[]>,
+  _noteTags: Map<string, string[]>,
   tagToNoteIds: Map<string, string[]>,
   threshold: number
 ): Array<{ a: string; b: string }> {

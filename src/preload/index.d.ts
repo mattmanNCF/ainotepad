@@ -19,6 +19,7 @@ interface Window {
       reprocess: (id: string) => Promise<void>
       allTags: () => Promise<string[][]>
       recentInsights: () => Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>>
+      getSimilarPairs: () => Promise<Array<{ a: string; b: string }>>
     }
     onAiUpdate: (cb: (data: {
       noteId: string

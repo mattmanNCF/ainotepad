@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('api', {
     allTags: (): Promise<string[][]> => ipcRenderer.invoke('notes:allTags'),
     recentInsights: (): Promise<Array<{ id: string; tags: string; aiInsights: string; submittedAt: string }>> =>
       ipcRenderer.invoke('notes:recentInsights'),
+    getSimilarPairs: (): Promise<Array<{ a: string; b: string }>> =>
+      ipcRenderer.invoke('notes:getSimilarPairs'),
   },
   onAiUpdate: (
     cb: (data: {
