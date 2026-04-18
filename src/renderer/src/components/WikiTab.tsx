@@ -173,6 +173,7 @@ export function WikiTab() {
     id: f.filename.replace(/\.md$/, ''),
     name: f.title,
     color: tagColors[f.tags[0] ?? ''] ?? '#6b7280',
+    tag: f.tags[0] ?? '',
   }))
 
   // Derive semantic graph edges from note tag co-occurrence.
@@ -212,7 +213,8 @@ export function WikiTab() {
         onBack={goBack}
         onForward={goForward}
         onToggleGraph={() => setShowGraph(v => !v)}
-        onNodeRightClick={handleDeleteFile}
+        onNodeDelete={handleDeleteFile}
+        onSetTagColor={handleSetTagColor}
       />
 
       {deleteTarget && (
