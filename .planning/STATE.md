@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Corkboard Polish
 status: unknown
-last_updated: "2026-04-18T23:03:49.238Z"
+last_updated: "2026-04-18T23:07:01.076Z"
 progress:
   total_phases: 9
   completed_phases: 5
   total_plans: 35
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Notal — Project State
@@ -136,6 +136,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 07-02]: Overlay zIndex 9998 vs context menu 9999 — context menu always appears above expand overlay
 - [Phase 07-02]: Leave delay 120ms via useRef timeout — cancels on overlay mouseEnter for safe card-to-overlay cursor transit
 - [Phase 08]: noteTags parameter prefixed with _ in computeSimilarPairs — grouping by tag done via tagToNoteIds in IPC handler; function signature kept for API clarity
+- [Phase 08]: getRollingWeekStart uses local midnight via new Date(y,m,d-7,0,0,0,0) for calendar-day alignment avoiding UTC drift
+- [Phase 08]: Weekly pre-load in PatternsTab uses getLatest check before generate - avoids unnecessary regeneration if digest already exists
 
 ### Quick Tasks Completed
 

@@ -135,7 +135,7 @@ Plans:
 Plans:
 - [x] 08-01-PLAN.md — TF-IDF similarity computation + IPC handler (main process)
 - [ ] 08-02-PLAN.md — SVG edge overlay on corkboard (NotesTab + NoteCard onRef prop)
-- [ ] 08-03-PLAN.md — Digest improvements: weekly pre-load on mount + calendar-aligned rolling window
+- [x] 08-03-PLAN.md — Digest improvements: weekly pre-load on mount + calendar-aligned rolling window
 
 ---
 

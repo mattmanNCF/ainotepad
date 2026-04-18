@@ -44,8 +44,8 @@
 ### Patterns Page
 
 - [ ] **PAT-01**: Patterns page footer (note count, top topics, most active day) is fully visible at default window size without scrolling
-- [ ] **PAT-02**: Weekly AI summary pre-generates on first open — no blank/Generate-Now state
-- [ ] **PAT-03**: Weekly digest uses a rolling 7-day window that updates daily (Day 8 = days 2–8, Day 9 = days 3–9)
+- [x] **PAT-02**: Weekly AI summary pre-generates on first open — no blank/Generate-Now state
+- [x] **PAT-03**: Weekly digest uses a rolling 7-day window that updates daily (Day 8 = days 2–8, Day 9 = days 3–9)
 
 ### App Icon
 
@@ -88,8 +88,8 @@
 | CORK-04 | Phase 07 | Complete |
 | CORK-05 | Phase 08 | Complete |
 | PAT-01 | Phase 07 | Pending |
-| PAT-02 | Phase 08 | Pending |
-| PAT-03 | Phase 08 | Pending |
+| PAT-02 | Phase 08 | Complete |
+| PAT-03 | Phase 08 | Complete |
 | ICON-01 | Phase 09 | Pending |
 
 **Coverage:**
