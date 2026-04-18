@@ -65,8 +65,18 @@ export function buildStats(
 }
 
 /**
+ * Returns ISO string for midnight (local time) 7 calendar days ago.
+ * Produces a clean day-aligned rolling window: Day 8 = days 2–8, Day 9 = days 3–9.
+ */
+function getRollingWeekStart(): string {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7, 0, 0, 0, 0)
+  return start.toISOString()
+}
+
+/**
  * Dispatch a digest-task for a given period if it's due.
- * Daily: >= 20h since last. Weekly: >= 6 days since last.
+ * Daily: >= 20h since last. Weekly: >= 22h since last.
  */
 function maybeDispatchDigest(
   period: 'daily' | 'weekly',
@@ -81,7 +91,9 @@ function maybeDispatchDigest(
   const lastTime = lastDigest ? new Date(lastDigest.generated_at).getTime() : 0
   const hoursElapsed = (Date.now() - lastTime) / (1000 * 60 * 60)
 
-  const periodStart = new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString()
+  const periodStart = period === 'weekly'
+    ? getRollingWeekStart()
+    : new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString()
   const wordCloud = buildWordCloudData(periodStart)
   const stats = buildStats(periodStart, wordCloud)
 
@@ -115,7 +127,9 @@ export function forceScheduleDigest(period: 'daily' | 'weekly' = 'daily'): void 
     return
   }
   const windowHours = period === 'weekly' ? 168 : 24
-  const periodStart = new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString()
+  const periodStart = period === 'weekly'
+    ? getRollingWeekStart()
+    : new Date(Date.now() - windowHours * 60 * 60 * 1000).toISOString()
   const wordCloud = buildWordCloudData(periodStart)
   const stats = buildStats(periodStart, wordCloud)
   workerPort.postMessage({
@@ -144,5 +158,5 @@ export function checkAndScheduleDigest(): void {
   }
 
   maybeDispatchDigest('daily', 24, 20, workerPort)
-  maybeDispatchDigest('weekly', 168, 20, workerPort) // 7-day window, refresh once per day
+  maybeDispatchDigest('weekly', 168, 22, workerPort) // 7-day window, refresh once per day
 }
