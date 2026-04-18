@@ -116,6 +116,7 @@ export function WikiSidebar({
         <div
           style={{ position: 'fixed', left: colorPicker.x, top: colorPicker.y, zIndex: 9999 }}
           className="bg-gray-800 border border-gray-600 rounded p-2 shadow-xl flex items-center gap-2"
+          onMouseLeave={() => setColorPicker(null)}
         >
           <input
             type="color"
@@ -124,12 +125,6 @@ export function WikiSidebar({
             className="w-8 h-8 cursor-pointer rounded border-0 bg-transparent"
           />
           <span className="text-xs text-gray-300">{colorPicker.tag}</span>
-          <button
-            onClick={() => setColorPicker(null)}
-            className="text-xs text-gray-500 hover:text-gray-300 ml-1"
-          >
-            x
-          </button>
         </div>,
         document.body
       )}
