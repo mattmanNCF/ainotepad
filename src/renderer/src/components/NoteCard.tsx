@@ -9,6 +9,7 @@ interface NoteRecord {
   aiAnnotation: string | null
   organizedText: string | null
   aiInsights: string | null
+  tags: string[]
 }
 
 interface NoteCardProps {
@@ -38,7 +39,7 @@ const MENU_H = 96
 
 export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps) {
   const style = aiStateStyle[note.aiState]
-  const [tags, setTags] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>(note.tags)
   const [tagColors, setTagColors] = useState<Record<string, string>>({})
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)

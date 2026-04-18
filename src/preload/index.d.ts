@@ -6,6 +6,7 @@ interface NoteRecord {
   aiAnnotation: string | null
   organizedText: string | null
   aiInsights: string | null
+  tags: string[]
 }
 
 interface Window {

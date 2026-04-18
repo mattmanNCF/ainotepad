@@ -10,6 +10,7 @@ interface NoteRecord {
   aiAnnotation: string | null
   organizedText: string | null
   aiInsights: string | null
+  tags: string[]
 }
 
 export function NotesTab() {
@@ -19,7 +20,11 @@ export function NotesTab() {
   useEffect(() => {
     window.api.notes.getAll()
       .then((loaded) => {
-        setNotes(loaded)
+        setNotes(loaded.map(n => {
+          let tags: string[] = []
+          try { tags = JSON.parse((n as any).tags ?? '[]') } catch { /* leave empty */ }
+          return { ...n, tags }
+        }))
         setLoading(false)
       })
       .catch((err) => {
@@ -31,7 +36,7 @@ export function NotesTab() {
   // Subscribe to real-time AI result pushes from main process
   useEffect(() => {
     if (!window.api.onAiUpdate) return
-    const unsub = window.api.onAiUpdate(({ noteId, aiState, aiAnnotation, organizedText }) => {
+    const unsub = window.api.onAiUpdate(({ noteId, aiState, aiAnnotation, organizedText, tags, insights }) => {
       setNotes((prev) =>
         prev.map((n) =>
           n.id === noteId
@@ -40,6 +45,8 @@ export function NotesTab() {
                 aiState: aiState as NoteRecord['aiState'],
                 aiAnnotation,
                 organizedText: organizedText ?? null,
+                tags: tags ?? n.tags,
+                aiInsights: insights ?? n.aiInsights,
               }
             : n
         )
@@ -73,13 +80,14 @@ export function NotesTab() {
       aiAnnotation: null,
       organizedText: null,
       aiInsights: null,
+      tags: [],
     }
     setNotes((prev) => [optimistic, ...prev])
 
     // Persist via IPC and replace optimistic entry with real record
     try {
       const saved = await window.api.notes.create(rawText)
-      setNotes((prev) => prev.map((n) => (n.id === optimistic.id ? saved : n)))
+      setNotes((prev) => prev.map((n) => (n.id === optimistic.id ? { ...saved, tags: [], aiInsights: null } : n)))
     } catch (err) {
       console.error('Failed to save note:', err)
       // Leave optimistic entry; in v1 we don't show error UI
