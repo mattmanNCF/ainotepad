@@ -3,27 +3,27 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Corkboard Polish
 status: unknown
-last_updated: "2026-04-18T03:08:32.093Z"
+last_updated: "2026-04-18T23:03:49.238Z"
 progress:
   total_phases: 9
   completed_phases: 5
-  total_plans: 32
-  completed_plans: 30
+  total_plans: 35
+  completed_plans: 31
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 07 (note-card-visual-redesign) — COMPLETE
-Plan: 2 of 2 (all complete)
+Phase: 08 (connections-digest-improvements) — EXECUTING
+Plan: 1 of 3
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Phase 07 — note-card-visual-redesign
+**Current focus:** Phase 08 — connections-digest-improvements
 
 ## Previous Milestone Summary (v1.0)
 
@@ -135,6 +135,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 07-02]: getBoundingClientRect called inside handleMouseEnter (not useEffect) for fresh rect at hover time
 - [Phase 07-02]: Overlay zIndex 9998 vs context menu 9999 — context menu always appears above expand overlay
 - [Phase 07-02]: Leave delay 120ms via useRef timeout — cancels on overlay mouseEnter for safe card-to-overlay cursor transit
+- [Phase 08]: noteTags parameter prefixed with _ in computeSimilarPairs — grouping by tag done via tagToNoteIds in IPC handler; function signature kept for API clarity
 
 ### Quick Tasks Completed
 

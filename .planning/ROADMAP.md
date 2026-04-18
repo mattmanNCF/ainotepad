@@ -27,7 +27,7 @@
 | 05. Agent Layer | Complete | Complete | 2026-04-17 |
 | 06. Polish & Ship | Complete | Complete | 2026-04-17 |
 | 07. Note Card Visual Redesign | 1/2 | In progress | - |
-| 08. Connections + Digest Improvements | 0/? | Not started | - |
+| 08. Connections + Digest Improvements | 0/3 | Not started | - |
 | 09. App Icon | 0/? | Not started | - |
 
 ---
@@ -131,7 +131,11 @@ Plans:
   1. Notes that share a tag and have high embedding similarity show a visible connecting edge on the corkboard — no new AI calls required
   2. The weekly digest is present and populated when the Patterns tab is first opened — no blank state or manual Generate Now
   3. The weekly digest window advances daily: opening on Day 8 shows days 2–8, Day 9 shows days 3–9
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [x] 08-01-PLAN.md — TF-IDF similarity computation + IPC handler (main process)
+- [ ] 08-02-PLAN.md — SVG edge overlay on corkboard (NotesTab + NoteCard onRef prop)
+- [ ] 08-03-PLAN.md — Digest improvements: weekly pre-load on mount + calendar-aligned rolling window
 
 ---
 
