@@ -105,7 +105,7 @@ export function NotesTab() {
             No notes yet. Start typing below.
           </p>
         )}
-        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))' }}>
+        <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
           {notes.map((note) => (
             <NoteCard key={note.id} note={note} onDelete={handleDelete} onHide={handleHide} onReprocess={handleReprocess} />
           ))}

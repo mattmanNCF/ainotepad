@@ -28,21 +28,22 @@ function formatTime(iso: string): string {
   }
 }
 
-const aiStateStyle: Record<NoteRecord['aiState'], { border: string; badge: string; badgeClass: string }> = {
-  pending:  { border: '#f59e0b', badge: '⏳',  badgeClass: 'text-amber-400/80' },
-  complete: { border: '#10b981', badge: '✓',   badgeClass: 'text-emerald-400/80' },
-  failed:   { border: '#ef4444', badge: '✗',   badgeClass: 'text-red-400/80' },
-}
-
 const MENU_W = 130
 const MENU_H = 96
 
 export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps) {
-  const style = aiStateStyle[note.aiState]
   const [tags, setTags] = useState<string[]>(note.tags)
   const [tagColors, setTagColors] = useState<Record<string, string>>({})
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  const primaryTagColor = tags.length > 0 && tagColors[tags[0]]
+    ? tagColors[tags[0]]
+    : '#6b7280'
+
+  const handleMouseEnter = useCallback(() => {}, [])
+  const handleMouseLeave = useCallback(() => {}, [])
 
   useEffect(() => {
     window.api.kb.getTagColors().then(setTagColors)
@@ -83,31 +84,36 @@ export function NoteCard({ note, onDelete, onHide, onReprocess }: NoteCardProps)
 
   return (
     <div
-      className="note-card-enter flex flex-col rounded-sm bg-[#1a1a14] hover:bg-[#1f1f18] transition-colors shadow-md"
-      style={{ borderLeft: `4px solid ${style.border}`, minHeight: '120px' }}
+      ref={cardRef}
+      className="note-card-enter relative overflow-hidden rounded-sm bg-[#1a1a14] hover:bg-[#1f1f18] transition-colors shadow-md cursor-default"
+      style={{ borderLeft: `4px solid ${primaryTagColor}`, height: '120px' }}
       onContextMenu={handleContextMenu}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <div className="flex-1 p-3">
-        <p className="text-sm text-gray-200 whitespace-pre-wrap leading-relaxed break-words">{note.rawText}</p>
-        {note.aiAnnotation && (
-          <p className="mt-2 text-xs text-blue-400/70 border-t border-white/5 pt-2 leading-relaxed">{note.aiAnnotation}</p>
-        )}
-        {tags.length > 0 && (
-          <div className="flex items-center gap-1 mt-1">
-            {tags.map(tag => (
-              <span
-                key={tag}
-                title={tag}
-                className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ backgroundColor: tagColors[tag] ?? '#6b7280' }}
-              />
-            ))}
-          </div>
-        )}
+      {/* Truncated text with fade gradient */}
+      <div className="relative p-2 pb-0">
+        <p className="text-xs text-gray-200 leading-snug line-clamp-3 break-words">{note.rawText}</p>
+        <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-[#1a1a14] to-transparent pointer-events-none" />
       </div>
-      <div className="flex items-center justify-between px-3 pb-2 pt-1 border-t border-white/5">
-        <span className="text-xs text-gray-600">{formatTime(note.submittedAt)}</span>
-        <span className={`text-xs ${style.badgeClass}`}>{style.badge}</span>
+
+      {/* Tag dots — pinned to bottom of card */}
+      {tags.length > 0 && (
+        <div className="absolute bottom-5 left-2 flex flex-wrap gap-0.5">
+          {tags.map(tag => (
+            <span
+              key={tag}
+              title={tag}
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: tagColors[tag] ?? '#6b7280' }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Timestamp — bottom of card */}
+      <div className="absolute bottom-1 left-2 right-2">
+        <span className="text-[9px] text-gray-600">{formatTime(note.submittedAt)}</span>
       </div>
 
       {/* Portal: renders directly on document.body — escapes all stacking contexts */}
