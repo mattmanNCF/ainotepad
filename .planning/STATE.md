@@ -17,8 +17,16 @@ progress:
 
 Phase: Not started (defining requirements)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-19 — Milestone v0.3.1 started
+Status: Defining requirements — RESEARCH COMPLETE, REQUIREMENTS.md pending
+Last activity: 2026-04-19 — Research phase complete (SUMMARY.md committed). Path A locked for mobile. Session ended at 81% context; resume target = REQUIREMENTS.md write.
+
+## Session Continuity
+
+**Last session:** 2026-04-19
+**Stopped at:** Step 9 (Define Requirements) of `/gsd:new-milestone` workflow, just before REQUIREMENTS.md write.
+**Resume file:** `.planning/HANDOFF.json` (structured handoff — read first)
+**Key locked decision:** Mobile platform = Path A (PWA + LAN HTTP); do not re-litigate.
+**Next action:** Read HANDOFF.json → read SUMMARY.md + FEATURES.md → write REQUIREMENTS.md using verbatim REQ-IDs from SUMMARY.md §Requirements Candidates → get Matt's approval → spawn roadmapper (continue phase numbering at Phase 10) → approve → commit → done.
 
 ## Project Reference
 

@@ -1,0 +1,81 @@
+{
+  "handoff_version": "1.0",
+  "created": "2026-04-19",
+  "session_ended_at": "context 81%",
+  "status": "milestone_setup_in_progress",
+  "project": "Notal (AInotepad)",
+  "working_directory": "C:/Users/mflma/workspace/AInotepad/",
+  "branch": "notal-v0.2",
+  "milestone": "v0.3.1",
+  "milestone_name": "Reminders, Graph Control, Mobile",
+
+  "workflow": "new-milestone",
+  "workflow_step_completed": "8 — Research (all 4 researchers + synthesizer committed)",
+  "workflow_step_next": "9 — Define Requirements (write REQUIREMENTS.md)",
+
+  "primary_decision_locked": {
+    "mobile_path": "A — PWA + LAN HTTP to desktop Fastify server",
+    "rejected": ["Path B (Telegram bot inbox)", "Defer to v0.3.2"],
+    "implications": [
+      "per-device QR pairing with 90s TTL",
+      "mTLS self-signed cert with fingerprint pinning",
+      "Bearer auth hardening on MCP :7723 as prerequisite",
+      "iOS 7-day PWA eviction UX copy required",
+      "vite-plugin-pwa + Fastify refactor of mcpServer.ts"
+    ]
+  },
+
+  "decisions_locked": {
+    "phase_order": "Phase 10 Graph → Phase 11 Calendar → Phase 12 Mobile",
+    "mobile_droppable_to": "v0.3.2 if schedule slips (Calendar is the ship gate)",
+    "calendar_ux": "silent creation + 10-second Undo toast + persistent chip; opt-in confirmBeforeCreate setting; confidence ≥0.85 gate",
+    "phrase_detection": "piggyback on existing AI worker structured output + chrono-node sanity check + confidence gate + regex pre-filter (local-model only)",
+    "graph_panel": "floating top-right collapsible overlay, 5 Radix sliders, 3 presets (Dense/Spacious/Hierarchical), always-visible Reset, p95 ≤50ms drag budget on 500-node fixture",
+    "mcp_auth_correction": "MCP uses node:http with ZERO auth today (not Fastify+Bearer as old docs claimed); Bearer middleware = first task of Phase 12"
+  },
+
+  "unrecovered_concept": {
+    "topic": "Google Drive",
+    "user_said": "there was something you had mentioned previously using Google drive but it seemed to get lost",
+    "action": "Ask Matt at start of mobile phase planning; candidate interpretations in project_notal_v0_3_1.md (transport alt / wiki backup / cross-device reminder sync)"
+  },
+
+  "artifacts_committed": {
+    "project_md": ".planning/PROJECT.md (commit a84622e)",
+    "state_md": ".planning/STATE.md (commit a84622e)",
+    "research": {
+      "stack": ".planning/research/STACK.md (commit d4d01a4)",
+      "features": ".planning/research/FEATURES.md (commit e112116)",
+      "architecture": ".planning/research/ARCHITECTURE.md (commit 48255c7)",
+      "pitfalls": ".planning/research/PITFALLS.md (commit e93c3fc)",
+      "summary": ".planning/research/SUMMARY.md (commit 49d2787)"
+    }
+  },
+
+  "artifacts_pending": {
+    "requirements_md": ".planning/REQUIREMENTS.md — NOT WRITTEN; write using SUMMARY.md §Requirements Candidates + categories from FEATURES.md",
+    "roadmap_md": ".planning/ROADMAP.md — NOT WRITTEN; spawn gsd-roadmapper after REQUIREMENTS approved; start from Phase 10 (continue numbering, do NOT reset)",
+    "state_md_phase_status_update": "Phase Status (v0.3.1) section in STATE.md needs population after roadmapper"
+  },
+
+  "next_action_for_next_session": {
+    "step_1": "Read .planning/research/SUMMARY.md (has all decisions + verbatim requirements candidates)",
+    "step_2": "Read .planning/research/FEATURES.md (categories + table-stakes/differentiators/anti-features)",
+    "step_3": "Write .planning/REQUIREMENTS.md with categories: Calendar (CAL-*), Graph (GRAPH-*), Mobile (MOB-*, Path A only), Cross-cutting (XCUT-*). Use verbatim IDs from SUMMARY.md §Requirements Candidates. Include v2 Requirements (deferred) and Out of Scope sections per template.",
+    "step_4": "Present REQUIREMENTS.md to Matt for approval (adjust if needed)",
+    "step_5": "Commit requirements: node ~/.claude/get-shit-done/bin/gsd-tools.cjs commit 'docs: define milestone v0.3.1 requirements' --files .planning/REQUIREMENTS.md",
+    "step_6": "Spawn gsd-roadmapper with continue-numbering (start Phase 10, do NOT reset); reference SUMMARY.md phase rationale",
+    "step_7": "Present ROADMAP, get approval, commit, done"
+  },
+
+  "post_milestone_backlog": [
+    "Init context optimization (26% → ≤10%): investigate TurboQuant KV-cache compression + prune init content — see ~/.claude/projects/C--Users-mflma-workspace/memory/project_init_context_optimization.md"
+  ],
+
+  "context_notes": [
+    "User is Matt — sole dev, Windows first, Telegram on phone already, uses Atlas bot pattern",
+    "Notal ships as point releases (v0.3.0 shipped; v0.3.1 is the next); prior docs mis-labeled it v1.1 — corrected in this milestone's PROJECT.md/STATE.md update",
+    "Path A locked despite Path B being my recommendation — respect the decision, do not re-litigate",
+    "Checkpoint discipline rule now: proactive checkpoints on scope/design events, MANDATORY at 80% context"
+  ]
+}
