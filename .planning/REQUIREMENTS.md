@@ -49,7 +49,7 @@
 
 ### App Icon
 
-- [ ] **ICON-01**: App icon replaced with custom illustrated asset (ChatGPT-generated image from user's Downloads folder, or commissioned art)
+- [x] **ICON-01**: App icon replaced with custom illustrated asset (ChatGPT-generated image from user's Downloads folder, or commissioned art)
 
 ---
 
@@ -90,7 +90,7 @@
 | PAT-01 | Phase 07 | Pending |
 | PAT-02 | Phase 08 | Complete |
 | PAT-03 | Phase 08 | Complete |
-| ICON-01 | Phase 09 | Pending |
+| ICON-01 | Phase 09 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 9 total

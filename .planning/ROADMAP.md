@@ -28,7 +28,7 @@
 | 06. Polish & Ship | Complete | Complete | 2026-04-17 |
 | 07. Note Card Visual Redesign | 1/2 | In progress | - |
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
-| 09. App Icon | 0/? | Not started | - |
+| 09. App Icon | 0/3 | Not started | - |
 
 ---
 
@@ -147,4 +147,8 @@ Plans:
   1. The app icon in the Windows taskbar and system tray shows the custom illustrated asset, not the placeholder geometric icon
   2. The NSIS installer uses the custom icon
   3. The icon renders cleanly at 16x16, 32x32, and 256x256 sizes
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [x] 09-01-PLAN.md — Source asset + icon generator script (illustrated lemur PNG → multi-resolution ICO + tray PNG)
+- [ ] 09-02-PLAN.md — Wire icons through main process (tray, BrowserWindow, About) + explicit electron-builder keys
+- [ ] 09-03-PLAN.md — Build Windows distribution + human verification checkpoint

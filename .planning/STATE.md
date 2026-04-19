@@ -3,19 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Corkboard Polish
 status: unknown
-last_updated: "2026-04-18T23:13:02.031Z"
+last_updated: "2026-04-19T04:00:23.092Z"
 progress:
   total_phases: 9
   completed_phases: 6
-  total_plans: 35
-  completed_plans: 33
+  total_plans: 38
+  completed_plans: 34
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 08 (connections-digest-improvements) — EXECUTING
+Phase: 09 (App Icon) — EXECUTING
 Plan: 1 of 3
 
 ## Project Reference
@@ -23,7 +23,7 @@ Plan: 1 of 3
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Phase 08 — connections-digest-improvements
+**Current focus:** Phase 09 — App Icon
 
 ## Previous Milestone Summary (v1.0)
 
@@ -140,6 +140,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 08]: Weekly pre-load in PatternsTab uses getLatest check before generate - avoids unnecessary regeneration if digest already exists
 - [Phase 08-02]: SVG placed inside overflow-y-auto container so edges scroll with content
 - [Phase 08-02]: useLayoutEffect for edge computation prevents flicker by measuring after DOM paint
+- [Phase 09-app-icon]: electron-icon-builder --flatten on Windows emits ICO to icons/icon.ico (not icons/win/); script checks artifact not exit code; shell:true required for .cmd on Windows spawnSync
 
 ### Quick Tasks Completed
 
