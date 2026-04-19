@@ -110,16 +110,22 @@ export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess, onRef
         <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-[#1a1a14] to-transparent pointer-events-none" />
       </div>
 
-      {/* Tag dots — pinned to bottom of card */}
+      {/* Tag pills — pinned to bottom of card */}
       {tags.length > 0 && (
-        <div className="absolute bottom-5 left-2 flex flex-wrap gap-0.5">
+        <div className="absolute bottom-5 left-2 right-2 flex flex-wrap gap-0.5 overflow-hidden" style={{ maxHeight: '14px' }}>
           {tags.map(tag => (
             <span
               key={tag}
               title={tag}
-              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-              style={{ backgroundColor: tagColors[tag] ?? '#6b7280' }}
-            />
+              className="text-[8px] leading-none px-1 py-0.5 rounded-sm flex-shrink-0 whitespace-nowrap"
+              style={{
+                backgroundColor: (tagColors[tag] ?? '#6b7280') + '28',
+                color: tagColors[tag] ?? '#9ca3af',
+                border: `1px solid ${(tagColors[tag] ?? '#6b7280')}55`,
+              }}
+            >
+              {tag}
+            </span>
           ))}
         </div>
       )}
@@ -171,7 +177,9 @@ export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess, onRef
           onMouseLeave={handleMouseLeave}
           style={{
             position: 'fixed',
-            left: cardRect.left,
+            left: cardRect.left + 300 + 8 > window.innerWidth
+              ? Math.max(0, cardRect.right - 300)
+              : cardRect.left,
             top: cardRect.top,
             width: 300,
             maxHeight: 300,

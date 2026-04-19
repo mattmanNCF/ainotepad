@@ -77,6 +77,10 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
         const db = getDb()
         const writtenFiles: string[] = []
         for (const update of wikiUpdates as Array<{ file: string; content: string }>) {
+          if (!update?.file || !update?.content) {
+            console.warn('[aiOrchestrator] skipping malformed wiki_update entry (missing file or content):', JSON.stringify(update))
+            continue
+          }
           try {
             await writeKbFile(update.file, update.content)
             writtenFiles.push(update.file)

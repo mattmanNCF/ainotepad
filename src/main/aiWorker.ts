@@ -275,7 +275,7 @@ async function drain(): Promise<void> {
         aiAnnotation: parsed.annotation,
         organizedText: parsed.organized,
         wikiUpdates: parsed.wiki_updates ?? [],
-        tags: parsed.tags ?? [],
+        tags: parsed.tags?.length ? parsed.tags : ['Untagged'],
         insights: parsed.insights ?? null,
       })
     } catch (err) {
