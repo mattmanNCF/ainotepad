@@ -220,7 +220,7 @@ async function handleDigestTask({
 }
 
 function handleMessage(event: Electron.MessageEvent): void {
-  const { type, noteId, rawText, contextMd, conceptSnippets, relatedNotes } = event.data
+  const { type, noteId, rawText, contextMd, conceptSnippets, relatedNotes, establishedTags } = event.data
   if (type === 'task') {
     queue.push({
       noteId,
@@ -228,6 +228,7 @@ function handleMessage(event: Electron.MessageEvent): void {
       contextMd: contextMd ?? '',
       conceptSnippets: conceptSnippets ?? '',
       relatedNotes: relatedNotes ?? '',
+      establishedTags: establishedTags ?? [],
     })
     if (!processing) drain()
   }
@@ -258,7 +259,7 @@ async function drain(): Promise<void> {
   while (queue.length > 0) {
     const task = queue.shift()!
     try {
-      const raw = await callAI(task.rawText, task.contextMd, task.conceptSnippets, task.relatedNotes)
+      const raw = await callAI(task.rawText, task.contextMd, task.conceptSnippets, task.relatedNotes, task.establishedTags ?? [])
       // Strip markdown code fences if model wrapped the JSON (common with gpt-4o-mini)
       const result = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
       const parsed = JSON.parse(result) as {
@@ -300,7 +301,7 @@ async function drain(): Promise<void> {
   processing = false
 }
 
-function buildPrompt(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string): string {
+function buildPrompt(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, establishedTags: string[] = []): string {
   const hasContext = contextMd.trim().length > 0
   const contextSection = hasContext
     ? `## Your Current Knowledge Context\n${contextMd}`
@@ -314,21 +315,26 @@ function buildPrompt(rawText: string, contextMd: string, conceptSnippets: string
     ? `\n## Related Past Notes (retrieved by similarity)\n${relatedNotes}`
     : ''
 
+  const tagSection = establishedTags.length > 0
+    ? `\n## Established Tags (reuse these when applicable — be consistent)\n${establishedTags.join(', ')}`
+    : ''
+
   return `You are a silent note-processing and knowledge-base assistant. Process the raw note below and return a JSON object with exactly these five fields.
 
 ${contextSection}
 ${conceptSection}
 ${relatedSection}
+${tagSection}
 
 ## Your Tasks
 1. **organized**: Clean/organize the note. Fix typos, improve clarity. Keep the user's voice.
 2. **annotation**: 1-2 sentence insight or connection to consider.
 3. **wiki_updates**: Array of concept file writes. Each entry: {"file": "slug.md", "content": "...full file content..."}
-   - ALWAYS include "_context.md" as one of the entries — every note updates the rolling context
+   - ALWAYS include an entry with "file": "_context.md" (EXACTLY this filename, underscore prefix) — every note updates the rolling context
    - Create/update concept files for key ideas in this note
    - Each file: YAML frontmatter (tags, created, updated), then Markdown with [[wikilinks]] to related concepts
    - Rewrite files in full — do not patch
-   - Include ONE entry for "_context.md" — your updated rolling context. Structure:
+   - The "_context.md" entry structure:
      ---
      updated: <ISO timestamp>
      note_count: <integer>
@@ -338,7 +344,7 @@ ${relatedSection}
      ## Recurring Concepts
      ## Recent Notes Summary
      Keep it bounded: max 5 recent notes, max 10 recurring concepts. Rewrite entire file each time.
-4. **tags**: Array of tag strings for this note (e.g. ["physics", "TOT", "math"]). If no meaningful tags apply, return ["Untagged"].
+4. **tags**: Array of tag strings for this note. Reuse tags from "Established Tags" above when they apply. Create new tags only when nothing fits. Never return an empty array — use ["Untagged"] if nothing applies.
 5. **insights**: Return a concise string with a specific observation — a connection to past notes, a pattern across recurring concepts, or a non-obvious implication of this idea. Return null only if there is genuinely nothing interesting to say (rare).
 
 IMPORTANT: Respond with ONLY a JSON object. No markdown fences, no explanation.
@@ -383,7 +389,7 @@ async function callLocal(rawText: string, contextMd: string, conceptSnippets: st
 
   // Grammar enforcement means output is already valid JSON — no fence stripping needed
   const result = await llamaSession.prompt(
-    buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes),
+    buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes, []),
     { grammar }
   )
   return result
@@ -412,13 +418,13 @@ async function callOpenAI(rawText: string, contextMd: string, conceptSnippets: s
   return resp.choices[0].message.content ?? ''
 }
 
-async function callOllama(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, model: string): Promise<string> {
+async function callOllama(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, model: string, establishedTags: string[] = []): Promise<string> {
   const client = new OpenAI({ baseURL: 'http://localhost:11434/v1', apiKey: 'ollama' })
   const resp = await client.chat.completions.create({
     model,
     max_tokens: 16384,
     response_format: { type: 'json_object' },
-    messages: [{ role: 'user', content: buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes) }],
+    messages: [{ role: 'user', content: buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes, establishedTags) }],
   })
   return resp.choices[0].message.content ?? ''
 }
@@ -431,22 +437,22 @@ const OPENAI_COMPAT_BASES: Record<string, { baseURL: string; model: string }> = 
   huggingface: { baseURL: 'https://api-inference.huggingface.co/v1', model: 'meta-llama/Llama-3.3-70B-Instruct' },
 }
 
-async function callOpenAICompat(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, key: string, baseURL: string, model: string): Promise<string> {
+async function callOpenAICompat(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, key: string, baseURL: string, model: string, establishedTags: string[] = []): Promise<string> {
   const client = new OpenAI({ apiKey: key, baseURL })
   const resp = await client.chat.completions.create({
     model,
     max_tokens: 4096,
-    messages: [{ role: 'user', content: buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes) }],
+    messages: [{ role: 'user', content: buildPrompt(rawText, contextMd, conceptSnippets, relatedNotes, establishedTags) }],
   })
   return resp.choices[0].message.content ?? ''
 }
 
-async function callAI(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string): Promise<string> {
+async function callAI(rawText: string, contextMd: string, conceptSnippets: string, relatedNotes: string, establishedTags: string[] = []): Promise<string> {
   if (provider === 'llamacpp') return callLocal(rawText, contextMd, conceptSnippets, relatedNotes)
-  if (provider === 'ollama') return callOllama(rawText, contextMd, conceptSnippets, relatedNotes, ollamaModel)
+  if (provider === 'ollama') return callOllama(rawText, contextMd, conceptSnippets, relatedNotes, ollamaModel, establishedTags)
   if (!apiKey) throw new Error('No API key configured')
   if (provider === 'openai') return callOpenAI(rawText, contextMd, conceptSnippets, relatedNotes, apiKey)
   const compat = OPENAI_COMPAT_BASES[provider]
-  if (compat) return callOpenAICompat(rawText, contextMd, conceptSnippets, relatedNotes, apiKey, compat.baseURL, compat.model)
+  if (compat) return callOpenAICompat(rawText, contextMd, conceptSnippets, relatedNotes, apiKey, compat.baseURL, compat.model, establishedTags)
   return callClaude(rawText, contextMd, conceptSnippets, relatedNotes, apiKey)
 }

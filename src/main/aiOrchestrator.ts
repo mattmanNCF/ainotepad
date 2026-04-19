@@ -172,11 +172,21 @@ function queryRelatedNotes(rawText: string): string {
 export async function enqueueNote(noteId: string, rawText: string): Promise<void> {
   if (!workerPort) return
 
-  // Load _context.md as AI working memory
-  const contextMd = (await readKbFile('_context.md')) ?? ''
+  // Load _context.md as AI working memory.
+  // Fall back to the most recently written *context*.md if the model misfiled it.
+  let contextMd = (await readKbFile('_context.md')) ?? ''
+  const allFiles = await listKbFiles()
+  if (!contextMd) {
+    const contextFallback = allFiles
+      .filter(f => f !== '_context.md' && f.toLowerCase().includes('context') && f.endsWith('.md'))
+      .at(0)
+    if (contextFallback) contextMd = (await readKbFile(contextFallback)) ?? ''
+  }
+
+  // Build established-tag list for consistent tagging across notes
+  const establishedTags = Object.keys(getTagColors()).filter(t => t !== 'Untagged')
 
   // Keyword heuristic: load concept files whose slug appears in the note text (cap at 5)
-  const allFiles = await listKbFiles()
   const lowerNote = rawText.toLowerCase()
   const relevant = allFiles
     .filter(f => !f.startsWith('_'))
@@ -199,7 +209,7 @@ export async function enqueueNote(noteId: string, rawText: string): Promise<void
 
   const harnessContext = await readHarnessContext()
 
-  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes, harnessContext })
+  workerPort.postMessage({ type: 'task', noteId, rawText, contextMd, conceptSnippets, relatedNotes, harnessContext, establishedTags })
 }
 
 export function reQueuePendingNotes(): void {
