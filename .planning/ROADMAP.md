@@ -12,7 +12,7 @@
 - [x] **Phase 06: Polish & Ship** - Onboarding, packaging, GitHub release
 - [ ] **Phase 07: Note Card Visual Redesign** - Post-it card layout with tag-color borders, hover-expand, and patterns footer fix
 - [x] **Phase 08: Connections + Digest Improvements** - Intra-tag edge connections and reliable rolling weekly digest (completed 2026-04-18)
-- [ ] **Phase 09: App Icon** - Replace placeholder icon with custom illustrated asset
+- [x] **Phase 09: App Icon** - Replace placeholder icon with custom illustrated asset (completed 2026-04-19)
 
 ---
 
@@ -28,7 +28,7 @@
 | 06. Polish & Ship | Complete | Complete | 2026-04-17 |
 | 07. Note Card Visual Redesign | 1/2 | In progress | - |
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
-| 09. App Icon | 0/3 | Not started | - |
+| 09. App Icon | 0/3 | Complete    | 2026-04-19 |
 
 ---
 
