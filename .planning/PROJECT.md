@@ -104,9 +104,16 @@ An **optional open connectivity layer** allows external AI agents to read the kn
 
 ---
 
+## Shipped: v0.3.0 — App Icon (Phase 09 complete, 2026-04-18)
+
+- Illustrated lemur icon across taskbar, tray, installer, and About dialog
+- Reproducible icon pipeline via `scripts/generate-icons.cjs`
+- Multi-resolution ICO (16/24/32/48/64/128/256)
+- ICON-01 validated in Phase 09 / v0.3.0
+
 ## Current Milestone: v1.1 — Corkboard Polish
 
-**Goal:** Transform the notes view into a true corkboard experience — small post-it cards with hover-expand, tag-color coding, intra-tag connections, and a always-visible patterns footer with a reliable rolling weekly digest.
+**Goal:** Transform the notes view into a true corkboard experience — small post-it cards with hover-expand, tag-color coding, intra-tag connections, and an always-visible patterns footer with a reliable rolling weekly digest.
 
 **Target features:**
 - Note cards resized to small square post-its with truncated text; hover expands in-place with user/AI bifurcation
@@ -114,7 +121,6 @@ An **optional open connectivity layer** allows external AI agents to read the kn
 - Intra-tag edge connections between notes discussing similar sub-topics (using existing sqlite-vec embeddings)
 - Patterns page layout fits at default window size — footer never clipped
 - Weekly digest pre-loads on open and uses a rolling 7-day window updated daily
-- App icon replaced with custom illustrated asset
 
 ## Evolution
 
@@ -134,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 — milestone v1.1 Corkboard Polish started*
+*Last updated: 2026-04-18 — v0.3.0 shipped (illustrated lemur icon, Phase 09 complete); milestone v1.1 Corkboard Polish in progress*
