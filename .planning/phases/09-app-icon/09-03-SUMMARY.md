@@ -107,3 +107,34 @@ Commit `8efb62f chore(09-03): build Windows distribution with illustrated lemur 
 - [x] Icon cache flushed
 
 ## Self-Check: PASSED
+
+## Version Correction
+
+**Date:** 2026-04-18
+**Reason:** User clarified versioning cadence after v0.2.0 was shipped: each packaged update is a minor bump. The icon update (note-page revert + rebuild) is the SECOND packaged update since v0.1.0, making it v0.3.0 — not v0.2.0. The v0.2.0 tag and git history are preserved; v0.2.0 was never externally distributed, so no external changelog entry was needed.
+
+**Files updated:**
+- `package.json`: `0.2.0` → `0.3.0`
+- `package-lock.json`: top-level `"version"` and `packages[""].version` fields updated from `0.1.0` → `0.3.0`
+  (package-lock.json had drifted to 0.1.0 — corrected to 0.3.0 to match)
+- `src/main/index.ts`: already uses `app.getVersion()` — no change needed
+- `.vscode/launch.json` `"version": "0.2.0"` — VS Code schema version, NOT app version; left unchanged
+- No CHANGELOG.md exists in this repo
+
+**Build output:**
+- `dist/Notal-0.3.0-setup.exe` (565 MB NSIS installer)
+- `dist/Notal-0.3.0-win-portable.zip`
+- Icon palette confirmed: top-left 10x10 avg RGB (18, 18, 31) = #1a1a2e (dark navy, note-page icon)
+
+**Install:**
+- v0.2.0 uninstalled silently via `Uninstall Notal.exe /S`
+- v0.3.0 installed silently via `Notal-0.3.0-setup.exe /S`
+- `C:\Users\mflma\AppData\Local\Programs\notal\Notal.exe` ProductVersion: `0.3.0.0`
+- Icon cache flushed via `ie4uinit.exe -show`
+- Installed icon palette: RGB (18, 18, 31) — note-page confirmed
+
+**Commits:**
+- `bee8079` — `chore(09-03): correct version 0.2.0 -> 0.3.0 (second packaged update since v0.1.0 ship)`
+- docs commit (this file + STATE.md update) — see final commit SHA
+
+**Status:** Ready for user visual verification. Tag v0.3.0 and push to main after user confirms.
