@@ -15,11 +15,20 @@ function filenameToTitle(filename: string): string {
     .replace(/\b\w/g, c => c.toUpperCase())
 }
 
-// Build edges between wiki pages that share at least one frontmatter tag.
-// Case-insensitive tag comparison. No IPC needed — uses parsed file tags directly.
+// Deterministic HSL color from a tag string — guarantees distinct hues without a fixed palette.
+// Used as fallback when a tag has no manually assigned color.
+function tagToAutoColor(tag: string): string {
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) hash = (hash * 31 + tag.charCodeAt(i)) & 0xffffffff
+  const hue = Math.abs(hash) % 360
+  return `hsl(${hue}, 65%, 58%)`
+}
+
+// Build edges between wiki pages that share frontmatter tags.
+// sharedCount = number of tags in common — used to weight link strength.
 function buildSharedTagLinks(
   files: KbFileEntry[]
-): Array<{ source: string; target: string }> {
+): Array<{ source: string; target: string; sharedCount: number }> {
   // Map from lowercase tag -> list of node IDs that have it
   const tagToNodes = new Map<string, string[]>()
   for (const f of files) {
@@ -30,22 +39,21 @@ function buildSharedTagLinks(
       tagToNodes.get(key)!.push(nodeId)
     }
   }
-  // For each tag shared by 2+ pages, emit one edge per pair (deduped)
-  const seen = new Set<string>()
-  const links: Array<{ source: string; target: string }> = []
+  // Accumulate shared-tag count per pair, then emit edges
+  const pairCounts = new Map<string, number>()
   for (const nodes of tagToNodes.values()) {
     if (nodes.length < 2) continue
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
         const key = [nodes[i], nodes[j]].sort().join('\0')
-        if (!seen.has(key)) {
-          seen.add(key)
-          links.push({ source: nodes[i], target: nodes[j] })
-        }
+        pairCounts.set(key, (pairCounts.get(key) ?? 0) + 1)
       }
     }
   }
-  return links
+  return Array.from(pairCounts.entries()).map(([key, sharedCount]) => {
+    const [source, target] = key.split('\0')
+    return { source, target, sharedCount }
+  })
 }
 
 export function WikiTab() {
@@ -168,12 +176,15 @@ export function WikiTab() {
   // Derive graph data from files state
   const existingFilenames = files.map(f => f.filename)
 
-  const graphNodes = useMemo(() => files.map(f => ({
-    id: f.filename.replace(/\.md$/, ''),
-    name: f.title,
-    color: tagColors[f.tags[0] ?? ''] ?? '#6b7280',
-    tag: f.tags[0] ?? '',
-  })), [files, tagColors])
+  const graphNodes = useMemo(() => files.map(f => {
+    const primaryTag = f.tags[0] ?? ''
+    return {
+      id: f.filename.replace(/\.md$/, ''),
+      name: f.title,
+      color: tagColors[primaryTag] ?? (primaryTag ? tagToAutoColor(primaryTag) : '#6b7280'),
+      tag: primaryTag,
+    }
+  }), [files, tagColors])
 
   const graphLinks = useMemo(() => buildSharedTagLinks(files), [files])
 

@@ -12,6 +12,7 @@ interface GraphNode {
 interface GraphLink {
   source: string
   target: string
+  sharedCount: number
 }
 
 interface WikiGraphProps {
@@ -53,6 +54,14 @@ export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, 
     return () => ro.disconnect()
   }, [])
 
+  // Set link distance inversely proportional to shared tag count — more shared = closer
+  useEffect(() => {
+    const g = graphRef.current
+    if (!g) return
+    const linkForce = g.d3Force('link')
+    if (linkForce) linkForce.distance((link: any) => 120 / Math.max(1, link.sharedCount ?? 1))
+  }, [nodes, links])
+
   // Dismiss context menu on outside mousedown
   useEffect(() => {
     if (!ctxMenu) return
@@ -86,7 +95,14 @@ export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, 
           const n = node as GraphNode
           setCtxMenu({ filename: n.id + '.md', tag: n.tag, x: event.clientX, y: event.clientY })
         }}
-        linkColor={() => '#4b5563'}
+        linkStrength={(link: any) => Math.min(0.8, (link.sharedCount ?? 1) * 0.15)}
+        linkColor={(link: any) => {
+          const opacity = Math.min(0.9, 0.25 + (link.sharedCount ?? 1) * 0.2)
+          return `rgba(99,102,241,${opacity})`
+        }}
+        linkWidth={(link: any) => Math.min(3, (link.sharedCount ?? 1) * 0.8)}
+        d3AlphaDecay={0.03}
+        d3VelocityDecay={0.3}
         backgroundColor="#111827"
         nodeRelSize={5}
       />
