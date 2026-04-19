@@ -15,27 +15,37 @@ function filenameToTitle(filename: string): string {
     .replace(/\b\w/g, c => c.toUpperCase())
 }
 
-// Build graph edges from note tag co-occurrence:
-// if a note is tagged [topicA, topicB], that creates an implicit edge topicA<->topicB.
-// Only emit edges where both topics have a corresponding wiki page (node).
-function buildCooccurrenceLinks(
-  allNoteTags: string[][],
-  nodeIds: Set<string>
+// Build edges between wiki pages that share at least one frontmatter tag.
+// Case-insensitive tag comparison. No IPC needed — uses parsed file tags directly.
+function buildSharedTagLinks(
+  files: KbFileEntry[]
 ): Array<{ source: string; target: string }> {
-  const counts = new Map<string, number>()
-  for (const tags of allNoteTags) {
-    const topics = tags.filter(t => nodeIds.has(t))
-    for (let i = 0; i < topics.length; i++) {
-      for (let j = i + 1; j < topics.length; j++) {
-        const key = [topics[i], topics[j]].sort().join('\0')
-        counts.set(key, (counts.get(key) ?? 0) + 1)
+  // Map from lowercase tag -> list of node IDs that have it
+  const tagToNodes = new Map<string, string[]>()
+  for (const f of files) {
+    const nodeId = f.filename.replace(/\.md$/, '')
+    for (const tag of f.tags) {
+      const key = tag.toLowerCase()
+      if (!tagToNodes.has(key)) tagToNodes.set(key, [])
+      tagToNodes.get(key)!.push(nodeId)
+    }
+  }
+  // For each tag shared by 2+ pages, emit one edge per pair (deduped)
+  const seen = new Set<string>()
+  const links: Array<{ source: string; target: string }> = []
+  for (const nodes of tagToNodes.values()) {
+    if (nodes.length < 2) continue
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const key = [nodes[i], nodes[j]].sort().join('\0')
+        if (!seen.has(key)) {
+          seen.add(key)
+          links.push({ source: nodes[i], target: nodes[j] })
+        }
       }
     }
   }
-  return Array.from(counts.keys()).map(key => {
-    const [source, target] = key.split('\0')
-    return { source, target }
-  })
+  return links
 }
 
 export function WikiTab() {
@@ -45,7 +55,6 @@ export function WikiTab() {
   const [cursor, setCursor] = useState<number>(-1)
   const [activeContent, setActiveContent] = useState<string | null>(null)
   const [showGraph, setShowGraph] = useState(false)
-  const [allNoteTags, setAllNoteTags] = useState<string[][]>([])
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
 
   // useRef for content cache — mutations do NOT trigger re-renders.
@@ -95,16 +104,6 @@ export function WikiTab() {
     const cleanup = window.api.kb.onUpdated(() => loadFilesWithTags())
     return cleanup
   }, [loadFilesWithTags])
-
-  // Load all note tags for co-occurrence graph; refresh when new notes are processed.
-  useEffect(() => {
-    function loadAllTags() {
-      window.api.notes.allTags().then(setAllNoteTags)
-    }
-    loadAllTags()
-    const unsub = window.api.onAiUpdate(() => loadAllTags())
-    return unsub
-  }, [])
 
   const navigate = useCallback(async (filename: string) => {
     let content = contentCacheRef.current[filename]
@@ -169,19 +168,14 @@ export function WikiTab() {
   // Derive graph data from files state
   const existingFilenames = files.map(f => f.filename)
 
-  const graphNodes = files.map(f => ({
+  const graphNodes = useMemo(() => files.map(f => ({
     id: f.filename.replace(/\.md$/, ''),
     name: f.title,
     color: tagColors[f.tags[0] ?? ''] ?? '#6b7280',
     tag: f.tags[0] ?? '',
-  }))
+  })), [files, tagColors])
 
-  // Derive semantic graph edges from note tag co-occurrence.
-  // Two wiki topics are connected when the same note is tagged with both.
-  const graphLinks = useMemo(() => {
-    const nodeIds = new Set(graphNodes.map(n => n.id))
-    return buildCooccurrenceLinks(allNoteTags, nodeIds)
-  }, [graphNodes, allNoteTags])
+  const graphLinks = useMemo(() => buildSharedTagLinks(files), [files])
 
   // Stable key that changes only when tag colors change — forces WikiGraph remount
   const colorKey = useMemo(
