@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto'
 import { updateNoteAiResult, getDb, getSqlite, setNoteWikiFiles } from './db'
 import { notes, kbPages } from '../../drizzle/schema'
 import { eq } from 'drizzle-orm'
-import { writeKbFile, readKbFile, listKbFiles } from './kb'
+import { writeKbFile, readKbFile, listKbFiles, kbDir } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
 import { readHarnessContext } from './agentHarness'
 
@@ -177,10 +177,23 @@ export async function enqueueNote(noteId: string, rawText: string): Promise<void
   let contextMd = (await readKbFile('_context.md')) ?? ''
   const allFiles = await listKbFiles()
   if (!contextMd) {
-    const contextFallback = allFiles
-      .filter(f => f !== '_context.md' && f.toLowerCase().includes('context') && f.endsWith('.md'))
-      .at(0)
-    if (contextFallback) contextMd = (await readKbFile(contextFallback)) ?? ''
+    // Model sometimes files context under a different name — find the most recently written *context*.md
+    const { stat } = await import('fs/promises')
+    const path = await import('path')
+    const contextCandidates = allFiles.filter(
+      f => f !== '_context.md' && f.toLowerCase().includes('context') && f.endsWith('.md')
+    )
+    if (contextCandidates.length > 0) {
+      const base = kbDir()
+      const withMtime = await Promise.all(
+        contextCandidates.map(async f => {
+          try { const s = await stat(path.join(base, f)); return { f, mtime: s.mtimeMs } }
+          catch { return { f, mtime: 0 } }
+        })
+      )
+      const newest = withMtime.sort((a, b) => b.mtime - a.mtime)[0]
+      contextMd = (await readKbFile(newest.f)) ?? ''
+    }
   }
 
   // Build established-tag list for consistent tagging across notes

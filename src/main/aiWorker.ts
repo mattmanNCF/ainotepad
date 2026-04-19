@@ -315,43 +315,31 @@ function buildPrompt(rawText: string, contextMd: string, conceptSnippets: string
     ? `\n## Related Past Notes (retrieved by similarity)\n${relatedNotes}`
     : ''
 
-  const tagSection = establishedTags.length > 0
-    ? `\n## Established Tags (reuse these when applicable — be consistent)\n${establishedTags.join(', ')}`
-    : ''
+  const tagConstraint = establishedTags.length > 0
+    ? `Established tags (prefer these over inventing new ones): ${establishedTags.join(', ')}. Never return an empty array.`
+    : `Never return an empty array — use ["Untagged"] if nothing applies.`
 
-  return `You are a silent note-processing and knowledge-base assistant. Process the raw note below and return a JSON object with exactly these five fields.
+  return `You are a silent note-processing and knowledge-base assistant. Return a JSON object with exactly these five fields.
 
 ${contextSection}
 ${conceptSection}
 ${relatedSection}
-${tagSection}
 
-## Your Tasks
-1. **organized**: Clean/organize the note. Fix typos, improve clarity. Keep the user's voice.
-2. **annotation**: 1-2 sentence insight or connection to consider.
-3. **wiki_updates**: Array of concept file writes. Each entry: {"file": "slug.md", "content": "...full file content..."}
-   - ALWAYS include an entry with "file": "_context.md" (EXACTLY this filename, underscore prefix) — every note updates the rolling context
-   - Create/update concept files for key ideas in this note
-   - Each file: YAML frontmatter (tags, created, updated), then Markdown with [[wikilinks]] to related concepts
-   - Rewrite files in full — do not patch
-   - The "_context.md" entry structure:
-     ---
-     updated: <ISO timestamp>
-     note_count: <integer>
-     ---
-     ## Active Interests
-     ## Project Map
-     ## Recurring Concepts
-     ## Recent Notes Summary
-     Keep it bounded: max 5 recent notes, max 10 recurring concepts. Rewrite entire file each time.
-4. **tags**: Array of tag strings for this note. Reuse tags from "Established Tags" above when they apply. Create new tags only when nothing fits. Never return an empty array — use ["Untagged"] if nothing applies.
-5. **insights**: Return a concise string with a specific observation — a connection to past notes, a pattern across recurring concepts, or a non-obvious implication of this idea. Return null only if there is genuinely nothing interesting to say (rare).
+## Tasks
+1. **organized**: Clean/organize the note text. Fix typos, improve clarity. Keep the user's voice.
+2. **annotation**: 1-2 sentence insight or connection.
+3. **wiki_updates**: Array of concept file writes: [{"file": "slug.md", "content": "..."}]
+   - MUST include {"file": "_context.md", "content": "..."} — use exactly "_context.md" as the filename
+   - Create/update concept files for key ideas
+   - Each file: YAML frontmatter then Markdown
+   - "_context.md" structure: ---\\nupdated: <ISO>\\nnote_count: <N>\\n---\\n## Active Interests\\n## Project Map\\n## Recurring Concepts\\n## Recent Notes Summary
+4. **tags**: ${tagConstraint}
+5. **insights**: Specific observation or connection. null only if truly nothing to say.
 
-IMPORTANT: Respond with ONLY a JSON object. No markdown fences, no explanation.
-{"organized": "...", "annotation": "...", "wiki_updates": [{"file": "...", "content": "..."}], "tags": [...], "insights": null}
+Respond with ONLY valid JSON. No markdown, no explanation.
+{"organized":"...","annotation":"...","wiki_updates":[{"file":"_context.md","content":"..."}],"tags":["tag1"],"insights":"..."}
 
-Raw note:
-${rawText}`
+Raw note: ${rawText}`
 }
 
 /**
