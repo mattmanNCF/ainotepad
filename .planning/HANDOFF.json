@@ -69,7 +69,7 @@
   },
 
   "post_milestone_backlog": [
-    "Init context optimization (26% → ≤10%): investigate TurboQuant KV-cache compression + prune init content — see ~/.claude/projects/C--Users-mflma-workspace/memory/project_init_context_optimization.md"
+    "Init context optimization: CURRENT init-context load is ~26% (fresh-session baseline); TARGET is ≤10%. Investigate TurboQuant KV-cache compression + prune init content. Do NOT confuse with live-session %. See ~/.claude/projects/C--Users-mflma-workspace/memory/project_init_context_optimization.md"
   ],
 
   "context_notes": [
