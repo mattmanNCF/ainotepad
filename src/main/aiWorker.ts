@@ -254,6 +254,20 @@ function handleMessage(event: Electron.MessageEvent): void {
   }
 }
 
+/**
+ * If the model returned no tags or only ["Untagged"], scan the note text for
+ * established tag keywords and promote any matches. Falls back to ["Untagged"].
+ */
+function resolvedTags(modelTags: string[] | undefined, rawText: string, establishedTags: string[]): string[] {
+  const tags = modelTags?.filter(t => t !== 'Untagged') ?? []
+  if (tags.length > 0) return tags
+
+  // Keyword fallback: check if any established tag appears in the note text
+  const lower = rawText.toLowerCase()
+  const matched = establishedTags.filter(t => lower.includes(t.toLowerCase()))
+  return matched.length > 0 ? matched : ['Untagged']
+}
+
 async function drain(): Promise<void> {
   processing = true
   while (queue.length > 0) {
@@ -276,7 +290,7 @@ async function drain(): Promise<void> {
         aiAnnotation: parsed.annotation,
         organizedText: parsed.organized,
         wikiUpdates: parsed.wiki_updates ?? [],
-        tags: parsed.tags?.length ? parsed.tags : ['Untagged'],
+        tags: resolvedTags(parsed.tags, task.rawText, task.establishedTags ?? []),
         insights: parsed.insights ?? null,
       })
     } catch (err) {
