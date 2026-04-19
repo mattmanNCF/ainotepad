@@ -181,7 +181,7 @@ export function WikiTab() {
     return {
       id: f.filename.replace(/\.md$/, ''),
       name: f.title,
-      color: tagColors[primaryTag] ?? (primaryTag ? tagToAutoColor(primaryTag) : '#6b7280'),
+      color: tagColors[primaryTag] ?? tagToAutoColor(primaryTag || f.filename),
       tag: primaryTag,
     }
   }), [files, tagColors])

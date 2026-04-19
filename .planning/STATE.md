@@ -147,6 +147,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 |---|-------------|------|--------|-----------|
 | 260418-12o | Fix wiki graph right-click context menu, sidebar color picker UX, and weekly digest scheduler rewrite | 2026-04-18 | 4622074 | [260418-12o](./quick/260418-12o-fix-wiki-graph-right-click-context-menu-/) |
 | 260418-pue | Fix digest narrative max_tokens (512→4096 for Ollama/OpenAI) and add cleanup DELETE | 2026-04-18 | c788523 | [260418-pue](./quick/260418-pue-fix-digest-narrative-max-tokens-raise-ol/) |
+| 260418-vru | Fix wiki graph edges — shared-tag linking between wiki pages | 2026-04-19 | ec4a651 | [260418-vru](./quick/260418-vru-fix-wiki-graph-edges-shared-tag-linking-/) |
+
+## Next Milestone Ideas (v1.2+)
+
+- **Wiki graph dynamic customization** — user-adjustable sliders for link force, center force, repel force, edge thickness, node size
+- **Google Calendar integration** — detect key phrases in notes ("I need to remember to...", "remind me to...") paired with date/time → auto-create calendar reminders
 
 ## Notes
 
