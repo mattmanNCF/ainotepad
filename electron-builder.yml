@@ -14,6 +14,7 @@ asarUnpack:
   - node_modules/node-llama-cpp/**/*
 win:
   executableName: notal
+  icon: build/icon.ico
   artifactName: ${productName}-${version}-win-portable.${ext}
   target:
     - target: nsis
@@ -25,6 +26,9 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
