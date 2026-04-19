@@ -104,23 +104,23 @@ An **optional open connectivity layer** allows external AI agents to read the kn
 
 ---
 
-## Shipped: v0.3.0 — App Icon (Phase 09 complete, 2026-04-18)
+## Shipped: v0.3.0 — Corkboard Polish + App Icon (Phases 07-09, 2026-04-17 → 2026-04-19)
 
+- Note cards as compact post-its with hover-expand, tag-color borders, and tag dots
+- Intra-tag edge overlay on corkboard (subsequently retired; connections now live on wiki graph)
+- Patterns footer fits at default window size; weekly digest pre-loads and uses rolling 7-day window
 - Illustrated lemur icon across taskbar, tray, installer, and About dialog
-- Reproducible icon pipeline via `scripts/generate-icons.cjs`
-- Multi-resolution ICO (16/24/32/48/64/128/256)
-- ICON-01 validated in Phase 09 / v0.3.0
+- Reproducible icon pipeline via `scripts/generate-icons.cjs` (multi-resolution ICO 16/24/32/48/64/128/256)
+- Requirements validated: CORK-01..05, PAT-01..03, ICON-01
 
-## Current Milestone: v1.1 — Corkboard Polish
+## Current Milestone: v0.3.1 — Reminders, Graph Control, Mobile
 
-**Goal:** Transform the notes view into a true corkboard experience — small post-it cards with hover-expand, tag-color coding, intra-tag connections, and an always-visible patterns footer with a reliable rolling weekly digest.
+**Goal:** Extend Notal beyond passive knowledge capture into actionable reminders (Google Calendar), give users direct control over how the wiki graph renders, and open a mobile capture pathway so notes aren't locked to the desktop.
 
 **Target features:**
-- Note cards resized to small square post-its with truncated text; hover expands in-place with user/AI bifurcation
-- Left border color = primary tag color (matching wiki color system); colored dots for all assigned tags on every note
-- Intra-tag edge connections between notes discussing similar sub-topics (using existing sqlite-vec embeddings)
-- Patterns page layout fits at default window size — footer never clipped
-- Weekly digest pre-loads on open and uses a rolling 7-day window updated daily
+- Google Calendar integration — detect "remind me to…" / "I need to remember to…" phrases with date/time and auto-create calendar reminders
+- Dynamic wiki graph parameters — user-adjustable sliders for link force, center force, repel force, edge thickness, node size (persistent per user)
+- Mobile extension — mobile capture companion (platform, capture-only vs full view, sync mechanism TBD in phase planning)
 
 ## Evolution
 
@@ -140,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 — v0.3.0 shipped (illustrated lemur icon, Phase 09 complete); milestone v1.1 Corkboard Polish in progress*
+*Last updated: 2026-04-19 — milestone v0.3.1 started (Reminders, Graph Control, Mobile); prior milestone v0.3.0 (Corkboard Polish + App Icon) shipped*

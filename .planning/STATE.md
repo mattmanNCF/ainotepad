@@ -1,32 +1,41 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: — Corkboard Polish
-status: unknown
-last_updated: "2026-04-19T16:16:11.290Z"
+milestone: v0.3.1
+milestone_name: — Reminders, Graph Control, Mobile
+status: defining_requirements
+last_updated: "2026-04-19T17:00:00.000Z"
 progress:
-  total_phases: 9
-  completed_phases: 7
-  total_plans: 38
-  completed_plans: 36
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 09 (App Icon) — COMPLETE
-Plan: 3 of 3 (all plans complete)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-19 — Milestone v0.3.1 started
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-17)
+See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Phase 09 — App Icon
+**Current focus:** Defining v0.3.1 requirements (Google Calendar + dynamic graph sliders + mobile extension)
 
-## Previous Milestone Summary (v1.0)
+## Previous Milestone Summaries
 
+**v0.3.0 — Corkboard Polish + App Icon (Phases 07-09, shipped 2026-04-19)**
+- Compact post-it cards with hover-expand, tag-color borders, tag-color dots
+- Intra-tag corkboard edges (subsequently retired; connections moved to wiki graph)
+- Patterns footer fits default window; weekly digest rolling 7-day window
+- Illustrated lemur icon end-to-end (taskbar, tray, installer, About)
+
+**v1.0 — Initial Release (Phases 01-06, shipped 2026-04-17)**
 - 6 phases complete, v0.1.0 shipped to GitHub Releases
 - Full AI pipeline: capture → tag → wiki → insights
 - Patterns tab, FTS5 + semantic search, MCP agent endpoint
@@ -34,13 +43,9 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ---
 
-## Phase Status (v1.1)
+## Phase Status (v0.3.1)
 
-| Phase | Name | Status | Plans |
-|-------|------|--------|-------|
-| 07 | Note Card Visual Redesign | ○ Not started | TBD |
-| 08 | Connections + Digest Improvements | ○ Not started | TBD |
-| 09 | App Icon | ○ Not started | TBD |
+Pending roadmapper — to be populated after requirements are defined.
 
 ---
 
