@@ -12,18 +12,15 @@ let tray: Tray | null = null
 let isQuiting = false
 
 function createTray(win: BrowserWindow): void {
-  // Use a simple generated icon for development; production will use the bundled icon
-  let trayIcon: Electron.NativeImage
-  try {
-    trayIcon = nativeImage.createFromDataURL(
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABGSURBVDiNY2CgFPwnoP6PgYGB4T8ZmCFAgUEDGBhJtYCBgYGBgYqWkwUGDWBgJNUCBgYGBgYqWk4WGDSAgZFUCxgYyLcAAHOoBArpAAAAAElFTkSuQmCC'
-    )
-  } catch {
-    trayIcon = nativeImage.createEmpty()
+  const trayIconPath = join(__dirname, '../../resources/tray-icon.png')
+  let trayIcon: Electron.NativeImage = nativeImage.createFromPath(trayIconPath)
+  if (trayIcon.isEmpty()) {
+    // Fallback for dev when script hasn't been run yet — use main icon asset
+    trayIcon = nativeImage.createFromPath(join(__dirname, '../../resources/icon.png'))
   }
 
   tray = new Tray(trayIcon)
-  tray.setToolTip('AInotepad')
+  tray.setToolTip('Notal')
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -67,7 +64,7 @@ function createWindow(): BrowserWindow {
     title: 'Notal',
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -126,6 +123,14 @@ function createWindow(): BrowserWindow {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.notal.app')
+
+  app.setAboutPanelOptions({
+    applicationName: 'Notal',
+    applicationVersion: app.getVersion(),
+    iconPath: join(__dirname, '../../resources/icon.png'),
+    copyright: '© 2026 Matthew Mancini',
+    website: 'https://github.com/mflma/ainotepad'
+  })
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
