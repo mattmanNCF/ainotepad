@@ -138,3 +138,43 @@ Commit `8efb62f chore(09-03): build Windows distribution with illustrated lemur 
 - docs commit (this file + STATE.md update) — see final commit SHA
 
 **Status:** Ready for user visual verification. Tag v0.3.0 and push to main after user confirms.
+
+---
+
+## Final Correction — Restored Lemur Icon
+
+**Date:** 2026-04-19
+
+**Why this correction was needed:**
+
+The orchestrator misread the user's feedback. The phrase "go ahead and package it the same way you did the last icon with the little generic note page as that worked fine before" referred to the *packaging approach* (the build pipeline, NSIS installer, silent install method), NOT a request to use a different icon. The user had all along wanted the illustrated lemur as the app icon. This was a communication failure on the orchestrator's end.
+
+The user's clarifying message:
+
+> "I wanted the new lemur picture as the icon. I just was saying that there should be no reason to really try to give significant testing to this as it should be a simple switch of an image source in the code and this is trivial. So go ahead and update to the lemur picture properly for me and make sure I am updated to this install."
+
+**What was done:**
+
+1. Restored `build/icon-source.png` (1,270,007 bytes, illustrated red-ruffed lemur) from git history (blob in commit `8150102`) via `git checkout 8150102 -- build/icon-source.png`.
+2. Updated `scripts/generate-icons.cjs` to read from the lemur PNG (`build/icon-source.png`) instead of the SVG. The `icon-source.svg` file is preserved on disk as a historical asset.
+3. Regenerated all icon derivatives via `node scripts/generate-icons.cjs` — all outputs now derive from the lemur.
+4. Rebuilt Windows NSIS installer: `npx electron-vite build && npx electron-builder --win`.
+5. Uninstalled the note-page v0.3.0 silently, installed lemur v0.3.0 silently.
+6. Flushed icon cache (`ie4uinit.exe -show`, `Stop-Process explorer`, `Start-Process explorer`).
+
+**Palette verification:**
+- `resources/icon.png` top-left 10x10 avg RGB: (254, 254, 254) — transparent border, NOT note-page navy
+- `dist/extracted-icon-lemur.png` (from built exe) top-left 10x10 avg RGB: (230, 219, 207) — warm cream/beige, lemur confirmed
+- `dist/installed-icon-lemur.png` (from installed exe) top-left 10x10 avg RGB: (230, 219, 207) — lemur confirmed
+
+**Commits:**
+- `f96092f` — `fix(09-03): restore illustrated lemur as canonical icon source`
+- Final docs commit — see closing SHA in git log
+
+**Final artifacts:**
+- `dist/Notal-0.3.0-setup.exe` — 592,974,978 bytes, lemur embedded
+- Installed at `C:\Users\mflma\AppData\Local\Programs\notal\Notal.exe` — ProductVersion `0.3.0.0`, lemur icon
+- `dist/extracted-icon-lemur.png` — extracted icon from built exe (user inspection)
+- `dist/installed-icon-lemur.png` — extracted icon from installed exe (user inspection)
+
+**Status:** Notal v0.3.0 installed locally with lemur icon. Awaiting user visual confirmation before tagging `v0.3.0` and pushing to main.

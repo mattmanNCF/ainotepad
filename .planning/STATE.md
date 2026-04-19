@@ -143,7 +143,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 09-app-icon]: electron-icon-builder --flatten on Windows emits ICO to icons/icon.ico (not icons/win/); script checks artifact not exit code; shell:true required for .cmd on Windows spawnSync
 - [Phase 09-app-icon]: BrowserWindow icon spread changed from linux-only conditional to unconditional — no regression on macOS, correct on Windows
 - [Phase 09-app-icon]: electron-builder NSIS: always declare installerIcon + uninstallerIcon + installerHeaderIcon explicitly rather than relying on buildResources convention
-- [Phase 09-03]: Illustrated lemur icon rejected at human-verify; reverted to geometric note-page SVG (build/icon-source.svg); initially built as v0.2.0, then corrected to v0.3.0 (second packaged update since v0.1.0 — each packaged update is a minor bump); Notal v0.3.0 installed locally at C:\Users\mflma\AppData\Local\Programs\notal\Notal.exe (ProductVersion 0.3.0.0); ready for user visual verification
+- [Phase 09-03]: Orchestrator initially misread user feedback and reverted to SVG note-page icon; user clarified the lemur was always wanted; lemur icon (`build/icon-source.png`, 1,270,007 bytes) restored from git history, `generate-icons.cjs` updated to use PNG source, all derivatives regenerated, v0.3.0 installer rebuilt with lemur embedded (592 MB), note-page v0.3.0 uninstalled, lemur v0.3.0 installed at C:\Users\mflma\AppData\Local\Programs\notal\Notal.exe (ProductVersion 0.3.0.0); icon cache flushed; awaiting user visual confirmation before tag + push to main
 
 ### Quick Tasks Completed
 
