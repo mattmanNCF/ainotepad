@@ -150,5 +150,5 @@ Plans:
 **Plans**: 3 plans
 Plans:
 - [x] 09-01-PLAN.md — Source asset + icon generator script (illustrated lemur PNG → multi-resolution ICO + tray PNG)
-- [ ] 09-02-PLAN.md — Wire icons through main process (tray, BrowserWindow, About) + explicit electron-builder keys
+- [x] 09-02-PLAN.md — Wire icons through main process (tray, BrowserWindow, About) + explicit electron-builder keys
 - [ ] 09-03-PLAN.md — Build Windows distribution + human verification checkpoint

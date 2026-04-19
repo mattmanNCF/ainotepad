@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: — Corkboard Polish
 status: unknown
-last_updated: "2026-04-19T04:00:23.092Z"
+last_updated: "2026-04-19T04:04:22.856Z"
 progress:
   total_phases: 9
   completed_phases: 6
   total_plans: 38
-  completed_plans: 34
+  completed_plans: 35
 ---
 
 # Notal — Project State
@@ -141,6 +141,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 - [Phase 08-02]: SVG placed inside overflow-y-auto container so edges scroll with content
 - [Phase 08-02]: useLayoutEffect for edge computation prevents flicker by measuring after DOM paint
 - [Phase 09-app-icon]: electron-icon-builder --flatten on Windows emits ICO to icons/icon.ico (not icons/win/); script checks artifact not exit code; shell:true required for .cmd on Windows spawnSync
+- [Phase 09-app-icon]: BrowserWindow icon spread changed from linux-only conditional to unconditional — no regression on macOS, correct on Windows
+- [Phase 09-app-icon]: electron-builder NSIS: always declare installerIcon + uninstallerIcon + installerHeaderIcon explicitly rather than relying on buildResources convention
 
 ### Quick Tasks Completed
 
