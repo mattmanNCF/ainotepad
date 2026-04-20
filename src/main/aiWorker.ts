@@ -434,7 +434,6 @@ async function callOllama(rawText: string, contextMd: string, conceptSnippets: s
 // OpenAI-compatible providers — same call, different base URL and model
 const OPENAI_COMPAT_BASES: Record<string, { baseURL: string; model: string }> = {
   gemini:      { baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.0-flash' },
-  openrouter:  { baseURL: 'https://openrouter.ai/api/v1', model: 'google/gemma-3-12b-it' },
   groq:        { baseURL: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile' },
   huggingface: { baseURL: 'https://api-inference.huggingface.co/v1', model: 'meta-llama/Llama-3.3-70B-Instruct' },
 }

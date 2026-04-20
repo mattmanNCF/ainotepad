@@ -21,7 +21,6 @@ const conf = new Conf<{
   provider: string
   apiKeyEncrypted: string       // Claude key (backward compat)
   geminiKeyEncrypted: string
-  openrouterKeyEncrypted: string
   groqKeyEncrypted: string
   hfKeyEncrypted: string
   ollamaModel: string
@@ -81,7 +80,6 @@ function decryptKey(slot: string): string | null {
 // Providers that use OpenAI-compatible APIs with just a base URL + key
 const OPENAI_COMPAT_PROVIDERS: Record<string, { baseURL: string; keySlot: string }> = {
   gemini: { baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai', keySlot: 'geminiKeyEncrypted' },
-  openrouter: { baseURL: 'https://openrouter.ai/api/v1', keySlot: 'openrouterKeyEncrypted' },
   groq: { baseURL: 'https://api.groq.com/openai/v1', keySlot: 'groqKeyEncrypted' },
   huggingface: { baseURL: 'https://api-inference.huggingface.co/v1', keySlot: 'hfKeyEncrypted' },
 }
@@ -275,7 +273,6 @@ export function registerIpcHandlers() {
       claude: !!decryptKey('apiKeyEncrypted'),
       openai: !!decryptKey('apiKeyEncrypted'),
       gemini: !!decryptKey('geminiKeyEncrypted'),
-      openrouter: !!decryptKey('openrouterKeyEncrypted'),
       groq: !!decryptKey('groqKeyEncrypted'),
       huggingface: !!decryptKey('hfKeyEncrypted'),
     }

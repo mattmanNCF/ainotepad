@@ -8,7 +8,6 @@ const API_PROVIDERS = [
   { id: 'claude',      label: 'Claude',       placeholder: 'sk-ant-...' },
   { id: 'openai',      label: 'OpenAI',        placeholder: 'sk-...' },
   { id: 'gemini',      label: 'Gemini',        placeholder: 'AIza...' },
-  { id: 'openrouter',  label: 'OpenRouter',    placeholder: 'sk-or-...' },
   { id: 'groq',        label: 'Groq',          placeholder: 'gsk_...' },
   { id: 'huggingface', label: 'Hugging Face',  placeholder: 'hf_...' },
 ] as const
