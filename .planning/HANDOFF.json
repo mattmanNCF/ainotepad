@@ -55,11 +55,14 @@
   "artifacts_pending": {},
 
   "next_action_for_next_session": {
-    "primary": "/gsd:plan-phase 10",
+    "prerequisite_0": "GLOBAL PRIORITY (before any Notal work): Run init-context optimization pass + set up daily KB-distillation cron. See ~/.claude/projects/C--Users-mflma-workspace/memory/project_init_context_optimization.md — promoted from backlog to NEXT SESSION priority by Matt on 2026-04-19.",
+    "prerequisite_1": "Before any v0.3.1 code/planning work: cut fresh branch off main (main = v0.3.0). New branch name: notal-v0.3.1 or milestone/v0.3.1. Cherry-pick commits d8c33a8 (REQUIREMENTS) and 293c5a2 (ROADMAP/STATE/HANDOFF) from notal-v0.2 onto the new branch. Verify main is current first via git log --oneline main..notal-v0.2. notal-v0.2 is a legacy name from the prior v0.2 milestone — continuing on it muddles v0.3.1 PR history.",
+    "primary": "/gsd:plan-phase 10 (after prerequisites 0 and 1 are done)",
     "step_1": "Phase 10 research flag is LOW — skip /gsd:research-phase and go straight to plan-phase",
     "step_2": "Plan should break Phase 10 into 3–5 plans (UI panel shell, slider wiring + live-preview throttle, presets + Reset + Ctrl+Z, persistence, a11y verification)",
     "step_3": "Key constraint: p95 ≤50ms on 500-node fixture during drag; use alphaTarget(0.1) during drag / (0) on release to prevent B1 re-heat pitfall",
-    "step_4": "After Phase 10 ships, run /gsd:plan-phase 11 (research flag MEDIUM — consider short /gsd:research-phase 11 for googleapis vs fetch + PKCE loopback specifics first)"
+    "step_4": "After Phase 10 ships, run /gsd:plan-phase 11 (research flag MEDIUM — consider short /gsd:research-phase 11 for googleapis vs fetch + PKCE loopback specifics first)",
+    "ship_merge": "On v0.3.1 completion: merge notal-v0.3.1 branch back to main, tag v0.3.1, retire notal-v0.2 branch"
   },
 
   "post_milestone_backlog": [
