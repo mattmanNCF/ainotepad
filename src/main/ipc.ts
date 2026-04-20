@@ -9,7 +9,7 @@ import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, countN
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile, deleteKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
-import { detectModelTier, findExistingModel, downloadModel } from './localModel'
+import { detectModelTier, findExistingModel, downloadModel, hasFineTunedModel, fineTunedModelPath, resolveModelPath } from './localModel'
 import { forceScheduleDigest } from './digestScheduler'
 import { readHarnessFiles, writeHarnessFiles, updateUserProfile } from './agentHarness'
 import { computeSimilarPairs } from './similarity'
@@ -57,11 +57,15 @@ export function getOllamaModel(): string {
 }
 
 // Returns the GGUF path for llama.cpp provider at startup.
-// Checks user-specified path first, then auto-downloaded path, then filesystem scan.
+// Preference order (Plan 02-08):
+//   1. user-specified llamaCppPath (manual override always wins)
+//   2. fine-tuned Notal GGUF if present (resolveModelPath → hasFineTunedModel)
+//   3. auto-downloaded generic path at the detected tier
 export function getStartupModelPath(provider: string): string {
   if (provider !== 'llamacpp') return ''
   const explicit = conf.get('llamaCppPath', '') as string
   if (explicit) return explicit
+  if (hasFineTunedModel()) return fineTunedModelPath()
   const tier = (conf.get('modelTier', detectModelTier())) as import('./localModel').ModelTier
   return (findExistingModel(tier) ?? (conf.get('modelPath', '') as string)) || ''
 }
@@ -228,13 +232,18 @@ export function registerIpcHandlers() {
     }
 
     // Resolve model path for llama.cpp
+    // Preference: manual path > fine-tuned GGUF > generic at detected tier.
     let resolvedModelPath = ''
     if (provider === 'llamacpp') {
       resolvedModelPath = llamaCppPath || (conf.get('llamaCppPath', '') as string)
       if (!resolvedModelPath) {
-        const tier = detectModelTier()
-        conf.set('modelTier', tier)
-        resolvedModelPath = (findExistingModel(tier) ?? (conf.get('modelPath', '') as string)) || ''
+        if (hasFineTunedModel()) {
+          resolvedModelPath = fineTunedModelPath()
+        } else {
+          const tier = detectModelTier()
+          conf.set('modelTier', tier)
+          resolvedModelPath = (findExistingModel(tier) ?? (conf.get('modelPath', '') as string)) || ''
+        }
       }
     }
 
@@ -357,9 +366,13 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('localModel:getStatus', () => {
     const tier = conf.get('modelTier', detectModelTier()) as string
-    const modelPath = (findExistingModel(tier as import('./localModel').ModelTier)
-      ?? (conf.get('modelPath', '') as string)) || null
-    return { tier, modelPath, ready: !!modelPath }
+    // resolveModelPath prefers the fine-tuned GGUF when present on disk (Plan 02-08).
+    const resolved = resolveModelPath()
+    const modelPath = hasFineTunedModel()
+      ? resolved
+      : ((findExistingModel(tier as import('./localModel').ModelTier)
+          ?? (conf.get('modelPath', '') as string)) || null)
+    return { tier, modelPath, ready: !!modelPath, fineTuned: hasFineTunedModel() }
   })
 
   ipcMain.handle('localModel:download', async (event, tier?: string) => {

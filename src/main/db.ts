@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { eq } from 'drizzle-orm'
 import { app } from 'electron'
 import path from 'path'
+import * as sqliteVec from 'sqlite-vec'
 import * as schema from '../../drizzle/schema'
 import { notes } from '../../drizzle/schema'
 
@@ -20,6 +21,16 @@ export function getDb() {
   const dbPath = path.join(app.getPath('userData'), 'ainotepad.db')
   const sqlite = new Database(dbPath)
   _sqlite = sqlite
+
+  // Load sqlite-vec extension BEFORE any vec0 CREATE runs (FNDR-06 / Plan 02-08).
+  // Mirrors pipeline/rag/vec_store.py's `sqlite_vec.load(conn)` idiom so Notal and
+  // the foundry pipeline speak the same virtual-table dialect.
+  try {
+    sqliteVec.load(sqlite)
+  } catch (err) {
+    console.error('[db] failed to load sqlite-vec extension:', (err as Error).message)
+    throw err
+  }
 
   // Enable WAL mode for better concurrent read performance
   sqlite.pragma('journal_mode = WAL')
@@ -112,6 +123,28 @@ export function getDb() {
   } catch {
     // Column already exists — safe to ignore
   }
+
+  // Migration: RAG chunk tables (FNDR-06 / Plan 02-08).
+  // Schema-of-record lives in pipeline/rag/vec_store.py — this DDL must stay
+  // bit-for-bit identical (CREATE VIRTUAL TABLE chunks_vec USING vec0 FLOAT[384])
+  // so retrievals indexed in the foundry CI match what Notal retrieves at runtime.
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS chunks (
+      chunk_id INTEGER PRIMARY KEY,
+      note_id INTEGER NOT NULL,
+      start_offset INTEGER NOT NULL,
+      end_offset INTEGER NOT NULL,
+      raw_text TEXT NOT NULL,
+      token_count INTEGER NOT NULL,
+      FOREIGN KEY(note_id) REFERENCES notes(id)
+    )
+  `)
+  sqlite.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS chunks_vec USING vec0(chunk_id INTEGER PRIMARY KEY, embedding FLOAT[384])
+  `)
+  sqlite.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS chunks_fts USING fts5(raw_text, chunk_id UNINDEXED)
+  `)
 
   _db = drizzle(sqlite, { schema })
   return _db

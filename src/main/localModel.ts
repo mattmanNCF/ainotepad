@@ -23,6 +23,18 @@ export const MODEL_FILENAMES = {
 export type ModelTier = 'small' | 'default' | 'large'
 
 /**
+ * Fine-tuned GGUF filename (FNDR-01 naming convention, Plan 02-08).
+ *
+ * v001 = E2B quantization trained on the 8GB Nvidia PC (research §Pitfall 2:
+ * E4B QLoRA needs ≥10GB VRAM). v002 = E4B on DGX Spark arrival — drop in
+ * `notal-gemma4e4b-notes-v002.gguf` beside this one and
+ * `resolveModelPath()` prefers whichever file is present. File goes in
+ * app.getPath('userData')/models/ — matches the generic-download location
+ * used by `findExistingModel`.
+ */
+export const FINE_TUNED_GGUF_FILENAME = 'notal-gemma4e2b-notes-v001.gguf'
+
+/**
  * Detect the appropriate model tier based on available system RAM.
  * >= 16 GB -> large | >= 8 GB -> default | < 8 GB -> small
  */
@@ -122,4 +134,37 @@ export async function downloadModel(
       `[localModel] Failed to download model tier "${tier}" from ${MODEL_URIS[tier]}: ${String((err as any)?.message ?? err)}`
     )
   }
+}
+
+/**
+ * Absolute path to where the fine-tuned GGUF would live on disk.
+ * The file does not need to exist — callers use `hasFineTunedModel()` to test.
+ */
+export function fineTunedModelPath(): string {
+  return path.join(getModelStoragePath(), FINE_TUNED_GGUF_FILENAME)
+}
+
+/**
+ * True iff the fine-tuned GGUF (Plan 02-04 output) has been deposited in
+ * app.getPath('userData')/models/. Drop-in detection: copy the GGUF into that
+ * folder and restart Notal — no config change required.
+ */
+export function hasFineTunedModel(): boolean {
+  return fs.existsSync(fineTunedModelPath())
+}
+
+/**
+ * Canonical resolver for "which GGUF should Notal load right now?".
+ *
+ * Preference order (Plan 02-08):
+ *   1. Fine-tuned Notal model if present on disk (notal-gemma4e2b-notes-v001.gguf).
+ *   2. Generic Gemma 4 at the detected tier (prior behavior).
+ *
+ * Callers in ipc.ts use this instead of computing a tier path directly so the
+ * fine-tune preference is enforced in a single place.
+ */
+export function resolveModelPath(): string {
+  if (hasFineTunedModel()) return fineTunedModelPath()
+  const tier = detectModelTier()
+  return path.join(getModelStoragePath(), MODEL_FILENAMES[tier])
 }
