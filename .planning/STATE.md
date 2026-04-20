@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
-status: defining_requirements
-last_updated: "2026-04-19T17:00:00.000Z"
+status: milestone_defined
+last_updated: "2026-04-19T21:30:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -15,18 +15,19 @@ progress:
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: Not started (milestone defined; ready to plan Phase 10)
 Plan: —
-Status: Defining requirements — RESEARCH COMPLETE, REQUIREMENTS.md pending
+Status: Milestone defined — REQUIREMENTS + ROADMAP committed; awaiting /gsd:plan-phase 10
 Last activity: 2026-04-19 — Research phase complete (SUMMARY.md committed). Path A locked for mobile. Session ended at 81% context; resume target = REQUIREMENTS.md write.
+2026-04-19 — Milestone v0.3.1 fully defined. Path C locked for mobile (Google Drive appDataFolder + github.io PWA). Phases 10/11/12 in ROADMAP.md.
 
 ## Session Continuity
 
 **Last session:** 2026-04-19
-**Stopped at:** Step 9 (Define Requirements) of `/gsd:new-milestone` workflow, just before REQUIREMENTS.md write.
-**Resume file:** `.planning/HANDOFF.json` (structured handoff — read first)
-**Key locked decision:** Mobile platform = Path A (PWA + LAN HTTP); do not re-litigate.
-**Next action:** Read HANDOFF.json → read SUMMARY.md + FEATURES.md → write REQUIREMENTS.md using verbatim REQ-IDs from SUMMARY.md §Requirements Candidates → get Matt's approval → spawn roadmapper (continue phase numbering at Phase 10) → approve → commit → done.
+**Stopped at:** Milestone v0.3.1 fully defined — REQUIREMENTS + ROADMAP committed, ready for phase planning.
+**Resume file:** `.planning/HANDOFF.json` (refreshed; next action = Plan Phase 10)
+**Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2.
+**Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
 ## Project Reference
 
@@ -53,7 +54,13 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 
 ## Phase Status (v0.3.1)
 
-Pending roadmapper — to be populated after requirements are defined.
+| Phase | Name | Status | Requirements |
+|-------|------|--------|--------------|
+| 10 | Dynamic Wiki Graph Parameters | Not started | GRAPH-PERF-01, GRAPH-SCOPE-01, GRAPH-UX-01, GRAPH-A11Y-01 |
+| 11 | Google Calendar Integration | Not started (ship gate) | CAL-SEC-01/02/03, CAL-UX-01/02, CAL-TZ-01, CAL-COST-01, CAL-DEL-01, XCUT-SEC-02, XCUT-CSP-01 |
+| 12 | Mobile Extension (Drive transport) | Not started (droppable to v0.3.2) | MOB-AUTH-01/02, MOB-TRANS-01/02/03, MOB-PWA-01/02, MOB-SEC-01, MOB-UX-01/02, MOB-QUOTA-01 |
+
+**Coverage:** 25 active requirements mapped across 3 phases. XCUT-SEC-01 (MCP Bearer) explicitly deferred to v2.
 
 ---
 

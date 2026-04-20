@@ -1,6 +1,6 @@
 # Notal Roadmap
 
-## Current Milestone: v1.1 — Corkboard Polish
+## Current Milestone: v0.3.1 — Reminders, Graph Control, Mobile
 
 ## Phases
 
@@ -10,9 +10,12 @@
 - [x] **Phase 04: AI Intelligence + Local Model + Patterns** - FTS5 search, semantic search, digest, word cloud
 - [x] **Phase 05: Agent Layer** - MCP server for external agent read access
 - [x] **Phase 06: Polish & Ship** - Onboarding, packaging, GitHub release
-- [ ] **Phase 07: Note Card Visual Redesign** - Post-it card layout with tag-color borders, hover-expand, and patterns footer fix
+- [x] **Phase 07: Note Card Visual Redesign** - Post-it card layout with tag-color borders, hover-expand, and patterns footer fix (completed 2026-04-18)
 - [x] **Phase 08: Connections + Digest Improvements** - Intra-tag edge connections and reliable rolling weekly digest (completed 2026-04-18)
 - [x] **Phase 09: App Icon** - Replace placeholder icon with custom illustrated asset (completed 2026-04-19)
+- [ ] **Phase 10: Dynamic Wiki Graph Parameters** - Floating slider panel over wiki graph (5 sliders, 3 presets, persistence, Ctrl+Z undo)
+- [ ] **Phase 11: Google Calendar Integration** - OAuth loopback+PKCE, reminder detection, silent+undo calendar creation (v0.3.1 ship gate)
+- [ ] **Phase 12: Mobile Extension (Drive transport)** - PWA at GitHub Pages + Drive `appDataFolder` ingress; droppable to v0.3.2
 
 ---
 
@@ -26,9 +29,12 @@
 | 04. AI Intelligence + Local Model + Patterns | Complete | Complete | 2026-04-16 |
 | 05. Agent Layer | Complete | Complete | 2026-04-17 |
 | 06. Polish & Ship | Complete | Complete | 2026-04-17 |
-| 07. Note Card Visual Redesign | 1/2 | In progress | - |
+| 07. Note Card Visual Redesign | 2/2 | Complete    | 2026-04-18 |
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
-| 09. App Icon | 0/3 | Complete    | 2026-04-19 |
+| 09. App Icon | 3/3 | Complete    | 2026-04-19 |
+| 10. Dynamic Wiki Graph Parameters | 0/? | Not started | - |
+| 11. Google Calendar Integration | 0/? | Not started | - |
+| 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 
 ---
 
@@ -151,4 +157,63 @@ Plans:
 Plans:
 - [x] 09-01-PLAN.md — Source asset + icon generator script (illustrated lemur PNG → multi-resolution ICO + tray PNG)
 - [x] 09-02-PLAN.md — Wire icons through main process (tray, BrowserWindow, About) + explicit electron-builder keys
-- [ ] 09-03-PLAN.md — Build Windows distribution + human verification checkpoint
+- [x] 09-03-PLAN.md — Build Windows distribution + human verification checkpoint
+
+---
+
+### Phase 10: Dynamic Wiki Graph Parameters
+**Goal**: A floating top-right collapsible overlay on the wiki graph exposes exactly 5 Radix sliders (link force, center force, repel force, edge thickness, node size) with 3 named presets (Dense, Spacious, Hierarchical), an always-visible Reset, per-user persistence via `electron-conf`, and Ctrl+Z undo of the last 10 parameter changes. Builds first: isolated, low-risk, visible win — and establishes the IPC/settings overlay patterns that Phase 11's Settings → Integrations panel reuses.
+**Depends on**: Phase 09
+**Requirements**: GRAPH-PERF-01, GRAPH-SCOPE-01, GRAPH-UX-01, GRAPH-A11Y-01
+**Success Criteria** (what must be TRUE):
+  1. User can open a floating panel over the wiki graph and adjust 5 sliders live — the graph responds without a reload and settles within ~1 second of slider release
+  2. p95 frame time during drag stays ≤50ms on a 500-node fixture (50ms throttle + `alphaTarget(0.1)` during drag / `alphaTarget(0)` on release — prevents B1 re-heat pitfall)
+  3. 3 named presets (Dense, Spacious, Hierarchical) apply in one click; always-visible Reset restores adaptive defaults; Ctrl+Z steps back through the last 10 parameter changes
+  4. Panel is keyboard-only operable with paired numeric input per slider and axe-core reports zero violations
+  5. Chosen slider values persist across app restarts via `electron-conf` per-user
+**Plans**: TBD
+**Research flag**: LOW — skip `/gsd:research-phase`
+**Deps**: `@radix-ui/react-slider@1.3.6`
+
+---
+
+### Phase 11: Google Calendar Integration
+**Goal**: OAuth 2.0 loopback + PKCE (Desktop-app client type, no `client_secret` persisted) connects the user's Google account; the existing AI worker's structured output piggybacks reminder detection (no second model call), `chrono-node` sanity-checks the emitted date, and confidence ≥0.85 gates silent calendar event creation. Every create shows a 10-second Undo toast plus a persistent inline chip on the note card. Refresh tokens are encrypted via `safeStorage.encryptString()`; timezones stored as `{timestamp_utc, original_tz, original_text}`; note deletion cascades to Google event deletion. MVP-critical — this is the ship gate for v0.3.1. Reuses the Settings overlay pattern from Phase 10 in a new Settings → Integrations tab.
+**Depends on**: Phase 10
+**Requirements**: CAL-SEC-01, CAL-SEC-02, CAL-SEC-03, CAL-UX-01, CAL-UX-02, CAL-TZ-01, CAL-COST-01, CAL-DEL-01, XCUT-SEC-02, XCUT-CSP-01
+**Success Criteria** (what must be TRUE):
+  1. User connects Google Calendar in Settings → Integrations via a loopback+PKCE flow on an ephemeral 127.0.0.1 port; `asar extract` grep returns zero `client_secret` hits; disconnect+revoke works end-to-end
+  2. On a 50-note fixture with 5 true-positive reminders, the system attempts ≤6 calendar creations (confidence ≥0.85 gate holds; piggyback adds zero extra model calls)
+  3. Every calendar creation is either silently performed with a reachable 10-second Undo toast, or (when `confirmBeforeCreate: true`) requires an explicit user click within the preceding 5s; a persistent chip on the note card links to the Google Calendar web event
+  4. Timezone test matrix passes for UTC + America/Los_Angeles + Asia/Kolkata + Pacific/Chatham + a DST crossover — stored UTC matches Google event start, original IANA zone and original text survive round-trip
+  5. Deleting a note deletes the linked Google event (reconciled via `extendedProperties.private.notal_note_id`); "don't ask again" confirmation respected; health indicator in Settings → Integrations shows green/yellow/red + last-success timestamp; refresh token present in `safeStorage` and absent from `config.json`
+**Plans**: TBD
+**Research flag**: MEDIUM — quick confirmation on `googleapis@171.4.0` SDK vs thin `fetch` + PKCE loopback specifics before implementation
+**Deps**: `googleapis@171.4.0` (or thin `fetch` — decide in research-phase), `chrono-node@2.9.0`
+**New code**: `src/main/calendar/{oauthFlow,tokenStore,googleClient,reminderService}.ts`; `reminders` table migration; `calendar:*` IPC handlers; `GoogleCalendarSection` in Settings → Integrations; inline chip on `NoteCard`
+**Pitfalls addressed**: A3 (refresh token `safeStorage`), A4 (no unilateral creation — silent+undo), A5 (timezone triple), D1 (binary gate — this is the ship gate, no "80% done" exit)
+
+---
+
+### Phase 12: Mobile Extension (Path C — Google Drive transport)
+**Goal**: A static PWA at `https://mattmanNCF.github.io/notal-mobile/` (hosted on GitHub Pages) performs client-side Google OAuth requesting `calendar.events` + `drive.appdata` in a single shared consent with Phase 11 (incremental scope add, one grant). Mobile text input writes a JSON envelope to Drive's `appDataFolder`; desktop subscribes to Drive Changes (push preferred, 60s polling fallback via checkpointed `startPageToken`) and ingests each file via a shared `createNote(rawText, source='mobile-drive')` code path, then deletes the Drive file so the folder stays empty. IndexedDB queue on mobile handles offline. Largest surface in the milestone — but the MCP Bearer prerequisite is GONE under Path C and the OAuth consent is already done by Phase 11. **Droppable to v0.3.2 if Phase 11 runs long; v0.3.1 ships with Graph + Calendar alone.**
+**Depends on**: Phase 11
+**Requirements**: MOB-AUTH-01, MOB-AUTH-02, MOB-TRANS-01, MOB-TRANS-02, MOB-TRANS-03, MOB-PWA-01, MOB-PWA-02, MOB-SEC-01, MOB-UX-01, MOB-UX-02, MOB-QUOTA-01
+**Success Criteria** (what must be TRUE):
+  1. End-to-end capture: a note typed into the iPhone Safari PWA (installed to home screen) appears in desktop Notal within 60s via Drive Changes subscription, or within ≤2 minutes via the 60s polling fallback if push subscription fails
+  2. At first Google connect after Phase 11 is in, the user sees a single incremental-consent prompt adding `drive.appdata` to the existing `calendar.events` grant — no second pairing flow, no device tokens, no QR; `revoke at Google Account security` terminates both sides and desktop surfaces the 401 in Settings → Integrations
+  3. After successful ingestion of a mobile note, the corresponding file in Drive `appDataFolder` is deleted (inspectable via Drive API); desktop detects a stuck-ingestion loop by folder size — warning at 10MB, hard stop at 100MB (MOB-QUOTA-01)
+  4. Mobile UI shows explicit delivery states (local → uploading → on-drive → ingested, the last observed via Drive file deletion); on desktop launch a grace banner reports count of pending Drive notes drained; `createNote(rawText, source)` is the single shared code path with desktop capture, validated against a strict ≤16KB JSON schema that rejects malformed files with a log entry
+  5. Mobile PWA is capture-only (no browse, search, wiki) and works offline — IndexedDB queue persists across tab close + reconnect; when GitHub Pages is reachable and the user is online, the queue drains automatically
+**Plans**: TBD
+**Research flag**: HIGH — targeted research on Drive Changes API push subscriptions vs 60s polling, `vite-plugin-pwa` config for static GitHub Pages publish, COOP/COEP headers if cross-origin isolation is needed for any PWA feature
+**Deps**: Drive REST API v3 via `googleapis` (reuses Phase 11 client), `vite-plugin-pwa` for mobile PWA build, `idb` (IndexedDB wrapper) for mobile offline queue
+**New code**: `src/main/drive/{driveClient,changesPoller,ingestService}.ts`; `source` column migration on `notes`; Settings → Integrations mobile section; new `mobile-pwa/` subproject (separate Vite config, static build pipeline to `docs/` for GitHub Pages publish)
+**Pitfalls addressed (Path C–specific, re-mapped from SUMMARY.md)**:
+  - Drive Changes API reliability — push subscription can silently drop; 60s polling fallback at `startPageToken` checkpoint required (MOB-TRANS-02)
+  - OAuth consent scope explosion — appending `drive.appdata` to an already-granted `calendar.events` must use incremental consent so the user sees the clear scope delta (MOB-AUTH-01)
+  - GitHub Pages outage — PWA unreachable during Pages downtime; acceptable because capture is async and the IndexedDB queue persists locally (MOB-PWA-01, MOB-UX-01)
+  - Drive appdata quota stalling — a broken ingestion loop could balloon the folder; MOB-QUOTA-01 warns at 10MB and hard-stops at 100MB
+  - D1 binary gate — Phase 12 either fully lands or is dropped to v0.3.2; no "80% mobile" ship
+**Dropped from Path A (no longer applicable under Path C)**: QR pairing with TTL, mTLS / self-signed cert + fingerprint pinning, 0.0.0.0 bind toggle, iOS 7-day eviction for auth, per-device Bearer tokens on MCP (XCUT-SEC-01 deferred to v2)
+**Schedule flag**: Droppable to v0.3.2 if Phase 11 (ship gate) runs long — v0.3.1 can ship with Graph + Calendar only
