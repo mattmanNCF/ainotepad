@@ -23,7 +23,7 @@ let localModelPath: string = ''
 let localModelReady = false
 let localModelInitPromise: Promise<void> | null = null
 
-const queue: Array<{ noteId: string; rawText: string; contextMd: string; conceptSnippets: string; relatedNotes: string }> = []
+const queue: Array<{ noteId: string; rawText: string; contextMd: string; conceptSnippets: string; relatedNotes: string; establishedTags?: string[] }> = []
 let processing = false
 
 // Receive init message from main process (transfers port2 from MessageChannelMain)
