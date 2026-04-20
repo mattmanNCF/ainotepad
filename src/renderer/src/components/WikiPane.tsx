@@ -11,6 +11,7 @@ interface GraphNode {
 interface GraphLink {
   source: string
   target: string
+  sharedCount: number
 }
 
 interface WikiPaneProps {

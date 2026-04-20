@@ -95,7 +95,6 @@ export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, 
           const n = node as GraphNode
           setCtxMenu({ filename: n.id + '.md', tag: n.tag, x: event.clientX, y: event.clientY })
         }}
-        linkStrength={(link: any) => Math.min(0.8, (link.sharedCount ?? 1) * 0.15)}
         linkColor={(link: any) => {
           const opacity = Math.min(0.9, 0.25 + (link.sharedCount ?? 1) * 0.2)
           return `rgba(99,102,241,${opacity})`
