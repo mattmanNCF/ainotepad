@@ -117,6 +117,30 @@ export function getDb() {
     ')'
   )
 
+  // Migration: create reminders table (Phase 11 — Google Calendar integration).
+  // FK cascade on notes(id) — deleting a note automatically drops the reminders row.
+  // Plan 11-05 handles the Google-event-delete cascade separately (via
+  // privateExtendedProperty=notal_note_id query BEFORE deleteNote()).
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS reminders (
+      id TEXT PRIMARY KEY,
+      note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+      event_id TEXT,
+      event_title TEXT NOT NULL,
+      timestamp_utc TEXT NOT NULL,
+      original_tz TEXT NOT NULL,
+      original_text TEXT NOT NULL,
+      confidence REAL NOT NULL,
+      calendar_sync_status TEXT NOT NULL DEFAULT 'pending',
+      calendar_link TEXT,
+      created_at TEXT NOT NULL,
+      last_error TEXT
+    )
+  `)
+  sqlite.exec(`
+    CREATE INDEX IF NOT EXISTS idx_reminders_note_id ON reminders(note_id)
+  `)
+
   // Migration: add wiki_files column to notes (Phase 07 gap)
   try {
     sqlite.exec("ALTER TABLE notes ADD COLUMN wiki_files TEXT NOT NULL DEFAULT '[]'")

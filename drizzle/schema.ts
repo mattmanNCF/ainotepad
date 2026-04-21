@@ -39,3 +39,21 @@ export const digests = sqliteTable('digests', {
 
 export type Digest = typeof digests.$inferSelect
 export type NewDigest = typeof digests.$inferInsert
+
+export const reminders = sqliteTable('reminders', {
+  id: text('id').primaryKey(),
+  noteId: text('note_id').notNull().references(() => notes.id, { onDelete: 'cascade' }),
+  eventId: text('event_id'),                                    // Google Calendar event ID (null while pending undo)
+  eventTitle: text('event_title').notNull(),
+  timestampUtc: text('timestamp_utc').notNull(),                // ISO 8601 UTC
+  originalTz: text('original_tz').notNull(),                    // IANA zone: "America/Los_Angeles"
+  originalText: text('original_text').notNull(),                // "next Tuesday at 3pm"
+  confidence: integer('confidence', { mode: 'number' }).notNull(), // REAL affinity — SQLite allows REAL in INTEGER column
+  calendarSyncStatus: text('calendar_sync_status').notNull().default('pending'), // pending|synced|failed|cancelled
+  calendarLink: text('calendar_link'),
+  createdAt: text('created_at').notNull(),
+  lastError: text('last_error'),
+})
+
+export type Reminder = typeof reminders.$inferSelect
+export type NewReminder = typeof reminders.$inferInsert
