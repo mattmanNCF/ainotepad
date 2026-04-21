@@ -5,7 +5,7 @@ import { DateTime } from 'luxon'
 import { getDb } from '../db'
 import { reminders } from '../../../drizzle/schema'
 import type { Reminder, NewReminder } from '../../../drizzle/schema'
-import { isConnected as isCalendarConnected, getConfirmBeforeCreate, markSyncSuccess } from './tokenStore'
+import { isConnected as isCalendarConnected, getConfirmBeforeCreate, markSyncSuccess, getDontAskDeleteCalEvent } from './tokenStore'
 import { buildCalendarClient } from './googleClient'
 import { parseReminderDate, systemIanaZone } from './reminderParser'
 
@@ -279,4 +279,110 @@ export function getLatestReminderForNote(noteId: string): Reminder | null {
 export function cancelAllTimersForShutdown(): void {
   for (const p of pendingTimers.values()) clearTimeout(p.timeout)
   pendingTimers.clear()
+}
+
+/**
+ * Returns true iff the user should be prompted to confirm the cascade.
+ * Plan 11-06's notes:delete UI calls this via IPC before triggering notes:delete.
+ *   - Calendar not connected → false (nothing to cascade)
+ *   - User has chosen "don't ask again" → false (silent cascade)
+ *   - Otherwise → only true when at least one event is actually linked
+ *     (queried live via privateExtendedProperty so we don't prompt spuriously
+ *     for notes that never created a calendar event)
+ */
+export async function needDeleteConfirm(noteId: string): Promise<boolean> {
+  if (!isCalendarConnected()) return false
+  if (getDontAskDeleteCalEvent()) return false
+  try {
+    const calendar = buildCalendarClient()
+    const res = await calendar.events.list({
+      calendarId: 'primary',
+      privateExtendedProperty: [`notal_note_id=${noteId}`],
+      maxResults: 1,
+      singleEvents: true,
+    })
+    return (res.data.items ?? []).length > 0
+  } catch (err) {
+    console.warn('[reminderService] needDeleteConfirm query failed:', err)
+    // On error, don't prompt — the cascade itself will try its best.
+    return false
+  }
+}
+
+/**
+ * Cascade calendar events on note deletion (CAL-DEL-01).
+ * MUST be called from notes:delete handler BEFORE deleteNote(id).
+ *
+ * Non-fatal: errors are logged but never propagated. The local note deletion
+ * must always succeed — we prioritize local consistency over remote cleanup.
+ *
+ * Source of truth: Google's privateExtendedProperty index. We deliberately do
+ * NOT rely on the local reminders.event_id column — a reinstall / DPAPI
+ * mismatch / manual reconciliation could leave orphans that only Google can
+ * surface. By querying events.list with the notal_note_id tag, we find ALL
+ * linked events (even orphans from prior installs).
+ */
+export async function cascadeCalendarEventForNote(noteId: string): Promise<{ deletedCount: number; errors: string[] }> {
+  const result = { deletedCount: 0, errors: [] as string[] }
+  if (!isCalendarConnected()) return result
+
+  let calendar
+  try {
+    calendar = buildCalendarClient()
+  } catch (err) {
+    console.warn('[reminderService] cascade: buildCalendarClient failed:', err)
+    return result
+  }
+
+  // Step 1: discover linked events via extendedProperties reconciliation
+  let items: Array<{ id?: string | null }> = []
+  try {
+    const res = await calendar.events.list({
+      calendarId: 'primary',
+      privateExtendedProperty: [`notal_note_id=${noteId}`],
+      maxResults: 10,
+      singleEvents: true,
+    })
+    items = res.data.items ?? []
+  } catch (err) {
+    const msg = String((err as Error)?.message ?? err)
+    console.warn('[reminderService] cascade: events.list failed:', msg)
+    result.errors.push(`events.list: ${msg}`)
+    return result
+  }
+
+  // Step 2: best-effort delete each
+  for (const event of items) {
+    if (!event.id) continue
+    try {
+      await calendar.events.delete({ calendarId: 'primary', eventId: event.id })
+      result.deletedCount++
+    } catch (err) {
+      // 404 (already deleted), 403 (permission), 410 (gone) are all "effectively deleted"
+      const status = (err as { status?: number; code?: number })?.status ?? (err as { code?: number })?.code
+      if (status === 404 || status === 410) {
+        result.deletedCount++ // treat as already-gone
+      } else {
+        const msg = String((err as Error)?.message ?? err)
+        console.warn('[reminderService] cascade: events.delete failed for', event.id, msg)
+        result.errors.push(`events.delete ${event.id}: ${msg}`)
+      }
+    }
+  }
+
+  // Step 3: also mark any local pending reminders for this note as cancelled,
+  // so they don't fire their undo-window timers after the note is gone.
+  // The FK cascade on reminders.note_id → notes.id will drop the rows when
+  // deleteNote() runs next; but any in-flight setTimeout needs clearing here.
+  // We iterate pendingTimers and cancel matching ones.
+  for (const [reminderId, pending] of pendingTimers.entries()) {
+    const row = getDb().select().from(reminders).where(eq(reminders.id, reminderId)).get() as Reminder | undefined
+    if (row?.noteId === noteId) {
+      clearTimeout(pending.timeout)
+      pendingTimers.delete(reminderId)
+      // Don't need markCancelled — the FK cascade wipes the row in a moment.
+    }
+  }
+
+  return result
 }

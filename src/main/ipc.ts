@@ -10,11 +10,15 @@ import {
   isEncryptionAvailable,
   getConfirmBeforeCreate,
   setConfirmBeforeCreate,
+  getDontAskDeleteCalEvent,
+  setDontAskDeleteCalEvent,
 } from './calendar/tokenStore'
 import {
   cancelPendingCreate,
   confirmPendingCreate,
   getLatestReminderForNote,
+  cascadeCalendarEventForNote,
+  needDeleteConfirm,
 } from './calendar/reminderService'
 import { randomUUID } from 'crypto'
 import { desc, eq } from 'drizzle-orm'
@@ -145,6 +149,24 @@ export function registerIpcHandlers() {
           } catch { /* file missing — skip */ }
         }
       }
+    }
+
+    // Cascade: delete any Google Calendar events linked via notal_note_id
+    // BEFORE deleting the note locally — if something explodes, we can retry.
+    // Resilient: never re-throws. deletedCount/errors surfaced to console only.
+    // CAL-DEL-01: every linked event deleted reconciled via extendedProperties.
+    try {
+      const cascadeRes = await cascadeCalendarEventForNote(id)
+      if (cascadeRes.deletedCount > 0) {
+        console.log('[notes:delete] cascaded', cascadeRes.deletedCount, 'calendar event(s) for note', id)
+      }
+      if (cascadeRes.errors.length > 0) {
+        console.warn('[notes:delete] calendar cascade had errors:', cascadeRes.errors)
+      }
+    } catch (err) {
+      // Defence-in-depth: cascadeCalendarEventForNote promises not to throw,
+      // but catch anyway so notes:delete ALWAYS proceeds to deleteNote below.
+      console.error('[notes:delete] unexpected cascade exception:', err)
     }
 
     // Delete the note (+ notes_fts)
@@ -442,6 +464,18 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('calendar:confirmCreate', async (_e, reminderId: string) => {
     await confirmPendingCreate(reminderId)
+  })
+
+  ipcMain.handle('calendar:needsDeleteConfirm', async (_e, noteId: string) => {
+    return await needDeleteConfirm(noteId)
+  })
+
+  ipcMain.handle('calendar:setDontAskDeleteCalEvent', (_e, value: boolean) => {
+    setDontAskDeleteCalEvent(value)
+  })
+
+  ipcMain.handle('calendar:getDontAskDeleteCalEvent', () => {
+    return getDontAskDeleteCalEvent()
   })
 
   ipcMain.handle('reminders:getForNote', (_e, noteId: string) => {

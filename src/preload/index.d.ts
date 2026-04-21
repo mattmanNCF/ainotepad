@@ -79,6 +79,9 @@ interface Window {
       openLink: (url: string) => Promise<void>
       undoCreate: (reminderId: string) => Promise<void>
       confirmCreate: (reminderId: string) => Promise<void>
+      needsDeleteConfirm: (noteId: string) => Promise<boolean>
+      setDontAskDeleteCalEvent: (value: boolean) => Promise<void>
+      getDontAskDeleteCalEvent: () => Promise<boolean>
       onEventPending: (cb: (data: {
         noteId: string
         reminderId: string

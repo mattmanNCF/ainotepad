@@ -72,6 +72,12 @@ contextBridge.exposeInMainWorld('api', {
     openLink: (url: string): Promise<void> => ipcRenderer.invoke('calendar:openLink', url),
     undoCreate: (reminderId: string): Promise<void> => ipcRenderer.invoke('calendar:undoCreate', reminderId),
     confirmCreate: (reminderId: string): Promise<void> => ipcRenderer.invoke('calendar:confirmCreate', reminderId),
+    needsDeleteConfirm: (noteId: string): Promise<boolean> =>
+      ipcRenderer.invoke('calendar:needsDeleteConfirm', noteId),
+    setDontAskDeleteCalEvent: (value: boolean): Promise<void> =>
+      ipcRenderer.invoke('calendar:setDontAskDeleteCalEvent', value),
+    getDontAskDeleteCalEvent: (): Promise<boolean> =>
+      ipcRenderer.invoke('calendar:getDontAskDeleteCalEvent'),
     onEventPending: (cb: (data: {
       noteId: string
       reminderId: string
