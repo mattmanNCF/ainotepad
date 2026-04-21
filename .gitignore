@@ -7,3 +7,5 @@ out
 hip-build.log
 *.log
 build-hip.ps1
+.env.local
+.env.*.local
