@@ -1,6 +1,8 @@
 import ForceGraph2D from 'react-force-graph-2d'
 import { useRef, useEffect, useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
+import type { GraphParams } from '../types/graphParams'
+import { DEFAULT_GRAPH_PARAMS } from '../types/graphParams'
 
 interface GraphNode {
   id: string
@@ -19,12 +21,13 @@ interface WikiGraphProps {
   nodes: GraphNode[]
   links: GraphLink[]
   tagColors: Record<string, string>
+  graphParams?: GraphParams
   onNodeClick: (filename: string) => void
   onNodeDelete: (filename: string) => void
   onSetTagColor: (tag: string, color: string) => void
 }
 
-export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, onSetTagColor }: WikiGraphProps) {
+export function WikiGraph({ nodes, links, tagColors, graphParams = DEFAULT_GRAPH_PARAMS, onNodeClick, onNodeDelete, onSetTagColor }: WikiGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const graphRef = useRef<any>(null)
   const [dims, setDims] = useState({ width: 600, height: 400 })
@@ -54,13 +57,20 @@ export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, 
     return () => ro.disconnect()
   }, [])
 
-  // Set link distance inversely proportional to shared tag count — more shared = closer
+  // Apply graphParams multipliers to d3 forces. Runs on every params change.
   useEffect(() => {
     const g = graphRef.current
     if (!g) return
     const linkForce = g.d3Force('link')
-    if (linkForce) linkForce.distance((link: any) => 120 / Math.max(1, link.sharedCount ?? 1))
-  }, [nodes, links])
+    if (linkForce) {
+      // Baseline distance 120 scales INVERSELY with linkForce multiplier — higher linkForce = tighter clustering.
+      linkForce.distance((link: any) => (120 / Math.max(1, link.sharedCount ?? 1)) / graphParams.linkForce)
+    }
+    const centerForce = g.d3Force('center')
+    if (centerForce) centerForce.strength(0.05 * graphParams.centerForce) // baseline 0.05
+    const chargeForce = g.d3Force('charge')
+    if (chargeForce) chargeForce.strength(-30 * graphParams.repelForce)   // baseline -30 (d3 default)
+  }, [nodes, links, graphParams])
 
   // Dismiss context menu on outside mousedown
   useEffect(() => {
@@ -83,7 +93,7 @@ export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, 
         nodeCanvasObject={(node, ctx, globalScale) => {
           const n = node as GraphNode & { x: number; y: number }
           const color = colorMapRef.current[n.id] ?? '#6b7280'
-          const r = 5 / Math.max(1, globalScale * 0.5)
+          const r = (5 * graphParams.nodeSize) / Math.max(1, globalScale * 0.5)
           ctx.beginPath()
           ctx.arc(n.x, n.y, r, 0, 2 * Math.PI)
           ctx.fillStyle = color
@@ -99,11 +109,11 @@ export function WikiGraph({ nodes, links, tagColors, onNodeClick, onNodeDelete, 
           const opacity = Math.min(0.9, 0.25 + (link.sharedCount ?? 1) * 0.2)
           return `rgba(99,102,241,${opacity})`
         }}
-        linkWidth={(link: any) => Math.min(3, (link.sharedCount ?? 1) * 0.8)}
+        linkWidth={(link: any) => Math.min(6, (link.sharedCount ?? 1) * 0.8 * graphParams.edgeThickness)}
         d3AlphaDecay={0.03}
         d3VelocityDecay={0.3}
         backgroundColor="#111827"
-        nodeRelSize={5}
+        nodeRelSize={5 * graphParams.nodeSize}
       />
 
       {ctxMenu && createPortal(
