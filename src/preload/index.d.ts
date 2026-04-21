@@ -101,6 +101,9 @@ interface Window {
       }) => void) => () => void
       onEventCancelled: (cb: (data: { noteId: string; reminderId: string; reason: string }) => void) => () => void
       onEventFailed: (cb: (data: { noteId: string; reminderId: string; error: string }) => void) => () => void
+      needsDeleteConfirm: (noteId: string) => Promise<boolean>
+      setDontAskDeleteCalEvent: (value: boolean) => Promise<void>
+      getDontAskDeleteCalEvent: () => Promise<boolean>
     }
     reminders: {
       getForNote: (noteId: string) => Promise<{
