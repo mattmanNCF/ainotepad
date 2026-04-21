@@ -33,7 +33,7 @@
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
-| 11. Google Calendar Integration | 0/? | Not started | - |
+| 11. Google Calendar Integration | 0/7 | Not started (ship gate) | - |
 | 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 
 ---
@@ -192,9 +192,17 @@ Plans:
   3. Every calendar creation is either silently performed with a reachable 10-second Undo toast, or (when `confirmBeforeCreate: true`) requires an explicit user click within the preceding 5s; a persistent chip on the note card links to the Google Calendar web event
   4. Timezone test matrix passes for UTC + America/Los_Angeles + Asia/Kolkata + Pacific/Chatham + a DST crossover — stored UTC matches Google event start, original IANA zone and original text survive round-trip
   5. Deleting a note deletes the linked Google event (reconciled via `extendedProperties.private.notal_note_id`); "don't ask again" confirmation respected; health indicator in Settings → Integrations shows green/yellow/red + last-success timestamp; refresh token present in `safeStorage` and absent from `config.json`
-**Plans**: TBD
-**Research flag**: MEDIUM — quick confirmation on `googleapis@171.4.0` SDK vs thin `fetch` + PKCE loopback specifics before implementation
-**Deps**: `googleapis@171.4.0` (or thin `fetch` — decide in research-phase), `chrono-node@2.9.0`
+**Plans**: 7 plans
+Plans:
+- [ ] 11-01-PLAN.md — Foundation: deps, build-time secret injection, reminders table, CSP hardening, sandbox migration + boot assertion
+- [ ] 11-02-PLAN.md — OAuth loopback+PKCE + tokenStore (safeStorage) + googleClient factory + calendar:* connect/disconnect/status IPC
+- [ ] 11-03-PLAN.md — AI worker reminder piggyback (6th JSON field) + grammar + reminderParser (chrono+luxon) + 5-zone test matrix
+- [ ] 11-04-PLAN.md — reminderService: confidence gate, 10s undo lifecycle, events.insert with extendedProperties, 4 push channels, delete-confirm IPC surface
+- [ ] 11-05-PLAN.md — Delete cascade: notes:delete calls events.list+delete via notal_note_id; don't-ask-again preference
+- [ ] 11-06-PLAN.md — Renderer UI: GoogleCalendarSection, UndoToast, NoteCard chip, NotesTab delete-confirm dialog
+- [ ] 11-07-PLAN.md — Ship-gate human-verify checkpoint on packaged NSIS installer (all 10 requirements + automated asar/config greps)
+**Research flag**: MEDIUM — /gsd:research-phase complete (11-RESEARCH.md). Stack: google-auth-library@10.6.2 + @googleapis/calendar@14.2.0 + chrono-node@2.9.0 + luxon@3.7.2 (luxon required for Pacific/Chatham + IANA DST)
+**Deps**: `google-auth-library@10.6.2` + `@googleapis/calendar@14.2.0` (split packages — 1.4MB vs 190MB monolith) + `chrono-node@2.9.0` + `luxon@3.7.2` (+ `@types/luxon` dev) + `tsx` dev (test runner)
 **New code**: `src/main/calendar/{oauthFlow,tokenStore,googleClient,reminderService}.ts`; `reminders` table migration; `calendar:*` IPC handlers; `GoogleCalendarSection` in Settings → Integrations; inline chip on `NoteCard`
 **Pitfalls addressed**: A3 (refresh token `safeStorage`), A4 (no unilateral creation — silent+undo), A5 (timezone triple), D1 (binary gate — this is the ship gate, no "80% done" exit)
 
