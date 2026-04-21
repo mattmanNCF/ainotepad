@@ -19,7 +19,8 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "axe:panel": "node scripts/axe-graph-panel.cjs"
+    "axe:panel": "node scripts/axe-graph-panel.cjs",
+    "test:reminder": "tsx --test test/reminderParser.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",
@@ -76,6 +77,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "sharp": "^0.34.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.2.6"
   }
