@@ -1,4 +1,5 @@
 import ForceGraph2D from 'react-force-graph-2d'
+import { forceX, forceY } from 'd3-force-3d'
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import type { GraphParams } from '../types/graphParams'
@@ -88,8 +89,12 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
       // Baseline distance 120 scales INVERSELY with linkForce multiplier — higher linkForce = tighter clustering.
       linkForce.distance((link: any) => (120 / Math.max(1, link.sharedCount ?? 1)) / graphParams.linkForce)
     }
-    const centerForce = g.d3Force('center')
-    if (centerForce) centerForce.strength(0.15 * graphParams.centerForce) // baseline 0.15 — strong enough to visibly pull nodes
+    // forceCenter only repositions center-of-mass — it's not gravity. Use forceX/forceY for per-node pull.
+    const cx = dims.width / 2
+    const cy = dims.height / 2
+    const cs = 0.06 * graphParams.centerForce // baseline 0.06 per axis ≈ noticeable but not overwhelming
+    g.d3Force('x', forceX(cx).strength(cs))
+    g.d3Force('y', forceY(cy).strength(cs))
     const chargeForce = g.d3Force('charge')
     if (chargeForce) chargeForce.strength(-30 * graphParams.repelForce)   // baseline -30 (d3 default)
     // Reheat so force changes take visible effect immediately (without this, cold sim ignores strength updates)
