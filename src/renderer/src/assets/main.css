@@ -37,3 +37,11 @@ body {
 .note-card-enter {
   animation: slideIn 0.2s ease-out forwards;
 }
+
+/* Radix slider — added for graph params panel (Phase 10). */
+.gpanel-slider-root { position: relative; display: flex; align-items: center; user-select: none; touch-action: none; width: 100%; height: 20px; }
+.gpanel-slider-track { background: rgb(55 65 81); position: relative; flex-grow: 1; border-radius: 9999px; height: 4px; }
+.gpanel-slider-range { position: absolute; background: rgb(99 102 241); border-radius: 9999px; height: 100%; }
+.gpanel-slider-thumb { display: block; width: 14px; height: 14px; background: white; border-radius: 9999px; box-shadow: 0 1px 4px rgba(0,0,0,0.4); outline: none; cursor: grab; }
+.gpanel-slider-thumb:focus-visible { outline: 2px solid rgb(99 102 241); outline-offset: 2px; }
+.gpanel-slider-thumb:active { cursor: grabbing; }
