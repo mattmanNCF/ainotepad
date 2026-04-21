@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-04-21T16:54:01.524Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-04-21T17:30:00.000Z"
 progress:
   total_phases: 12
   completed_phases: 7
   total_plans: 42
-  completed_plans: 37
+  completed_plans: 38
 ---
 
 # Notal — Project State
@@ -17,12 +17,12 @@ progress:
 ## Current Position
 
 Phase: 10 (Dynamic Wiki Graph Parameters) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T16:53:48.594Z
-**Stopped at:** Completed 10-01-PLAN.md
+**Last session:** 2026-04-21T17:30:00.000Z
+**Stopped at:** Completed 10-02-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -166,6 +166,10 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 10]: @radix-ui/react-slider requires --legacy-peer-deps (same React 19 peer conflict as react-d3-cloud and sharp)
 - [Phase 10]: GraphParams type file in renderer/src/types/ imported via 'import type' in main — erased at compile time, no runtime cross-boundary dependency
 - [Phase 10]: preload/index.d.ts inlines GraphParams shape rather than importing — keeps file ambient, avoids module-declaration collision
+- [Phase 10-02]: Radix slider CSS added to assets/main.css (plan referred to nonexistent index.css)
+- [Phase 10-02]: d3AlphaTarget() confirmed public API on react-force-graph-2d ref — no _simulation fallback needed
+- [Phase 10-02]: GraphParamsPanel collapsed state resets on WikiGraph remount (colorKey change) — acceptable for v1
+- [Phase 10-02]: Keyboard slider nudges do not pre-heat simulation (pointer events only); deferred to Plan 10-04
 
 ### Quick Tasks Completed
 
