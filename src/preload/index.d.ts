@@ -28,6 +28,7 @@ interface Window {
       organizedText: string | null
       tags: string[]
       insights: string | null
+      reminder: { text: string; date_text: string; confidence: number } | null
     }) => void) => () => void
     settings: {
       save: (key: string, provider: string, ollamaModel?: string, llamaCppPath?: string) => Promise<void>

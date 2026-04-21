@@ -33,7 +33,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
   port1.start() // REQUIRED: port is paused until start() is called
 
   port1.on('message', async (event) => {
-    const { type, noteId, aiState, aiAnnotation, organizedText, wikiUpdates, tags, insights, errorMsg } = event.data
+    const { type, noteId, aiState, aiAnnotation, organizedText, wikiUpdates, tags, insights, reminder, errorMsg } = event.data
 
     if (type === 'digest-error') {
       const { period, error } = event.data
@@ -71,6 +71,37 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
       if (aiState === 'failed') console.error('[aiOrchestrator] worker failed for note', noteId, '—', errorMsg)
       const tagsJson = JSON.stringify(tags ?? [])
       updateNoteAiResult(noteId, aiState as 'complete' | 'failed', aiAnnotation ?? null, organizedText ?? null, tagsJson, insights ?? null)
+
+      // Hand off the reminder field to Plan 11-04's reminderService (if present).
+      // Dynamic import keeps this plan compilable even before 11-04 lands.
+      // The service is responsible for:
+      //   - confidence >= 0.85 gate (CAL-COST-01)
+      //   - isConnected() check from tokenStore
+      //   - parseReminderDate conversion
+      //   - 10s undo lifecycle + events.insert
+      // If the module doesn't exist yet, we swallow the error — the note:aiUpdate push
+      // above still carries the reminder field so the renderer knows something was detected.
+      if (aiState === 'complete' && reminder) {
+        try {
+          // reminderService.ts is created in Plan 11-04. Use Function('p', 'return import(p)')
+          // to prevent rollup/vite from statically resolving (and failing on) the module path
+          // at build time. At runtime in the Electron main process, Node's dynamic import
+          // will succeed once Plan 11-04 ships the module; until then, the catch swallows
+          // the MODULE_NOT_FOUND error — the note:aiUpdate push above still carries the
+          // reminder field so renderers (Plan 11-06) can display the chip.
+          const reminderSvcPath = __dirname + '/calendar/reminderService.js'
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const mod = await (Function('p', 'return import(p)')(reminderSvcPath) as Promise<any>)
+          if (mod && typeof mod.handleNoteReminder === 'function') {
+            // Fire-and-forget — the undo lifecycle is handled inside the service.
+            mod.handleNoteReminder(noteId, reminder).catch((err: unknown) => {
+              console.error('[aiOrchestrator] reminderService.handleNoteReminder failed:', err)
+            })
+          }
+        } catch {
+          // Module not yet present (Plan 11-03 shipped alone, 11-04 not yet) — expected.
+        }
+      }
 
       // Write wiki files to kb/
       if (wikiUpdates && wikiUpdates.length > 0) {
@@ -133,7 +164,7 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
 
       // Always push note AI update to renderer — include tags so NoteCard can display colored indicators
       if (mainWin && !mainWin.webContents.isDestroyed()) {
-        mainWin.webContents.send('note:aiUpdate', { noteId, aiState, aiAnnotation, organizedText, tags: tags ?? [], insights: insights ?? null })
+        mainWin.webContents.send('note:aiUpdate', { noteId, aiState, aiAnnotation, organizedText, tags: tags ?? [], insights: insights ?? null, reminder: reminder ?? null })
       }
     }
   })

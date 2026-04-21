@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('api', {
       organizedText: string | null
       tags: string[]
       insights: string | null
+      reminder: { text: string; date_text: string; confidence: number } | null
     }) => void
   ) => {
     const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
