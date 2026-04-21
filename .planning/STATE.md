@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-04-21T23:04:38.652Z"
+stopped_at: Completed 11-03-PLAN.md
+last_updated: "2026-04-21T23:06:34.684Z"
 progress:
   total_phases: 12
   completed_phases: 8
   total_plans: 49
-  completed_plans: 42
+  completed_plans: 43
 ---
 
 # Notal — Project State
@@ -21,8 +21,8 @@ Plan: 2 of 7
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T23:04:38.647Z
-**Stopped at:** Completed 11-02-PLAN.md
+**Last session:** 2026-04-21T23:06:34.679Z
+**Stopped at:** Completed 11-03-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -179,6 +179,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 11]: Electron 39.x does not expose getWebPreferences() on WebContents — boot assertion uses REQUIRED_WEB_PREFS sentinel constant
 - [Phase 11]: reminders.confidence uses integer({mode:'number'}) in drizzle (no real() helper); DDL uses REAL NOT NULL — SQLite dynamic typing bridges gap
 - [Phase 11]: CodeChallengeMethod.S256 enum used (not string literal) per google-auth-library TypeScript types; calendar() factory used from @googleapis/calendar (not google.calendar())
+- [Phase 11]: chrono.parse()+Luxon DateTime.fromObject for IANA-correct timezone conversion (not parseDate which uses host TZ)
+- [Phase 11]: Function('p','return import(p)') indirect dynamic import for reminderService to bypass rollup static analysis
 
 ### Quick Tasks Completed
 
