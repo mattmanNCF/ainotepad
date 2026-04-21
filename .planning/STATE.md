@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed 10-03-PLAN.md
-last_updated: "2026-04-21T17:09:56.386Z"
+stopped_at: Completed 10-04-PLAN.md
+last_updated: "2026-04-21T20:59:17.801Z"
 progress:
   total_phases: 12
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 42
-  completed_plans: 39
+  completed_plans: 40
 ---
 
 # Notal — Project State
@@ -21,8 +21,8 @@ Plan: 3 of 4
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T17:09:56.382Z
-**Stopped at:** Completed 10-03-PLAN.md
+**Last session:** 2026-04-21T20:59:09.731Z
+**Stopped at:** Completed 10-04-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -173,6 +173,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 10]: Tasks 2/3/4-wiring folded into one commit to keep typecheck green at each step (same pattern as 10-02)
 - [Phase 10]: History push is tick-level (every onValueChange); Plan 10-04 may refine to commit-only on pointer release
 - [Phase 10]: Ctrl+Z scoped via closest('[data-graph-params-panel]') on document.activeElement; data attr on outermost wrapper div
+- [Phase Phase 10]: axe verification implemented as DevTools console snippet — no CDP dependency, simpler than Playwright for one-shot scan
+- [Phase Phase 10]: forceCenter replaced with forceX/forceY for real per-node gravity; center baseline 0.01 after empirical tuning; repel max capped at 2.0
 
 ### Quick Tasks Completed
 
