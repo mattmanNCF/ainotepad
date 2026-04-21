@@ -282,6 +282,7 @@ async function drain(): Promise<void> {
         wiki_updates: Array<{ file: string; content: string }>
         tags: string[]
         insights: string | null
+        reminder: { text: string; date_text: string; confidence: number } | null
       }
       taskPort!.postMessage({
         type: 'result',
@@ -292,6 +293,7 @@ async function drain(): Promise<void> {
         wikiUpdates: parsed.wiki_updates ?? [],
         tags: resolvedTags(parsed.tags, task.rawText, task.establishedTags ?? []),
         insights: parsed.insights ?? null,
+        reminder: parsed.reminder ?? null,
       })
     } catch (err) {
       const errMsg = String((err as any)?.message ?? err)
@@ -307,6 +309,7 @@ async function drain(): Promise<void> {
         wikiUpdates: [],
         tags: [],
         insights: null,
+        reminder: null,
       })
     }
     // 500ms gap between calls to avoid rate limit bursts
@@ -349,9 +352,10 @@ ${relatedSection}
    - "_context.md" structure: ---\\nupdated: <ISO>\\nnote_count: <N>\\n---\\n## Active Interests\\n## Project Map\\n## Recurring Concepts\\n## Recent Notes Summary
 4. **tags**: ${tagConstraint}
 5. **insights**: Specific observation or connection. null only if truly nothing to say.
+6. **reminder**: If the note contains a specific date/time-bound intent the user is likely trying to remember ("remind me to X on Friday", "meeting Tuesday 3pm", "call Mom tomorrow") return {"text":"concise reminder title","date_text":"exact date phrase from the note","confidence":0.0..1.0}. Confidence reflects BOTH certainty of reminder intent AND date precision — high only for specific datetimes. Return null if no reminder is present.
 
 Respond with ONLY valid JSON. No markdown, no explanation.
-{"organized":"...","annotation":"...","wiki_updates":[{"file":"_context.md","content":"..."}],"tags":["tag1"],"insights":"..."}
+{"organized":"...","annotation":"...","wiki_updates":[{"file":"_context.md","content":"..."}],"tags":["tag1"],"insights":"...","reminder":null}
 
 Raw note: ${rawText}`
 }
@@ -386,6 +390,20 @@ async function callLocal(rawText: string, contextMd: string, conceptSnippets: st
       },
       tags: { type: 'array', items: { type: 'string' } },
       insights: { type: ['string', 'null'] },
+      reminder: {
+        oneOf: [
+          {
+            type: 'object',
+            properties: {
+              text: { type: 'string' },
+              date_text: { type: 'string' },
+              confidence: { type: 'number' },
+            },
+            required: ['text', 'date_text', 'confidence'],
+          },
+          { type: 'null' },
+        ],
+      },
     },
   })
 
