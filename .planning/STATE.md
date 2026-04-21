@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-04-21T17:30:00.000Z"
+stopped_at: Completed 10-03-PLAN.md
+last_updated: "2026-04-21T17:09:56.386Z"
 progress:
   total_phases: 12
   completed_phases: 7
   total_plans: 42
-  completed_plans: 38
+  completed_plans: 39
 ---
 
 # Notal — Project State
@@ -21,8 +21,8 @@ Plan: 3 of 4
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T17:30:00.000Z
-**Stopped at:** Completed 10-02-PLAN.md
+**Last session:** 2026-04-21T17:09:56.382Z
+**Stopped at:** Completed 10-03-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -170,6 +170,9 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 10-02]: d3AlphaTarget() confirmed public API on react-force-graph-2d ref — no _simulation fallback needed
 - [Phase 10-02]: GraphParamsPanel collapsed state resets on WikiGraph remount (colorKey change) — acceptable for v1
 - [Phase 10-02]: Keyboard slider nudges do not pre-heat simulation (pointer events only); deferred to Plan 10-04
+- [Phase 10]: Tasks 2/3/4-wiring folded into one commit to keep typecheck green at each step (same pattern as 10-02)
+- [Phase 10]: History push is tick-level (every onValueChange); Plan 10-04 may refine to commit-only on pointer release
+- [Phase 10]: Ctrl+Z scoped via closest('[data-graph-params-panel]') on document.activeElement; data attr on outermost wrapper div
 
 ### Quick Tasks Completed
 
