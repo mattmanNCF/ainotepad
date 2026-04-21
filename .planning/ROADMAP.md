@@ -33,7 +33,7 @@
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
-| 11. Google Calendar Integration | 1/7 | In Progress|  |
+| 11. Google Calendar Integration | 2/7 | In Progress|  |
 | 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 
 ---
@@ -195,7 +195,7 @@ Plans:
 **Plans**: 7 plans
 Plans:
 - [x] 11-01-PLAN.md — Foundation: deps, build-time secret injection, reminders table, CSP hardening, sandbox migration + boot assertion
-- [ ] 11-02-PLAN.md — OAuth loopback+PKCE + tokenStore (safeStorage) + googleClient factory + calendar:* connect/disconnect/status IPC
+- [x] 11-02-PLAN.md — OAuth loopback+PKCE + tokenStore (safeStorage) + googleClient factory + calendar:* connect/disconnect/status IPC
 - [ ] 11-03-PLAN.md — AI worker reminder piggyback (6th JSON field) + grammar + reminderParser (chrono+luxon) + 5-zone test matrix
 - [ ] 11-04-PLAN.md — reminderService: confidence gate, 10s undo lifecycle, events.insert with extendedProperties, 4 push channels, delete-confirm IPC surface
 - [ ] 11-05-PLAN.md — Delete cascade: notes:delete calls events.list+delete via notal_note_id; don't-ask-again preference

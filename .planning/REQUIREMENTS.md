@@ -8,8 +8,8 @@
 ### Calendar (Google Calendar integration)
 
 - [x] **CAL-SEC-01**: OAuth client type "Desktop app"; PKCE; no client_secret persisted; `asar extract` grep returns zero client_secret hits
-- [ ] **CAL-SEC-02**: Refresh token stored only via `safeStorage.encryptString()`; config.json contains zero Google token prefixes
-- [ ] **CAL-SEC-03**: Loopback redirect on ephemeral port, 127.0.0.1-only, non-deterministic port
+- [x] **CAL-SEC-02**: Refresh token stored only via `safeStorage.encryptString()`; config.json contains zero Google token prefixes
+- [x] **CAL-SEC-03**: Loopback redirect on ephemeral port, 127.0.0.1-only, non-deterministic port
 - [ ] **CAL-UX-01**: No Calendar write without (a) silent+undo toast reachable OR (b) explicit user click within preceding 5s in opt-in confirm mode
 - [ ] **CAL-UX-02**: Health indicator (green/yellow/red + last-success timestamp); per-note pending chip on failure
 - [ ] **CAL-TZ-01**: `{timestamp_utc, original_tz, original_text}` triple; test matrix UTC + America/Los_Angeles + Asia/Kolkata + Pacific/Chatham + DST crossover
