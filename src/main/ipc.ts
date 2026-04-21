@@ -9,6 +9,8 @@ import { deleteNote, hideNote, reprocessNote, insertNoteToFts, getSqlite, countN
 import { Conf } from 'electron-conf/main'
 import { listKbFiles, readKbFile, deleteKbFile } from './kb'
 import { getTagColors, setTagColors } from './tagColors'
+import { getGraphParams, setGraphParams } from './graphParams'
+import type { GraphParams } from '../renderer/src/types/graphParams'
 import { detectModelTier, findExistingModel, downloadModel, hasFineTunedModel, fineTunedModelPath, resolveModelPath } from './localModel'
 import { forceScheduleDigest } from './digestScheduler'
 import { readHarnessFiles, writeHarnessFiles, updateUserProfile } from './agentHarness'
@@ -362,6 +364,12 @@ export function registerIpcHandlers() {
 
     // Notify renderer
     BrowserWindow.getAllWindows()[0]?.webContents.send('kb:updated')
+  })
+
+  ipcMain.handle('graph-params:get', (): GraphParams => getGraphParams())
+
+  ipcMain.handle('graph-params:save', (_e, params: GraphParams): void => {
+    setGraphParams(params)
   })
 
   ipcMain.handle('localModel:getStatus', () => {
