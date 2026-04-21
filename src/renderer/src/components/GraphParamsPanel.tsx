@@ -13,8 +13,6 @@ interface GraphParamsPanelProps {
   onReset: () => void                           // fires with no args; parent resets to DEFAULT_GRAPH_PARAMS
 }
 
-const PARAM_KEYS = ['linkForce', 'centerForce', 'repelForce', 'edgeThickness', 'nodeSize'] as const
-
 // DEFAULT_GRAPH_PARAMS imported above for Plan 10-04 tooltip/aria-description; not used directly here yet.
 void DEFAULT_GRAPH_PARAMS
 
@@ -54,8 +52,9 @@ export function GraphParamsPanel({ params, onParamsChange, onDragStart, onDragEn
       <button
         onClick={() => setCollapsed(v => !v)}
         style={{ width: '100%', textAlign: 'left', cursor: 'pointer', background: 'none', border: 'none' }}
-        className="flex items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white rounded"
+        className="flex items-center justify-between gap-2 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
         aria-expanded={!collapsed}
+        aria-label="Toggle graph parameters panel"
       >
         <span>Graph params</span>
         <span style={{ fontSize: 10, opacity: 0.7 }}>{collapsed ? '▾' : '▴'}</span>
@@ -87,60 +86,165 @@ export function GraphParamsPanel({ params, onParamsChange, onDragStart, onDragEn
             </button>
           </div>
 
-          {PARAM_KEYS.map(key => {
-            const range = SLIDER_RANGES[key]
-            const label = PARAM_LABELS[key]
-            const inputId = `gpanel-${key}`
+          {/* Row: Link force */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="gp-linkForce" className="text-xs text-gray-400 flex-shrink-0" style={{ width: 96 }}>
+              {PARAM_LABELS.linkForce}
+            </label>
+            <div className="flex-1" onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+              <Slider.Root
+                className="gpanel-slider-root"
+                min={SLIDER_RANGES.linkForce.min}
+                max={SLIDER_RANGES.linkForce.max}
+                step={SLIDER_RANGES.linkForce.step}
+                value={[params.linkForce]}
+                onValueChange={([v]) => handleSliderChange('linkForce', v)}
+                aria-label={PARAM_LABELS.linkForce}
+              >
+                <Slider.Track className="gpanel-slider-track"><Slider.Range className="gpanel-slider-range" /></Slider.Track>
+                <Slider.Thumb className="gpanel-slider-thumb" />
+              </Slider.Root>
+            </div>
+            <input
+              id="gp-linkForce"
+              type="number"
+              min={SLIDER_RANGES.linkForce.min}
+              max={SLIDER_RANGES.linkForce.max}
+              step={SLIDER_RANGES.linkForce.step}
+              value={params.linkForce}
+              onChange={e => handleNumberInput('linkForce', e.target.value)}
+              className="text-xs text-gray-300 bg-gray-700 border border-gray-600 rounded px-1 py-0.5 text-right focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+              style={{ width: 56 }}
+            />
+          </div>
 
-            return (
-              <div key={key} className="flex items-center gap-2">
-                {/* Label */}
-                <label
-                  htmlFor={inputId}
-                  className="text-xs text-gray-400 flex-shrink-0"
-                  style={{ width: 96 }}
-                >
-                  {label}
-                </label>
+          {/* Row: Center force */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="gp-centerForce" className="text-xs text-gray-400 flex-shrink-0" style={{ width: 96 }}>
+              {PARAM_LABELS.centerForce}
+            </label>
+            <div className="flex-1" onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+              <Slider.Root
+                className="gpanel-slider-root"
+                min={SLIDER_RANGES.centerForce.min}
+                max={SLIDER_RANGES.centerForce.max}
+                step={SLIDER_RANGES.centerForce.step}
+                value={[params.centerForce]}
+                onValueChange={([v]) => handleSliderChange('centerForce', v)}
+                aria-label={PARAM_LABELS.centerForce}
+              >
+                <Slider.Track className="gpanel-slider-track"><Slider.Range className="gpanel-slider-range" /></Slider.Track>
+                <Slider.Thumb className="gpanel-slider-thumb" />
+              </Slider.Root>
+            </div>
+            <input
+              id="gp-centerForce"
+              type="number"
+              min={SLIDER_RANGES.centerForce.min}
+              max={SLIDER_RANGES.centerForce.max}
+              step={SLIDER_RANGES.centerForce.step}
+              value={params.centerForce}
+              onChange={e => handleNumberInput('centerForce', e.target.value)}
+              className="text-xs text-gray-300 bg-gray-700 border border-gray-600 rounded px-1 py-0.5 text-right focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+              style={{ width: 56 }}
+            />
+          </div>
 
-                {/* Radix Slider — pointer events drive onDragStart / onDragEnd */}
-                <div
-                  className="flex-1"
-                  onPointerDown={onDragStart}
-                  onPointerUp={onDragEnd}
-                  onPointerCancel={onDragEnd}
-                >
-                  <Slider.Root
-                    className="gpanel-slider-root"
-                    min={range.min}
-                    max={range.max}
-                    step={range.step}
-                    value={[params[key]]}
-                    onValueChange={([v]) => handleSliderChange(key, v)}
-                    aria-label={label}
-                  >
-                    <Slider.Track className="gpanel-slider-track">
-                      <Slider.Range className="gpanel-slider-range" />
-                    </Slider.Track>
-                    <Slider.Thumb className="gpanel-slider-thumb" />
-                  </Slider.Root>
-                </div>
+          {/* Row: Repel force */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="gp-repelForce" className="text-xs text-gray-400 flex-shrink-0" style={{ width: 96 }}>
+              {PARAM_LABELS.repelForce}
+            </label>
+            <div className="flex-1" onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+              <Slider.Root
+                className="gpanel-slider-root"
+                min={SLIDER_RANGES.repelForce.min}
+                max={SLIDER_RANGES.repelForce.max}
+                step={SLIDER_RANGES.repelForce.step}
+                value={[params.repelForce]}
+                onValueChange={([v]) => handleSliderChange('repelForce', v)}
+                aria-label={PARAM_LABELS.repelForce}
+              >
+                <Slider.Track className="gpanel-slider-track"><Slider.Range className="gpanel-slider-range" /></Slider.Track>
+                <Slider.Thumb className="gpanel-slider-thumb" />
+              </Slider.Root>
+            </div>
+            <input
+              id="gp-repelForce"
+              type="number"
+              min={SLIDER_RANGES.repelForce.min}
+              max={SLIDER_RANGES.repelForce.max}
+              step={SLIDER_RANGES.repelForce.step}
+              value={params.repelForce}
+              onChange={e => handleNumberInput('repelForce', e.target.value)}
+              className="text-xs text-gray-300 bg-gray-700 border border-gray-600 rounded px-1 py-0.5 text-right focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+              style={{ width: 56 }}
+            />
+          </div>
 
-                {/* Paired numeric input */}
-                <input
-                  id={inputId}
-                  type="number"
-                  min={range.min}
-                  max={range.max}
-                  step={range.step}
-                  value={params[key]}
-                  onChange={e => handleNumberInput(key, e.target.value)}
-                  className="text-xs text-gray-300 bg-gray-700 border border-gray-600 rounded px-1 py-0.5 text-right"
-                  style={{ width: 56 }}
-                />
-              </div>
-            )
-          })}
+          {/* Row: Edge thickness */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="gp-edgeThickness" className="text-xs text-gray-400 flex-shrink-0" style={{ width: 96 }}>
+              {PARAM_LABELS.edgeThickness}
+            </label>
+            <div className="flex-1" onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+              <Slider.Root
+                className="gpanel-slider-root"
+                min={SLIDER_RANGES.edgeThickness.min}
+                max={SLIDER_RANGES.edgeThickness.max}
+                step={SLIDER_RANGES.edgeThickness.step}
+                value={[params.edgeThickness]}
+                onValueChange={([v]) => handleSliderChange('edgeThickness', v)}
+                aria-label={PARAM_LABELS.edgeThickness}
+              >
+                <Slider.Track className="gpanel-slider-track"><Slider.Range className="gpanel-slider-range" /></Slider.Track>
+                <Slider.Thumb className="gpanel-slider-thumb" />
+              </Slider.Root>
+            </div>
+            <input
+              id="gp-edgeThickness"
+              type="number"
+              min={SLIDER_RANGES.edgeThickness.min}
+              max={SLIDER_RANGES.edgeThickness.max}
+              step={SLIDER_RANGES.edgeThickness.step}
+              value={params.edgeThickness}
+              onChange={e => handleNumberInput('edgeThickness', e.target.value)}
+              className="text-xs text-gray-300 bg-gray-700 border border-gray-600 rounded px-1 py-0.5 text-right focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+              style={{ width: 56 }}
+            />
+          </div>
+
+          {/* Row: Node size */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="gp-nodeSize" className="text-xs text-gray-400 flex-shrink-0" style={{ width: 96 }}>
+              {PARAM_LABELS.nodeSize}
+            </label>
+            <div className="flex-1" onPointerDown={onDragStart} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+              <Slider.Root
+                className="gpanel-slider-root"
+                min={SLIDER_RANGES.nodeSize.min}
+                max={SLIDER_RANGES.nodeSize.max}
+                step={SLIDER_RANGES.nodeSize.step}
+                value={[params.nodeSize]}
+                onValueChange={([v]) => handleSliderChange('nodeSize', v)}
+                aria-label={PARAM_LABELS.nodeSize}
+              >
+                <Slider.Track className="gpanel-slider-track"><Slider.Range className="gpanel-slider-range" /></Slider.Track>
+                <Slider.Thumb className="gpanel-slider-thumb" />
+              </Slider.Root>
+            </div>
+            <input
+              id="gp-nodeSize"
+              type="number"
+              min={SLIDER_RANGES.nodeSize.min}
+              max={SLIDER_RANGES.nodeSize.max}
+              step={SLIDER_RANGES.nodeSize.step}
+              value={params.nodeSize}
+              onChange={e => handleNumberInput('nodeSize', e.target.value)}
+              className="text-xs text-gray-300 bg-gray-700 border border-gray-600 rounded px-1 py-0.5 text-right focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+              style={{ width: 56 }}
+            />
+          </div>
 
         </div>
       )}
