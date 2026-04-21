@@ -14,7 +14,7 @@
 - [ ] **CAL-UX-02**: Health indicator (green/yellow/red + last-success timestamp); per-note pending chip on failure
 - [x] **CAL-TZ-01**: `{timestamp_utc, original_tz, original_text}` triple; test matrix UTC + America/Los_Angeles + Asia/Kolkata + Pacific/Chatham + DST crossover
 - [x] **CAL-COST-01**: Piggyback pass; confidence ≥0.85 gate; 50-note corpus (5 TP) triggers ≤6 creation attempts
-- [ ] **CAL-DEL-01**: Note delete cascades to Google event delete; confirmation with "don't ask again"; orphan reconciliation via `extendedProperties.private.notal_note_id`
+- [x] **CAL-DEL-01**: Note delete cascades to Google event delete; confirmation with "don't ask again"; orphan reconciliation via `extendedProperties.private.notal_note_id`
 
 ### Graph (Dynamic wiki-graph control panel)
 

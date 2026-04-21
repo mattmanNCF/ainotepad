@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed 11-04-PLAN.md
-last_updated: "2026-04-21T23:13:57.718Z"
+stopped_at: Completed 11-05-PLAN.md
+last_updated: "2026-04-21T23:19:38.254Z"
 progress:
   total_phases: 12
   completed_phases: 8
   total_plans: 49
-  completed_plans: 44
+  completed_plans: 45
 ---
 
 # Notal — Project State
@@ -21,8 +21,8 @@ Plan: 2 of 7
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T23:13:57.714Z
-**Stopped at:** Completed 11-04-PLAN.md
+**Last session:** 2026-04-21T23:19:38.250Z
+**Stopped at:** Completed 11-05-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -182,6 +182,7 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 11]: chrono.parse()+Luxon DateTime.fromObject for IANA-correct timezone conversion (not parseDate which uses host TZ)
 - [Phase 11]: Function('p','return import(p)') indirect dynamic import for reminderService to bypass rollup static analysis
 - [Phase 11]: getLatestReminderForNote uses drizzle select not raw SQL - raw SELECT * returns snake_case breaking calendarSyncStatus on renderer
+- [Phase 11]: cascadeCalendarEventForNote queries Google privateExtendedProperty (not local reminders.event_id) as source of truth; 404/410 treated as successfully deleted; cascade never re-throws
 
 ### Quick Tasks Completed
 
