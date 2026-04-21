@@ -1,8 +1,8 @@
 import ForceGraph2D from 'react-force-graph-2d'
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import type { GraphParams } from '../types/graphParams'
-import { DEFAULT_GRAPH_PARAMS } from '../types/graphParams'
+import { GraphParamsPanel } from './GraphParamsPanel'
 
 interface GraphNode {
   id: string
@@ -21,13 +21,14 @@ interface WikiGraphProps {
   nodes: GraphNode[]
   links: GraphLink[]
   tagColors: Record<string, string>
-  graphParams?: GraphParams
+  graphParams: GraphParams
+  onGraphParamsChange: (next: GraphParams) => void
   onNodeClick: (filename: string) => void
   onNodeDelete: (filename: string) => void
   onSetTagColor: (tag: string, color: string) => void
 }
 
-export function WikiGraph({ nodes, links, tagColors, graphParams = DEFAULT_GRAPH_PARAMS, onNodeClick, onNodeDelete, onSetTagColor }: WikiGraphProps) {
+export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsChange, onNodeClick, onNodeDelete, onSetTagColor }: WikiGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const graphRef = useRef<any>(null)
   const [dims, setDims] = useState({ width: 600, height: 400 })
@@ -72,6 +73,24 @@ export function WikiGraph({ nodes, links, tagColors, graphParams = DEFAULT_GRAPH
     if (chargeForce) chargeForce.strength(-30 * graphParams.repelForce)   // baseline -30 (d3 default)
   }, [nodes, links, graphParams])
 
+  // alphaTarget lifecycle — keep simulation warm at 0.1 during slider drag, settle at 0 on release.
+  // Per ROADMAP Phase 10 spec (B1 re-heat pitfall fix).
+  const handleDragStart = useCallback(() => {
+    const g = graphRef.current
+    if (!g) return
+    if (typeof (g as any).d3AlphaTarget === 'function') {
+      (g as any).d3AlphaTarget(0.1)
+    }
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    const g = graphRef.current
+    if (!g) return
+    if (typeof (g as any).d3AlphaTarget === 'function') {
+      (g as any).d3AlphaTarget(0)
+    }
+  }, [])
+
   // Dismiss context menu on outside mousedown
   useEffect(() => {
     if (!ctxMenu) return
@@ -83,7 +102,13 @@ export function WikiGraph({ nodes, links, tagColors, graphParams = DEFAULT_GRAPH
   }, [ctxMenu])
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-gray-900">
+    <div ref={containerRef} className="w-full h-full bg-gray-900 relative">
+      <GraphParamsPanel
+        params={graphParams}
+        onParamsChange={onGraphParamsChange}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      />
       <ForceGraph2D
         ref={graphRef}
         graphData={{ nodes, links }}

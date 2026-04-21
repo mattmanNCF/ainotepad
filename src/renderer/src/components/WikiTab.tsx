@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { WikiSidebar } from './WikiSidebar'
 import { WikiPane } from './WikiPane'
+import { DEFAULT_GRAPH_PARAMS } from '../types/graphParams'
+import type { GraphParams } from '../types/graphParams'
 
 interface KbFileEntry {
   filename: string
@@ -64,6 +66,26 @@ export function WikiTab() {
   const [activeContent, setActiveContent] = useState<string | null>(null)
   const [showGraph, setShowGraph] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [graphParams, setGraphParamsState] = useState<GraphParams>(DEFAULT_GRAPH_PARAMS)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Load saved params on mount (fires once). Ignore errors — fall back to defaults.
+  useEffect(() => {
+    window.api.graphParams.get().then(p => setGraphParamsState(p)).catch(() => { /* keep defaults */ })
+  }, [])
+
+  // Throttled save: coalesce rapid slider updates to at most one IPC save per 50ms.
+  // Plan 10-03 will replace this with history-aware save; for now, straight debounce is fine.
+  const handleParamsChange = useCallback((next: GraphParams) => {
+    setGraphParamsState(next)
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => {
+      window.api.graphParams.save(next).catch(err => console.warn('[graphParams] save failed', err))
+    }, 50)
+  }, [])
+
+  // Clean up pending save on unmount.
+  useEffect(() => () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current) }, [])
 
   // useRef for content cache — mutations do NOT trigger re-renders.
   // If this were useState, the cache update would invalidate useCallback deps,
@@ -220,6 +242,8 @@ export function WikiTab() {
         onToggleGraph={() => setShowGraph(v => !v)}
         onNodeDelete={handleDeleteFile}
         onSetTagColor={handleSetTagColor}
+        graphParams={graphParams}
+        onGraphParamsChange={handleParamsChange}
       />
 
       {deleteTarget && (
