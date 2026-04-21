@@ -23,10 +23,9 @@ Last activity: 2026-04-19 — Research phase complete (SUMMARY.md committed). Pa
 
 ## Session Continuity
 
-**Last session:** 2026-04-19
-**Stopped at:** Milestone v0.3.1 fully defined — REQUIREMENTS + ROADMAP committed, ready for phase planning.
-**Resume file:** `.planning/HANDOFF.json` (refreshed; next action = Plan Phase 10)
-**Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2.
+**Last session:** 2026-04-21
+**Stopped at:** HANDOFF.json consumed + deleted (stale prerequisites cleared). Ready to plan Phase 10.
+**Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
 ## Project Reference

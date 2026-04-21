@@ -32,7 +32,7 @@
 | 07. Note Card Visual Redesign | 2/2 | Complete    | 2026-04-18 |
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
-| 10. Dynamic Wiki Graph Parameters | 0/? | Not started | - |
+| 10. Dynamic Wiki Graph Parameters | 0/4 | Not started | - |
 | 11. Google Calendar Integration | 0/? | Not started | - |
 | 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 
@@ -171,7 +171,12 @@ Plans:
   3. 3 named presets (Dense, Spacious, Hierarchical) apply in one click; always-visible Reset restores adaptive defaults; Ctrl+Z steps back through the last 10 parameter changes
   4. Panel is keyboard-only operable with paired numeric input per slider and axe-core reports zero violations
   5. Chosen slider values persist across app restarts via `electron-conf` per-user
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 10-01-PLAN.md — Install @radix-ui/react-slider + IPC scaffold (graph-params:get/save + electron-conf persistence + GraphParams contract)
+- [ ] 10-02-PLAN.md — GraphParamsPanel component + 5 sliders wired live to WikiGraph d3 forces (50ms save throttle + alphaTarget lifecycle)
+- [ ] 10-03-PLAN.md — 3 presets (Dense/Spacious/Hierarchical) + always-visible Reset + Ctrl+Z undo (last 10, panel-focus scoped)
+- [ ] 10-04-PLAN.md — Keyboard a11y + axe-core scan (zero violations) + 500-node perf fixture (p95 ≤50ms)
 **Research flag**: LOW — skip `/gsd:research-phase`
 **Deps**: `@radix-ui/react-slider@1.3.6`
 
