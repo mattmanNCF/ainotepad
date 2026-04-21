@@ -2,29 +2,27 @@
 gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
-status: milestone_defined
-last_updated: "2026-04-19T21:30:00.000Z"
+status: unknown
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-04-21T16:54:01.524Z"
 progress:
-  total_phases: 3
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 12
+  completed_phases: 7
+  total_plans: 42
+  completed_plans: 37
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: Not started (milestone defined; ready to plan Phase 10)
-Plan: —
-Status: Milestone defined — REQUIREMENTS + ROADMAP committed; awaiting /gsd:plan-phase 10
-Last activity: 2026-04-19 — Research phase complete (SUMMARY.md committed). Path A locked for mobile. Session ended at 81% context; resume target = REQUIREMENTS.md write.
-2026-04-19 — Milestone v0.3.1 fully defined. Path C locked for mobile (Google Drive appDataFolder + github.io PWA). Phases 10/11/12 in ROADMAP.md.
+Phase: 10 (Dynamic Wiki Graph Parameters) — EXECUTING
+Plan: 2 of 4
 
 ## Session Continuity
 
-**Last session:** 2026-04-21
-**Stopped at:** HANDOFF.json consumed + deleted (stale prerequisites cleared). Ready to plan Phase 10.
+**Last session:** 2026-04-21T16:53:48.594Z
+**Stopped at:** Completed 10-01-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -33,17 +31,19 @@ Last activity: 2026-04-19 — Research phase complete (SUMMARY.md committed). Pa
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Defining v0.3.1 requirements (Google Calendar + dynamic graph sliders + mobile extension)
+**Current focus:** Phase 10 — Dynamic Wiki Graph Parameters
 
 ## Previous Milestone Summaries
 
 **v0.3.0 — Corkboard Polish + App Icon (Phases 07-09, shipped 2026-04-19)**
+
 - Compact post-it cards with hover-expand, tag-color borders, tag-color dots
 - Intra-tag corkboard edges (subsequently retired; connections moved to wiki graph)
 - Patterns footer fits default window; weekly digest rolling 7-day window
 - Illustrated lemur icon end-to-end (taskbar, tray, installer, About)
 
 **v1.0 — Initial Release (Phases 01-06, shipped 2026-04-17)**
+
 - 6 phases complete, v0.1.0 shipped to GitHub Releases
 - Full AI pipeline: capture → tag → wiki → insights
 - Patterns tab, FTS5 + semantic search, MCP agent endpoint
@@ -163,6 +163,9 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 09-app-icon]: BrowserWindow icon spread changed from linux-only conditional to unconditional — no regression on macOS, correct on Windows
 - [Phase 09-app-icon]: electron-builder NSIS: always declare installerIcon + uninstallerIcon + installerHeaderIcon explicitly rather than relying on buildResources convention
 - [Phase 09-03]: Orchestrator initially misread user feedback and reverted to SVG note-page icon; user clarified the lemur was always wanted; lemur icon (`build/icon-source.png`, 1,270,007 bytes) restored from git history, `generate-icons.cjs` updated to use PNG source, all derivatives regenerated, v0.3.0 installer rebuilt with lemur embedded (592 MB), note-page v0.3.0 uninstalled, lemur v0.3.0 installed at C:\Users\mflma\AppData\Local\Programs\notal\Notal.exe (ProductVersion 0.3.0.0); icon cache flushed; awaiting user visual confirmation before tag + push to main
+- [Phase 10]: @radix-ui/react-slider requires --legacy-peer-deps (same React 19 peer conflict as react-d3-cloud and sharp)
+- [Phase 10]: GraphParams type file in renderer/src/types/ imported via 'import type' in main — erased at compile time, no runtime cross-boundary dependency
+- [Phase 10]: preload/index.d.ts inlines GraphParams shape rather than importing — keeps file ambient, avoids module-declaration collision
 
 ### Quick Tasks Completed
 
