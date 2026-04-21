@@ -113,12 +113,6 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on('calendar:eventFailed', handler)
       return () => ipcRenderer.removeListener('calendar:eventFailed', handler)
     },
-    needsDeleteConfirm: (noteId: string): Promise<boolean> =>
-      ipcRenderer.invoke('calendar:needsDeleteConfirm', noteId),
-    setDontAskDeleteCalEvent: (value: boolean): Promise<void> =>
-      ipcRenderer.invoke('calendar:setDontAskDeleteCalEvent', value),
-    getDontAskDeleteCalEvent: (): Promise<boolean> =>
-      ipcRenderer.invoke('calendar:getDontAskDeleteCalEvent'),
   },
   reminders: {
     getForNote: (noteId: string): Promise<{

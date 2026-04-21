@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
+import { GoogleCalendarSection } from './GoogleCalendarSection'
 
 interface SettingsPanelProps {
   onClose: () => void
@@ -367,6 +368,12 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
   }
 }`}
           </pre>
+        </div>
+
+        {/* Integrations — Google Calendar */}
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Integrations</p>
+          <GoogleCalendarSection />
         </div>
       </div>
     </div>

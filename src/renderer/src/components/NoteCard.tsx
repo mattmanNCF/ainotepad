@@ -33,8 +33,17 @@ function formatTime(iso: string): string {
 const MENU_W = 130
 const MENU_H = 96
 
+interface ReminderRow {
+  id: string
+  eventTitle: string
+  timestampUtc: string
+  calendarSyncStatus: 'pending' | 'synced' | 'failed' | 'cancelled'
+  calendarLink: string | null
+}
+
 export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess, onRef }: NoteCardProps) {
   const [tags, setTags] = useState<string[]>(note.tags)
+  const [reminder, setReminder] = useState<ReminderRow | null>(null)
   const [menu, setMenu] = useState<{ x: number; y: number } | null>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
@@ -63,13 +72,53 @@ export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess, onRef
   }, [])
 
   useEffect(() => {
-    if (!window.api.onAiUpdate) return
-    const unsub = window.api.onAiUpdate((data) => {
-      if (data.noteId === note.id) {
-        if (data.tags) setTags(data.tags)
-      }
+    const unsubs: Array<() => void> = []
+
+    // Initial reminder load
+    window.api.reminders.getForNote(note.id).then((r) => {
+      if (r) setReminder({
+        id: r.id,
+        eventTitle: r.eventTitle,
+        timestampUtc: r.timestampUtc,
+        calendarSyncStatus: r.calendarSyncStatus,
+        calendarLink: r.calendarLink,
+      })
     })
-    return unsub
+
+    // Tags push
+    if (window.api.onAiUpdate) {
+      unsubs.push(window.api.onAiUpdate((data) => {
+        if (data.noteId === note.id && data.tags) setTags(data.tags)
+      }))
+    }
+
+    // Reminder lifecycle — refresh reminder state when any push matches this note
+    const refreshReminder = () => {
+      window.api.reminders.getForNote(note.id).then((r) => {
+        setReminder(r ? {
+          id: r.id,
+          eventTitle: r.eventTitle,
+          timestampUtc: r.timestampUtc,
+          calendarSyncStatus: r.calendarSyncStatus,
+          calendarLink: r.calendarLink,
+        } : null)
+      })
+    }
+
+    unsubs.push(window.api.calendar.onEventPending((data) => {
+      if (data.noteId === note.id) refreshReminder()
+    }))
+    unsubs.push(window.api.calendar.onEventSynced((data) => {
+      if (data.noteId === note.id) refreshReminder()
+    }))
+    unsubs.push(window.api.calendar.onEventCancelled((data) => {
+      if (data.noteId === note.id) refreshReminder()
+    }))
+    unsubs.push(window.api.calendar.onEventFailed((data) => {
+      if (data.noteId === note.id) refreshReminder()
+    }))
+
+    return () => { for (const u of unsubs) u() }
   }, [note.id])
 
   useEffect(() => {
@@ -130,15 +179,32 @@ export function NoteCard({ note, tagColors, onDelete, onHide, onReprocess, onRef
         </div>
       )}
 
-      {/* Timestamp + AI state indicator — bottom of card */}
-      <div className="absolute bottom-1 left-2 right-2 flex justify-between items-center">
+      {/* Timestamp + reminder chip + AI state indicator — bottom of card */}
+      <div className="absolute bottom-1 left-2 right-2 flex justify-between items-center gap-2">
         <span className="text-[9px] text-gray-600">{formatTime(note.submittedAt)}</span>
-        {note.aiState === 'pending' && (
-          <span className="text-[10px] text-amber-400/80" title="Processing…">⏳</span>
-        )}
-        {note.aiState === 'failed' && (
-          <span className="text-[10px] text-red-400/80" title="Processing failed">✗</span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {reminder?.calendarSyncStatus === 'pending' && (
+            <span className="text-[10px] text-amber-400/70" title={`Pending: ${reminder.eventTitle}`}>⏳ cal</span>
+          )}
+          {reminder?.calendarSyncStatus === 'synced' && reminder.calendarLink && (
+            <button
+              onClick={(e) => { e.stopPropagation(); window.api.calendar.openLink(reminder.calendarLink!) }}
+              className="text-[9px] text-blue-400/70 hover:text-blue-300"
+              title={reminder.eventTitle}
+            >
+              ▸ Cal
+            </button>
+          )}
+          {reminder?.calendarSyncStatus === 'failed' && (
+            <span className="text-[10px] text-red-400/70" title={`Calendar failed: ${reminder.eventTitle}`}>⚠ cal</span>
+          )}
+          {note.aiState === 'pending' && (
+            <span className="text-[10px] text-amber-400/80" title="Processing…">⏳</span>
+          )}
+          {note.aiState === 'failed' && (
+            <span className="text-[10px] text-red-400/80" title="Processing failed">✗</span>
+          )}
+        </div>
       </div>
 
       {/* Portal: renders directly on document.body — escapes all stacking contexts */}

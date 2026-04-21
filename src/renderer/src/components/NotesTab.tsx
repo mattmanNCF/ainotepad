@@ -21,6 +21,8 @@ export function NotesTab() {
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map())
   const [similarPairs, setSimilarPairs] = useState<Array<{ a: string; b: string }>>([])
   const [edgeLines, setEdgeLines] = useState<Array<{ key: string; x1: number; y1: number; x2: number; y2: number }>>([])
+  const [deleteConfirm, setDeleteConfirm] = useState<{ noteId: string } | null>(null)
+  const [dontAskAgain, setDontAskAgain] = useState(false)
 
   // Load tag colors once and refresh when KB updates — shared across all cards (no per-card race)
   useEffect(() => {
@@ -102,10 +104,25 @@ export function NotesTab() {
     setEdgeLines(lines)
   }, [similarPairs, notes])
 
-  const handleDelete = useCallback((id: string) => {
-    window.api.notes.delete(id)
-    setNotes(prev => prev.filter(n => n.id !== id))
+  const handleDelete = useCallback(async (id: string) => {
+    const needsConfirm = await window.api.calendar.needsDeleteConfirm(id)
+    if (needsConfirm) {
+      setDeleteConfirm({ noteId: id })
+      setDontAskAgain(false)
+    } else {
+      await window.api.notes.delete(id)
+      setNotes(prev => prev.filter(n => n.id !== id))
+    }
   }, [])
+
+  const confirmDelete = useCallback(async () => {
+    if (!deleteConfirm) return
+    if (dontAskAgain) await window.api.calendar.setDontAskDeleteCalEvent(true)
+    await window.api.notes.delete(deleteConfirm.noteId)
+    setNotes(prev => prev.filter(n => n.id !== deleteConfirm.noteId))
+    setDeleteConfirm(null)
+    setDontAskAgain(false)
+  }, [deleteConfirm, dontAskAgain])
 
   const handleHide = useCallback((id: string) => {
     window.api.notes.hide(id)
@@ -188,6 +205,44 @@ export function NotesTab() {
         </div>
       </div>
       <CaptureBuffer onSubmit={handleSubmit} />
+
+      {/* Delete-with-calendar-event confirm dialog */}
+      {deleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          onClick={(e) => { if (e.target === e.currentTarget) setDeleteConfirm(null) }}
+        >
+          <div className="bg-[#1a1a14] border border-white/10 rounded-md p-5 w-80 shadow-xl">
+            <h3 className="text-sm font-semibold text-gray-200 mb-2">Delete note and calendar event?</h3>
+            <p className="text-xs text-gray-400 mb-4">
+              This note has a linked Google Calendar event. Deleting the note will also delete the event.
+            </p>
+            <label className="flex items-center gap-2 text-xs text-gray-500 mb-4 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={dontAskAgain}
+                onChange={(e) => setDontAskAgain(e.target.checked)}
+                className="accent-blue-400"
+              />
+              <span>Don&apos;t ask again</span>
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-1.5 rounded text-xs bg-white/5 hover:bg-white/10 text-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 py-1.5 rounded text-xs bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors"
+              >
+                Delete both
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

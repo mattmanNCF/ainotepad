@@ -5,6 +5,7 @@ import { WikiTab } from './components/WikiTab'
 import { SearchTab } from './components/SearchTab'
 import { SettingsPanel } from './components/SettingsPanel'
 import { OnboardingModal } from './components/OnboardingModal'
+import { UndoToast } from './components/UndoToast'
 
 type Tab = 'notes' | 'wiki' | 'search'
 
@@ -39,6 +40,7 @@ export default function App() {
       </div>
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
       {showOnboarding && <OnboardingModal onDismiss={() => setShowOnboarding(false)} />}
+      <UndoToast />
     </div>
   )
 }
