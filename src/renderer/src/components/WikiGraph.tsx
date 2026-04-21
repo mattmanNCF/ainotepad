@@ -23,12 +23,14 @@ interface WikiGraphProps {
   tagColors: Record<string, string>
   graphParams: GraphParams
   onGraphParamsChange: (next: GraphParams) => void
+  onGraphParamsPresetClick: (next: GraphParams) => void
+  onGraphParamsReset: () => void
   onNodeClick: (filename: string) => void
   onNodeDelete: (filename: string) => void
   onSetTagColor: (tag: string, color: string) => void
 }
 
-export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsChange, onNodeClick, onNodeDelete, onSetTagColor }: WikiGraphProps) {
+export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsChange, onGraphParamsPresetClick, onGraphParamsReset, onNodeClick, onNodeDelete, onSetTagColor }: WikiGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const graphRef = useRef<any>(null)
   const [dims, setDims] = useState({ width: 600, height: 400 })
@@ -106,6 +108,8 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
       <GraphParamsPanel
         params={graphParams}
         onParamsChange={onGraphParamsChange}
+        onPresetClick={onGraphParamsPresetClick}
+        onReset={onGraphParamsReset}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       />

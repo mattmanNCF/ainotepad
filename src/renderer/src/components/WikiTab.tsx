@@ -69,19 +69,71 @@ export function WikiTab() {
   const [graphParams, setGraphParamsState] = useState<GraphParams>(DEFAULT_GRAPH_PARAMS)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Undo history — at most 10 entries. historyRef holds PAST states only (newest last).
+  // Each entry is a snapshot of graphParams BEFORE the change that produced the current value.
+  const historyRef = useRef<GraphParams[]>([])
+  const HISTORY_CAP = 10
+
   // Load saved params on mount (fires once). Ignore errors — fall back to defaults.
   useEffect(() => {
     window.api.graphParams.get().then(p => setGraphParamsState(p)).catch(() => { /* keep defaults */ })
   }, [])
 
-  // Throttled save: coalesce rapid slider updates to at most one IPC save per 50ms.
-  // Plan 10-03 will replace this with history-aware save; for now, straight debounce is fine.
-  const handleParamsChange = useCallback((next: GraphParams) => {
-    setGraphParamsState(next)
+  // Push the CURRENT graphParams onto history, then apply the new value.
+  // Used by preset / reset / slider-change paths.
+  const pushHistoryAndSet = useCallback((next: GraphParams) => {
+    setGraphParamsState(prev => {
+      historyRef.current = [...historyRef.current, prev].slice(-HISTORY_CAP)
+      return next
+    })
+    // Save to disk (debounced, coalesces rapid slider updates).
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(() => {
       window.api.graphParams.save(next).catch(err => console.warn('[graphParams] save failed', err))
     }, 50)
+  }, [])
+
+  // Slider onChange handler — pushes a history entry on every tick (tick-level granularity).
+  // Plan 10-04 may refine to commit-only (push on pointer release) for cleaner undo UX.
+  const handleParamsChange = useCallback((next: GraphParams) => {
+    pushHistoryAndSet(next)
+  }, [pushHistoryAndSet])
+
+  // Preset click — apply preset params and push old value to history.
+  const handlePresetClick = useCallback((nextParams: GraphParams) => {
+    pushHistoryAndSet(nextParams)
+  }, [pushHistoryAndSet])
+
+  // Reset — restore DEFAULT_GRAPH_PARAMS and push old value to history.
+  const handleReset = useCallback(() => {
+    pushHistoryAndSet(DEFAULT_GRAPH_PARAMS)
+  }, [pushHistoryAndSet])
+
+  // Ctrl+Z undo — scoped to panel focus via data-graph-params-panel attribute.
+  // Does NOT fire when Shift is held (avoids collision with global Ctrl+Shift+Space shortcut).
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      // Ctrl+Z (no Shift — Shift+Ctrl+Z would be redo; we don't implement redo in v1)
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.key.toLowerCase() !== 'z') return
+      // Only handle if focus is inside the panel (data attribute marker set in GraphParamsPanel)
+      const active = document.activeElement
+      if (!active || !(active as HTMLElement).closest('[data-graph-params-panel]')) return
+      e.preventDefault()
+      setGraphParamsState(curr => {
+        const hist = historyRef.current
+        if (hist.length === 0) return curr
+        const prev = hist[hist.length - 1]
+        historyRef.current = hist.slice(0, -1)
+        // Persist the restored value (no pushHistory — undoing should not itself add to history)
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = setTimeout(() => {
+          window.api.graphParams.save(prev).catch(err => console.warn('[graphParams] save failed', err))
+        }, 50)
+        return prev
+      })
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
   }, [])
 
   // Clean up pending save on unmount.
@@ -244,6 +296,8 @@ export function WikiTab() {
         onSetTagColor={handleSetTagColor}
         graphParams={graphParams}
         onGraphParamsChange={handleParamsChange}
+        onGraphParamsPresetClick={handlePresetClick}
+        onGraphParamsReset={handleReset}
       />
 
       {deleteTarget && (

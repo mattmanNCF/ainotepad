@@ -34,6 +34,8 @@ interface WikiPaneProps {
   onSetTagColor: (tag: string, color: string) => void
   graphParams: GraphParams
   onGraphParamsChange: (next: GraphParams) => void
+  onGraphParamsPresetClick: (next: GraphParams) => void
+  onGraphParamsReset: () => void
 }
 
 export function WikiPane({
@@ -55,6 +57,8 @@ export function WikiPane({
   onSetTagColor,
   graphParams,
   onGraphParamsChange,
+  onGraphParamsPresetClick,
+  onGraphParamsReset,
 }: WikiPaneProps) {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
@@ -93,7 +97,7 @@ export function WikiPane({
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {showGraph ? (
-          <WikiGraph key={colorKey} nodes={graphNodes} links={graphLinks} tagColors={tagColors} graphParams={graphParams} onGraphParamsChange={onGraphParamsChange} onNodeClick={onNavigate} onNodeDelete={onNodeDelete} onSetTagColor={onSetTagColor} />
+          <WikiGraph key={colorKey} nodes={graphNodes} links={graphLinks} tagColors={tagColors} graphParams={graphParams} onGraphParamsChange={onGraphParamsChange} onGraphParamsPresetClick={onGraphParamsPresetClick} onGraphParamsReset={onGraphParamsReset} onNodeClick={onNavigate} onNodeDelete={onNodeDelete} onSetTagColor={onSetTagColor} />
         ) : content !== null ? (
           <WikiMarkdown content={content} existingFiles={existingFiles} onNavigate={onNavigate} insights={insights} />
         ) : (
