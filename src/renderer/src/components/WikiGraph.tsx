@@ -92,7 +92,7 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
     // forceCenter only repositions center-of-mass — it's not gravity. Use forceX/forceY for per-node pull.
     const cx = dims.width / 2
     const cy = dims.height / 2
-    const cs = 0.03 * graphParams.centerForce // baseline 0.03 per axis
+    const cs = 0.01 * graphParams.centerForce // baseline 0.01 per axis
     g.d3Force('x', forceX(cx).strength(cs))
     g.d3Force('y', forceY(cy).strength(cs))
     const chargeForce = g.d3Force('charge')
