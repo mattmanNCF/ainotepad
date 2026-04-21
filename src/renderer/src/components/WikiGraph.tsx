@@ -89,7 +89,7 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
       linkForce.distance((link: any) => (120 / Math.max(1, link.sharedCount ?? 1)) / graphParams.linkForce)
     }
     const centerForce = g.d3Force('center')
-    if (centerForce) centerForce.strength(0.05 * graphParams.centerForce) // baseline 0.05
+    if (centerForce) centerForce.strength(0.1 * graphParams.centerForce) // baseline 0.1 — doubled to counteract repel on isolated nodes
     const chargeForce = g.d3Force('charge')
     if (chargeForce) chargeForce.strength(-30 * graphParams.repelForce)   // baseline -30 (d3 default)
   }, [nodes, links, graphParams])

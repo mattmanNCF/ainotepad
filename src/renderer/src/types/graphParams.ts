@@ -20,7 +20,7 @@ export const DEFAULT_GRAPH_PARAMS: GraphParams = {
 export const SLIDER_RANGES: Record<keyof GraphParams, { min: number; max: number; step: number }> = {
   linkForce:     { min: 0.1, max: 3.0, step: 0.05 },
   centerForce:   { min: 0.0, max: 3.0, step: 0.05 },
-  repelForce:    { min: 0.1, max: 3.0, step: 0.05 },
+  repelForce:    { min: 0.1, max: 2.0, step: 0.05 },
   edgeThickness: { min: 0.2, max: 3.0, step: 0.05 },
   nodeSize:      { min: 0.2, max: 3.0, step: 0.05 },
 }
