@@ -35,6 +35,7 @@ export function GraphParamsPanel({ params, onParamsChange, onDragStart, onDragEn
 
   return (
     <div
+      data-graph-params-panel=""
       style={{
         position: 'absolute',
         top: 8,
