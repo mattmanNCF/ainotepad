@@ -3,6 +3,7 @@ import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import type { GraphParams } from '../types/graphParams'
 import { GraphParamsPanel } from './GraphParamsPanel'
+import { makePerfFixture } from '../fixtures/graphPerfFixture'
 
 interface GraphNode {
   id: string
@@ -37,13 +38,31 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
   const [ctxMenu, setCtxMenu] = useState<{ filename: string; tag: string; x: number; y: number } | null>(null)
   const [colorPickerTarget, setColorPickerTarget] = useState<{ tag: string; x: number; y: number } | null>(null)
 
+  // Dev-only perf fixture toggle: append `?perfTest=500` (or any integer) to the renderer URL.
+  // In production (electron-builder package), URLSearchParams will find no match → prop nodes/links are used unchanged.
+  const perfOverride = useMemo(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      const v = params.get('perfTest')
+      if (!v) return null
+      const count = parseInt(v, 10)
+      if (!Number.isFinite(count) || count < 10) return null
+      return makePerfFixture(count)
+    } catch {
+      return null
+    }
+  }, [])
+
+  const effectiveNodes = perfOverride ? perfOverride.nodes : nodes
+  const effectiveLinks = perfOverride ? perfOverride.links : links
+
   // Build a color lookup: nodeId -> color, derived from nodes (which already embed tagColors).
   // This is a plain object, not state — updated every render, read at canvas draw time.
   const colorMap = useMemo(() => {
     const m: Record<string, string> = {}
-    for (const n of nodes) m[n.id] = n.color
+    for (const n of effectiveNodes) m[n.id] = n.color
     return m
-  }, [nodes])
+  }, [effectiveNodes])
 
   // Keep a stable ref so nodeCanvasObject closure always reads the latest map
   const colorMapRef = useRef(colorMap)
@@ -115,7 +134,7 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
       />
       <ForceGraph2D
         ref={graphRef}
-        graphData={{ nodes, links }}
+        graphData={{ nodes: effectiveNodes, links: effectiveLinks }}
         width={dims.width}
         height={dims.height}
         nodeLabel="name"
