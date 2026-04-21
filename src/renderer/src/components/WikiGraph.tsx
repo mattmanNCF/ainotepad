@@ -89,9 +89,13 @@ export function WikiGraph({ nodes, links, tagColors, graphParams, onGraphParamsC
       linkForce.distance((link: any) => (120 / Math.max(1, link.sharedCount ?? 1)) / graphParams.linkForce)
     }
     const centerForce = g.d3Force('center')
-    if (centerForce) centerForce.strength(0.1 * graphParams.centerForce) // baseline 0.1 — doubled to counteract repel on isolated nodes
+    if (centerForce) centerForce.strength(0.15 * graphParams.centerForce) // baseline 0.15 — strong enough to visibly pull nodes
     const chargeForce = g.d3Force('charge')
     if (chargeForce) chargeForce.strength(-30 * graphParams.repelForce)   // baseline -30 (d3 default)
+    // Reheat so force changes take visible effect immediately (without this, cold sim ignores strength updates)
+    if (typeof (g as any).d3ReheatSimulation === 'function') {
+      ;(g as any).d3ReheatSimulation()
+    }
   }, [nodes, links, graphParams])
 
   // alphaTarget lifecycle — keep simulation warm at 0.1 during slider drag, settle at 0 on release.
