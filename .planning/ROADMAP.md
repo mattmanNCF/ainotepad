@@ -32,7 +32,7 @@
 | 07. Note Card Visual Redesign | 2/2 | Complete    | 2026-04-18 |
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
-| 10. Dynamic Wiki Graph Parameters | 4/4 | Complete   | 2026-04-21 |
+| 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
 | 11. Google Calendar Integration | 0/? | Not started | - |
 | 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 

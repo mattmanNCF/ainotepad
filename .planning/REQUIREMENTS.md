@@ -19,7 +19,7 @@
 ### Graph (Dynamic wiki-graph control panel)
 
 - [x] **GRAPH-PERF-01**: p95 frame time ≤50ms on 500-node fixture during drag; 50ms throttle; `alphaTarget(0.1)` during / `(0)` on release
-- [ ] **GRAPH-SCOPE-01**: Exactly 5 sliders at phase exit
+- [x] **GRAPH-SCOPE-01**: Exactly 5 sliders at phase exit
 - [x] **GRAPH-UX-01**: Always-visible Reset; adaptive defaults (multipliers); Ctrl+Z undo of last 10
 - [x] **GRAPH-A11Y-01**: axe-core clean; keyboard-only adjustable; paired numeric input
 
