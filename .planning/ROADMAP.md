@@ -33,7 +33,7 @@
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
-| 11. Google Calendar Integration | 0/7 | Not started (ship gate) | - |
+| 11. Google Calendar Integration | 1/7 | In Progress|  |
 | 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 
 ---
@@ -194,7 +194,7 @@ Plans:
   5. Deleting a note deletes the linked Google event (reconciled via `extendedProperties.private.notal_note_id`); "don't ask again" confirmation respected; health indicator in Settings → Integrations shows green/yellow/red + last-success timestamp; refresh token present in `safeStorage` and absent from `config.json`
 **Plans**: 7 plans
 Plans:
-- [ ] 11-01-PLAN.md — Foundation: deps, build-time secret injection, reminders table, CSP hardening, sandbox migration + boot assertion
+- [x] 11-01-PLAN.md — Foundation: deps, build-time secret injection, reminders table, CSP hardening, sandbox migration + boot assertion
 - [ ] 11-02-PLAN.md — OAuth loopback+PKCE + tokenStore (safeStorage) + googleClient factory + calendar:* connect/disconnect/status IPC
 - [ ] 11-03-PLAN.md — AI worker reminder piggyback (6th JSON field) + grammar + reminderParser (chrono+luxon) + 5-zone test matrix
 - [ ] 11-04-PLAN.md — reminderService: confidence gate, 10s undo lifecycle, events.insert with extendedProperties, 4 push channels, delete-confirm IPC surface

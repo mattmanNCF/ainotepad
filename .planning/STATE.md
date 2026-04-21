@@ -3,26 +3,26 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed 10-04-PLAN.md
-last_updated: "2026-04-21T21:01:56.129Z"
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-04-21T22:56:15.638Z"
 progress:
   total_phases: 12
   completed_phases: 8
-  total_plans: 42
-  completed_plans: 40
+  total_plans: 49
+  completed_plans: 41
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 10 (Dynamic Wiki Graph Parameters) — EXECUTING
-Plan: 3 of 4
+Phase: 11 (google-calendar-integration) — EXECUTING
+Plan: 2 of 7
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T20:59:09.731Z
-**Stopped at:** Completed 10-04-PLAN.md
+**Last session:** 2026-04-21T22:56:15.634Z
+**Stopped at:** Completed 11-01-PLAN.md
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
 **Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
 
@@ -31,7 +31,7 @@ Plan: 3 of 4
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Phase 10 — Dynamic Wiki Graph Parameters
+**Current focus:** Phase 11 — google-calendar-integration
 
 ## Previous Milestone Summaries
 
@@ -175,6 +175,9 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 10]: Ctrl+Z scoped via closest('[data-graph-params-panel]') on document.activeElement; data attr on outermost wrapper div
 - [Phase Phase 10]: axe verification implemented as DevTools console snippet — no CDP dependency, simpler than Playwright for one-shot scan
 - [Phase Phase 10]: forceCenter replaced with forceX/forceY for real per-node gravity; center baseline 0.01 after empirical tuning; repel max capped at 2.0
+- [Phase 11]: --legacy-peer-deps required for google-auth-library, @googleapis/calendar, chrono-node, luxon (React 19 peer conflict)
+- [Phase 11]: Electron 39.x does not expose getWebPreferences() on WebContents — boot assertion uses REQUIRED_WEB_PREFS sentinel constant
+- [Phase 11]: reminders.confidence uses integer({mode:'number'}) in drizzle (no real() helper); DDL uses REAL NOT NULL — SQLite dynamic typing bridges gap
 
 ### Quick Tasks Completed
 

@@ -7,7 +7,7 @@
 
 ### Calendar (Google Calendar integration)
 
-- [ ] **CAL-SEC-01**: OAuth client type "Desktop app"; PKCE; no client_secret persisted; `asar extract` grep returns zero client_secret hits
+- [x] **CAL-SEC-01**: OAuth client type "Desktop app"; PKCE; no client_secret persisted; `asar extract` grep returns zero client_secret hits
 - [ ] **CAL-SEC-02**: Refresh token stored only via `safeStorage.encryptString()`; config.json contains zero Google token prefixes
 - [ ] **CAL-SEC-03**: Loopback redirect on ephemeral port, 127.0.0.1-only, non-deterministic port
 - [ ] **CAL-UX-01**: No Calendar write without (a) silent+undo toast reachable OR (b) explicit user click within preceding 5s in opt-in confirm mode
@@ -39,8 +39,8 @@
 
 ### Cross-cutting
 
-- [ ] **XCUT-SEC-02**: `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`; boot-time assertion
-- [ ] **XCUT-CSP-01**: `connect-src` enumerates explicit hosts; no `'unsafe-inline'`, `'unsafe-eval'`, or blanket `https:`
+- [x] **XCUT-SEC-02**: `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`; boot-time assertion
+- [x] **XCUT-CSP-01**: `connect-src` enumerates explicit hosts; no `'unsafe-inline'`, `'unsafe-eval'`, or blanket `https:`
 
 ---
 
