@@ -11,7 +11,7 @@
 - [x] **CAL-SEC-02**: Refresh token stored only via `safeStorage.encryptString()`; config.json contains zero Google token prefixes
 - [x] **CAL-SEC-03**: Loopback redirect on ephemeral port, 127.0.0.1-only, non-deterministic port
 - [x] **CAL-UX-01**: No Calendar write without (a) silent+undo toast reachable OR (b) explicit user click within preceding 5s in opt-in confirm mode
-- [ ] **CAL-UX-02**: Health indicator (green/yellow/red + last-success timestamp); per-note pending chip on failure
+- [x] **CAL-UX-02**: Health indicator (green/yellow/red + last-success timestamp); per-note pending chip on failure
 - [x] **CAL-TZ-01**: `{timestamp_utc, original_tz, original_text}` triple; test matrix UTC + America/Los_Angeles + Asia/Kolkata + Pacific/Chatham + DST crossover
 - [x] **CAL-COST-01**: Piggyback pass; confidence ≥0.85 gate; 50-note corpus (5 TP) triggers ≤6 creation attempts
 - [x] **CAL-DEL-01**: Note delete cascades to Google event delete; confirmation with "don't ask again"; orphan reconciliation via `extendedProperties.private.notal_note_id`

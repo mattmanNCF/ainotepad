@@ -33,7 +33,7 @@
 | 08. Connections + Digest Improvements | 0/3 | Complete    | 2026-04-18 |
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
-| 11. Google Calendar Integration | 5/7 | In Progress|  |
+| 11. Google Calendar Integration | 6/7 | In Progress|  |
 | 12. Mobile Extension (Drive transport) | 0/? | Not started (droppable to v0.3.2) | - |
 
 ---
@@ -199,7 +199,7 @@ Plans:
 - [x] 11-03-PLAN.md — AI worker reminder piggyback (6th JSON field) + grammar + reminderParser (chrono+luxon) + 5-zone test matrix
 - [x] 11-04-PLAN.md — reminderService: confidence gate, 10s undo lifecycle, events.insert with extendedProperties, 4 push channels, delete-confirm IPC surface
 - [x] 11-05-PLAN.md — Delete cascade: notes:delete calls events.list+delete via notal_note_id; don't-ask-again preference
-- [ ] 11-06-PLAN.md — Renderer UI: GoogleCalendarSection, UndoToast, NoteCard chip, NotesTab delete-confirm dialog
+- [x] 11-06-PLAN.md — Renderer UI: GoogleCalendarSection, UndoToast, NoteCard chip, NotesTab delete-confirm dialog
 - [ ] 11-07-PLAN.md — Ship-gate human-verify checkpoint on packaged NSIS installer (all 10 requirements + automated asar/config greps)
 **Research flag**: MEDIUM — /gsd:research-phase complete (11-RESEARCH.md). Stack: google-auth-library@10.6.2 + @googleapis/calendar@14.2.0 + chrono-node@2.9.0 + luxon@3.7.2 (luxon required for Pacific/Chatham + IANA DST)
 **Deps**: `google-auth-library@10.6.2` + `@googleapis/calendar@14.2.0` (split packages — 1.4MB vs 190MB monolith) + `chrono-node@2.9.0` + `luxon@3.7.2` (+ `@types/luxon` dev) + `tsx` dev (test runner)
