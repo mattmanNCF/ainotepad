@@ -195,6 +195,11 @@ app.whenReady().then(() => {
       isCleaningUp = true
       event.preventDefault()
       await stopMcp()
+      // Cancel any pending reminder timers so we don't leave orphaned setTimeouts (Plan 11-04)
+      try {
+        const mod = await import('./calendar/reminderService.js')
+        mod.cancelAllTimersForShutdown?.()
+      } catch { /* module absent */ }
       app.quit()
     })
   }

@@ -70,6 +70,59 @@ contextBridge.exposeInMainWorld('api', {
     setConfirmBeforeCreate: (value: boolean): Promise<void> =>
       ipcRenderer.invoke('calendar:setConfirmBeforeCreate', value),
     openLink: (url: string): Promise<void> => ipcRenderer.invoke('calendar:openLink', url),
+    undoCreate: (reminderId: string): Promise<void> => ipcRenderer.invoke('calendar:undoCreate', reminderId),
+    confirmCreate: (reminderId: string): Promise<void> => ipcRenderer.invoke('calendar:confirmCreate', reminderId),
+    onEventPending: (cb: (data: {
+      noteId: string
+      reminderId: string
+      eventTitle: string
+      timestampUtc: string
+      originalTz: string
+      mode: 'auto' | 'confirm'
+      undoDeadlineMs: number
+    }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('calendar:eventPending', handler)
+      return () => ipcRenderer.removeListener('calendar:eventPending', handler)
+    },
+    onEventSynced: (cb: (data: {
+      noteId: string
+      reminderId: string
+      eventId: string
+      eventTitle: string
+      timestampUtc: string
+      calendarLink: string | null
+    }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('calendar:eventSynced', handler)
+      return () => ipcRenderer.removeListener('calendar:eventSynced', handler)
+    },
+    onEventCancelled: (cb: (data: { noteId: string; reminderId: string; reason: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('calendar:eventCancelled', handler)
+      return () => ipcRenderer.removeListener('calendar:eventCancelled', handler)
+    },
+    onEventFailed: (cb: (data: { noteId: string; reminderId: string; error: string }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, data: Parameters<typeof cb>[0]) => cb(data)
+      ipcRenderer.on('calendar:eventFailed', handler)
+      return () => ipcRenderer.removeListener('calendar:eventFailed', handler)
+    },
+  },
+  reminders: {
+    getForNote: (noteId: string): Promise<{
+      id: string
+      noteId: string
+      eventId: string | null
+      eventTitle: string
+      timestampUtc: string
+      originalTz: string
+      originalText: string
+      confidence: number
+      calendarSyncStatus: 'pending' | 'synced' | 'failed' | 'cancelled'
+      calendarLink: string | null
+      createdAt: string
+      lastError: string | null
+    } | null> => ipcRenderer.invoke('reminders:getForNote', noteId),
   },
   localModel: {
     getStatus: (): Promise<{ tier: string; modelPath: string | null; ready: boolean }> =>

@@ -77,6 +77,43 @@ interface Window {
       disconnect: () => Promise<{ ok: boolean }>
       setConfirmBeforeCreate: (value: boolean) => Promise<void>
       openLink: (url: string) => Promise<void>
+      undoCreate: (reminderId: string) => Promise<void>
+      confirmCreate: (reminderId: string) => Promise<void>
+      onEventPending: (cb: (data: {
+        noteId: string
+        reminderId: string
+        eventTitle: string
+        timestampUtc: string
+        originalTz: string
+        mode: 'auto' | 'confirm'
+        undoDeadlineMs: number
+      }) => void) => () => void
+      onEventSynced: (cb: (data: {
+        noteId: string
+        reminderId: string
+        eventId: string
+        eventTitle: string
+        timestampUtc: string
+        calendarLink: string | null
+      }) => void) => () => void
+      onEventCancelled: (cb: (data: { noteId: string; reminderId: string; reason: string }) => void) => () => void
+      onEventFailed: (cb: (data: { noteId: string; reminderId: string; error: string }) => void) => () => void
+    }
+    reminders: {
+      getForNote: (noteId: string) => Promise<{
+        id: string
+        noteId: string
+        eventId: string | null
+        eventTitle: string
+        timestampUtc: string
+        originalTz: string
+        originalText: string
+        confidence: number
+        calendarSyncStatus: 'pending' | 'synced' | 'failed' | 'cancelled'
+        calendarLink: string | null
+        createdAt: string
+        lastError: string | null
+      } | null>
     }
     localModel: {
       getStatus: () => Promise<{ tier: string; modelPath: string | null; ready: boolean }>

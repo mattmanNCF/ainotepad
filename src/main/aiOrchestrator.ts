@@ -21,6 +21,14 @@ export function getWorkerPort(): Electron.MessagePortMain | null {
 export function startAiWorker(win: BrowserWindow, provider: string, apiKey: string, ollamaModel: string, modelPath = ''): void {
   mainWin = win
 
+  // Hand the main window handle to reminderService for IPC pushes (Plan 11-04).
+  // Same guarded dynamic import pattern as the 'result' handler below — this
+  // import can fail in builds that don't yet include reminderService, and we
+  // tolerate that silently.
+  import('./calendar/reminderService').then((mod) => {
+    if (mod && typeof mod.setMainWindow === 'function') mod.setMainWindow(win)
+  }).catch(() => { /* module absent — expected before Plan 11-04 ships */ })
+
   const child = utilityProcess.fork(path.join(__dirname, 'aiWorker.js'), [], { stdio: 'pipe' })
   child.stdout?.on('data', (d: Buffer) => console.log('[aiWorker stdout]', d.toString()))
   child.stderr?.on('data', (d: Buffer) => console.error('[aiWorker stderr]', d.toString()))

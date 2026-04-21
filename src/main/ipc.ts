@@ -11,6 +11,11 @@ import {
   getConfirmBeforeCreate,
   setConfirmBeforeCreate,
 } from './calendar/tokenStore'
+import {
+  cancelPendingCreate,
+  confirmPendingCreate,
+  getLatestReminderForNote,
+} from './calendar/reminderService'
 import { randomUUID } from 'crypto'
 import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
@@ -429,6 +434,18 @@ export function registerIpcHandlers() {
       throw new Error('calendar:openLink rejected non-calendar URL')
     }
     await shell.openExternal(url)
+  })
+
+  ipcMain.handle('calendar:undoCreate', async (_e, reminderId: string) => {
+    await cancelPendingCreate(reminderId)
+  })
+
+  ipcMain.handle('calendar:confirmCreate', async (_e, reminderId: string) => {
+    await confirmPendingCreate(reminderId)
+  })
+
+  ipcMain.handle('reminders:getForNote', (_e, noteId: string) => {
+    return getLatestReminderForNote(noteId)
   })
 
   ipcMain.handle('localModel:getStatus', () => {
