@@ -49,6 +49,22 @@ interface Window {
       deleteFile: (filename: string) => Promise<void>
       onUpdated: (cb: () => void) => () => void
     }
+    graphParams: {
+      get: () => Promise<{
+        linkForce: number
+        centerForce: number
+        repelForce: number
+        edgeThickness: number
+        nodeSize: number
+      }>
+      save: (params: {
+        linkForce: number
+        centerForce: number
+        repelForce: number
+        edgeThickness: number
+        nodeSize: number
+      }) => Promise<void>
+    }
     localModel: {
       getStatus: () => Promise<{ tier: string; modelPath: string | null; ready: boolean }>
       download: (tier?: string) => Promise<{ ok: boolean; modelPath?: string; error?: string }>

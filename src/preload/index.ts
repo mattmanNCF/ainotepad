@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { GraphParams } from '../renderer/src/types/graphParams'
 
 contextBridge.exposeInMainWorld('api', {
   notes: {
@@ -51,6 +52,10 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.on('kb:updated', handler)
       return () => ipcRenderer.removeListener('kb:updated', handler)
     },
+  },
+  graphParams: {
+    get: (): Promise<GraphParams> => ipcRenderer.invoke('graph-params:get'),
+    save: (params: GraphParams): Promise<void> => ipcRenderer.invoke('graph-params:save', params),
   },
   localModel: {
     getStatus: (): Promise<{ tier: string; modelPath: string | null; ready: boolean }> =>
