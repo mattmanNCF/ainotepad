@@ -33,3 +33,41 @@ export const PARAM_LABELS: Record<keyof GraphParams, string> = {
   edgeThickness: 'Edge thickness',
   nodeSize:      'Node size',
 }
+
+// Named presets — applied in one click by the panel.
+// Values are multipliers — same convention as DEFAULT_GRAPH_PARAMS (= all 1.0).
+export const PRESETS: Record<string, { label: string; params: GraphParams }> = {
+  dense: {
+    label: 'Dense',
+    params: {
+      linkForce: 2.0,      // stronger links → tighter clusters
+      centerForce: 1.5,
+      repelForce: 0.5,     // weaker repulsion → nodes allowed to pack
+      edgeThickness: 1.2,
+      nodeSize: 0.8,
+    },
+  },
+  spacious: {
+    label: 'Spacious',
+    params: {
+      linkForce: 0.6,
+      centerForce: 0.3,
+      repelForce: 2.2,     // strong repulsion → airy layout
+      edgeThickness: 0.8,
+      nodeSize: 1.1,
+    },
+  },
+  hierarchical: {
+    label: 'Hierarchical',
+    params: {
+      linkForce: 1.8,      // strong links to hold parent/child pairs close
+      centerForce: 0.2,    // weak center so branches can extend
+      repelForce: 1.5,     // medium repulsion to keep branches visually separated
+      edgeThickness: 1.0,
+      nodeSize: 1.0,
+    },
+  },
+}
+
+// Preset order in the UI — stable across renders. Matches success-criteria spec order.
+export const PRESET_ORDER = ['dense', 'spacious', 'hierarchical'] as const
