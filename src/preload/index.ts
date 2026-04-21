@@ -57,6 +57,19 @@ contextBridge.exposeInMainWorld('api', {
     get: (): Promise<GraphParams> => ipcRenderer.invoke('graph-params:get'),
     save: (params: GraphParams): Promise<void> => ipcRenderer.invoke('graph-params:save', params),
   },
+  calendar: {
+    getStatus: (): Promise<{
+      connected: boolean
+      lastSuccess: string | null
+      encryptionAvailable: boolean
+      confirmBeforeCreate: boolean
+    }> => ipcRenderer.invoke('calendar:getStatus'),
+    connect: (): Promise<{ ok: boolean; error?: string }> => ipcRenderer.invoke('calendar:connect'),
+    disconnect: (): Promise<{ ok: boolean }> => ipcRenderer.invoke('calendar:disconnect'),
+    setConfirmBeforeCreate: (value: boolean): Promise<void> =>
+      ipcRenderer.invoke('calendar:setConfirmBeforeCreate', value),
+    openLink: (url: string): Promise<void> => ipcRenderer.invoke('calendar:openLink', url),
+  },
   localModel: {
     getStatus: (): Promise<{ tier: string; modelPath: string | null; ready: boolean }> =>
       ipcRenderer.invoke('localModel:getStatus'),

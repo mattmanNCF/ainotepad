@@ -65,6 +65,18 @@ interface Window {
         nodeSize: number
       }) => Promise<void>
     }
+    calendar: {
+      getStatus: () => Promise<{
+        connected: boolean
+        lastSuccess: string | null
+        encryptionAvailable: boolean
+        confirmBeforeCreate: boolean
+      }>
+      connect: () => Promise<{ ok: boolean; error?: string }>
+      disconnect: () => Promise<{ ok: boolean }>
+      setConfirmBeforeCreate: (value: boolean) => Promise<void>
+      openLink: (url: string) => Promise<void>
+    }
     localModel: {
       getStatus: () => Promise<{ tier: string; modelPath: string | null; ready: boolean }>
       download: (tier?: string) => Promise<{ ok: boolean; modelPath?: string; error?: string }>

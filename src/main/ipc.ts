@@ -1,5 +1,16 @@
-import { ipcMain, BrowserWindow } from 'electron'
+import { ipcMain, BrowserWindow, shell } from 'electron'
 import { safeStorage } from 'electron'
+import { startOAuthFlow, revokeToken } from './calendar/oauthFlow'
+import {
+  storeRefreshToken,
+  getRefreshToken,
+  clearTokens,
+  isConnected as isCalendarConnected,
+  getLastSuccess,
+  isEncryptionAvailable,
+  getConfirmBeforeCreate,
+  setConfirmBeforeCreate,
+} from './calendar/tokenStore'
 import { randomUUID } from 'crypto'
 import { desc, eq } from 'drizzle-orm'
 import { getDb } from './db'
@@ -370,6 +381,54 @@ export function registerIpcHandlers() {
 
   ipcMain.handle('graph-params:save', (_e, params: GraphParams): void => {
     setGraphParams(params)
+  })
+
+  ipcMain.handle('calendar:getStatus', () => {
+    return {
+      connected: isCalendarConnected(),
+      lastSuccess: getLastSuccess(),
+      encryptionAvailable: isEncryptionAvailable(),
+      confirmBeforeCreate: getConfirmBeforeCreate(),
+    }
+  })
+
+  ipcMain.handle('calendar:connect', async () => {
+    if (!isEncryptionAvailable()) {
+      return { ok: false, error: 'safeStorage unavailable — cannot securely store refresh token on this system' }
+    }
+    try {
+      const tokens = await startOAuthFlow()
+      storeRefreshToken(tokens.refresh_token)
+      return { ok: true }
+    } catch (err) {
+      const msg = String((err as Error)?.message ?? err)
+      console.error('[calendar:connect] failed:', msg)
+      return { ok: false, error: msg }
+    }
+  })
+
+  ipcMain.handle('calendar:disconnect', async () => {
+    const token = getRefreshToken()
+    try {
+      if (token) await revokeToken(token)
+    } catch (err) {
+      console.warn('[calendar:disconnect] revoke failed, clearing local tokens anyway:', err)
+    }
+    clearTokens()
+    return { ok: true }
+  })
+
+  ipcMain.handle('calendar:setConfirmBeforeCreate', (_e, value: boolean) => {
+    setConfirmBeforeCreate(value)
+  })
+
+  ipcMain.handle('calendar:openLink', async (_e, url: string) => {
+    // Allowlist guard: only open Google Calendar event links to avoid the renderer
+    // being able to launch arbitrary URLs via shell.openExternal.
+    if (!/^https:\/\/calendar\.google\.com\//.test(url)) {
+      throw new Error('calendar:openLink rejected non-calendar URL')
+    }
+    await shell.openExternal(url)
   })
 
   ipcMain.handle('localModel:getStatus', () => {
