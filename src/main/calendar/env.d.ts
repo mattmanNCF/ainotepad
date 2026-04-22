@@ -4,3 +4,4 @@
 // `process.env.GOOGLE_CLIENT_ID` would NOT work because we never read env at runtime.
 declare const __GOOGLE_CLIENT_ID__: string
 declare const __GOOGLE_CLIENT_SECRET__: string
+declare const __GOOGLE_WEB_CLIENT_ID__: string

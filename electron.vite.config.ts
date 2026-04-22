@@ -11,12 +11,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const GOOGLE_CLIENT_ID = JSON.stringify(env.GOOGLE_CLIENT_ID ?? '')
   const GOOGLE_CLIENT_SECRET = JSON.stringify(env.GOOGLE_CLIENT_SECRET ?? '')
+  const GOOGLE_WEB_CLIENT_ID = JSON.stringify(env.GOOGLE_WEB_CLIENT_ID ?? '')
 
   return {
     main: {
       define: {
         __GOOGLE_CLIENT_ID__: GOOGLE_CLIENT_ID,
         __GOOGLE_CLIENT_SECRET__: GOOGLE_CLIENT_SECRET,
+        __GOOGLE_WEB_CLIENT_ID__: GOOGLE_WEB_CLIENT_ID,
       },
       build: {
         rollupOptions: {
@@ -28,6 +30,8 @@ export default defineConfig(({ mode }) => {
             '@googleapis/calendar',
             'chrono-node',
             'luxon',
+            '@googleapis/drive',
+            'ajv',
           ],
           input: {
             index: resolve(__dirname, 'src/main/index.ts'),
@@ -47,11 +51,16 @@ export default defineConfig(({ mode }) => {
             '@googleapis/calendar',
             'chrono-node',
             'luxon',
+            '@googleapis/drive',
+            'ajv',
           ]
         }
       }
     },
     renderer: {
+      define: {
+        __GOOGLE_WEB_CLIENT_ID__: GOOGLE_WEB_CLIENT_ID,
+      },
       resolve: {
         alias: { '@renderer': resolve('src/renderer/src') }
       },
