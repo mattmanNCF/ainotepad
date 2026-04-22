@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
-status: unknown
-stopped_at: Completed 11-06-PLAN.md
-last_updated: "2026-04-21T23:22:11.909Z"
+status: in_progress
+stopped_at: Phase 11 SHIP_GATE GO. Phase 12 next.
+last_updated: "2026-04-22T00:00:00.000Z"
 progress:
   total_phases: 12
-  completed_phases: 8
+  completed_phases: 11
   total_plans: 49
-  completed_plans: 46
+  completed_plans: 47
 ---
 
 # Notal — Project State
@@ -21,10 +21,11 @@ Plan: 2 of 7
 
 ## Session Continuity
 
-**Last session:** 2026-04-21T23:22:11.905Z
-**Stopped at:** Completed 11-06-PLAN.md
-**Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Path A abandoned. MCP Bearer (XCUT-SEC-01) deferred to v2. Working branch: `notal-v0.2`.
-**Next action:** `/gsd:plan-phase 10` — Graph panel phase (research flag LOW, skip /gsd:research-phase).
+**Last session:** 2026-04-22
+**Stopped at:** Phase 11 SHIP_GATE: GO. Phase 12 branch cut.
+**Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Phase 12 kept in v0.3.1 scope (not dropped to v0.3.2). Working branch: `notal-v0.3.1-mobile` (cut from `notal-v0.2`).
+**Next action:** `/gsd:plan-phase 12` — Mobile Extension.
+**Non-blocking bug:** Toast stacking on rapid double-submit (v0.3.2 polish).
 
 ## Project Reference
 
