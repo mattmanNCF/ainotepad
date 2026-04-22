@@ -20,7 +20,8 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
     "axe:panel": "node scripts/axe-graph-panel.cjs",
-    "test:reminder": "tsx --test test/reminderParser.test.mjs"
+    "test:reminder": "tsx --test test/reminderParser.test.mjs",
+    "test:cost-gate": "tsx --test test/costGate.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",
