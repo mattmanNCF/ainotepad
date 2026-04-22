@@ -148,6 +148,13 @@ export function getDb() {
     // Column already exists — safe to ignore
   }
 
+  // Migration: add source column to notes (Phase 12 — mobile-drive ingestion path)
+  try {
+    sqlite.exec("ALTER TABLE notes ADD COLUMN source TEXT NOT NULL DEFAULT 'desktop'")
+  } catch {
+    // Column already exists — idempotent no-op
+  }
+
   // Migration: RAG chunk tables (FNDR-06 / Plan 02-08).
   // Schema-of-record lives in pipeline/rag/vec_store.py — this DDL must stay
   // bit-for-bit identical (CREATE VIRTUAL TABLE chunks_vec USING vec0 FLOAT[384])

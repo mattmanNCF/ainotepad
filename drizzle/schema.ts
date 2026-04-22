@@ -10,6 +10,7 @@ export const notes = sqliteTable('notes', {
   tags: text('tags').notNull().default('[]'),
   aiInsights: text('ai_insights'),
   hidden: integer('hidden').notNull().default(0),
+  source: text('source').notNull().default('desktop'),
 })
 
 export type Note = typeof notes.$inferSelect

@@ -111,6 +111,38 @@ const OPENAI_COMPAT_PROVIDERS: Record<string, { baseURL: string; keySlot: string
 }
 export { OPENAI_COMPAT_PROVIDERS }
 
+/**
+ * Shared note creation path. Used by:
+ *   - notes:create IPC (source='desktop', from CaptureBuffer)
+ *   - src/main/drive/ingestService.ts (source='mobile-drive', from Drive appDataFolder polling)
+ * MOB-SEC-01: This is the single code path for both capture sources.
+ */
+export async function createNote(
+  rawText: string,
+  source: 'desktop' | 'mobile-drive' = 'desktop'
+): Promise<{ id: string; rawText: string; submittedAt: string; aiState: 'pending'; aiAnnotation: null; organizedText: null }> {
+  const db = getDb()
+  const now = new Date().toISOString()
+  const id = randomUUID()
+  db.insert(notes).values({ id, rawText, submittedAt: now, source }).run()
+  insertNoteToFts(id, rawText)
+  const record = {
+    id,
+    rawText,
+    submittedAt: now,
+    aiState: 'pending' as const,
+    aiAnnotation: null,
+    organizedText: null,
+  }
+  const provider = getProvider()
+  const apiKey = getDecryptedApiKey()
+  if (provider === 'ollama' || provider === 'llamacpp' || apiKey ||
+      (OPENAI_COMPAT_PROVIDERS[provider] && !!decryptKey(OPENAI_COMPAT_PROVIDERS[provider].keySlot))) {
+    await enqueueNote(id, rawText)
+  }
+  return record
+}
+
 export function registerIpcHandlers() {
   ipcMain.handle('notes:getAll', () => {
     const db = getDb()
@@ -230,27 +262,7 @@ export function registerIpcHandlers() {
   })
 
   ipcMain.handle('notes:create', async (_event, rawText: string) => {
-    const db = getDb()
-    const now = new Date().toISOString()
-    const id = randomUUID()
-    db.insert(notes).values({ id, rawText, submittedAt: now }).run()
-    insertNoteToFts(id, rawText)
-    const record = {
-      id,
-      rawText,
-      submittedAt: now,
-      aiState: 'pending' as const,
-      aiAnnotation: null,
-      organizedText: null,
-    }
-    // Enqueue for AI processing. Ollama and local providers don't need an API key.
-    const provider = getProvider()
-    const apiKey = getDecryptedApiKey()
-    if (provider === 'ollama' || provider === 'llamacpp' || apiKey ||
-        (OPENAI_COMPAT_PROVIDERS[provider] && !!decryptKey(OPENAI_COMPAT_PROVIDERS[provider].keySlot))) {
-      await enqueueNote(id, rawText)
-    }
-    return record
+    return createNote(rawText, 'desktop')
   })
 
   // safeStorage is safe here — ipcMain.handle() callbacks only fire after app is ready
