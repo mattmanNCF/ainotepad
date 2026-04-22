@@ -90,25 +90,13 @@ export function startAiWorker(win: BrowserWindow, provider: string, apiKey: stri
       // If the module doesn't exist yet, we swallow the error — the note:aiUpdate push
       // above still carries the reminder field so the renderer knows something was detected.
       if (aiState === 'complete' && reminder) {
-        try {
-          // reminderService.ts is created in Plan 11-04. Use Function('p', 'return import(p)')
-          // to prevent rollup/vite from statically resolving (and failing on) the module path
-          // at build time. At runtime in the Electron main process, Node's dynamic import
-          // will succeed once Plan 11-04 ships the module; until then, the catch swallows
-          // the MODULE_NOT_FOUND error — the note:aiUpdate push above still carries the
-          // reminder field so renderers (Plan 11-06) can display the chip.
-          const reminderSvcPath = __dirname + '/calendar/reminderService.js'
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const mod = await (Function('p', 'return import(p)')(reminderSvcPath) as Promise<any>)
+        import('./calendar/reminderService').then((mod) => {
           if (mod && typeof mod.handleNoteReminder === 'function') {
-            // Fire-and-forget — the undo lifecycle is handled inside the service.
             mod.handleNoteReminder(noteId, reminder).catch((err: unknown) => {
               console.error('[aiOrchestrator] reminderService.handleNoteReminder failed:', err)
             })
           }
-        } catch {
-          // Module not yet present (Plan 11-03 shipped alone, 11-04 not yet) — expected.
-        }
+        }).catch(() => { /* module absent */ })
       }
 
       // Write wiki files to kb/

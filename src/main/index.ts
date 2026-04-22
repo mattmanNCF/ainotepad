@@ -1,6 +1,11 @@
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+// Isolate dev data from the installed app so test notes/settings don't bleed into production.
+if (is.dev) {
+  app.setPath('userData', join(app.getPath('appData'), 'notal-dev'))
+}
 import icon from '../../resources/icon.png?asset'
 import { registerIpcHandlers, getDecryptedApiKey, getProvider, getOllamaModel, getStartupModelPath } from './ipc'
 import { startAiWorker, reQueuePendingNotes } from './aiOrchestrator'
