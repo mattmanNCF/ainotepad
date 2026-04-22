@@ -25,14 +25,14 @@
 
 ### Mobile (Path C — Google Drive transport)
 
-- [ ] **MOB-AUTH-01**: Single Google OAuth consent combines `calendar.events` + `drive.appdata` scopes; no separate mobile pairing flow
+- [x] **MOB-AUTH-01**: Single Google OAuth consent combines `calendar.events` + `drive.appdata` scopes; no separate mobile pairing flow
 - [ ] **MOB-AUTH-02**: Mobile identity = Google account; revoke = user revokes OAuth at Google Account security page; desktop detects 401, surfaces in Settings → Integrations
-- [ ] **MOB-TRANS-01**: Transport = Drive `appDataFolder` (OAuth-client-private, no public links, no shared folders)
+- [x] **MOB-TRANS-01**: Transport = Drive `appDataFolder` (OAuth-client-private, no public links, no shared folders)
 - [ ] **MOB-TRANS-02**: Desktop uses Drive Changes API with checkpointed `startPageToken`; polling fallback at 60s interval if Changes subscription fails
 - [ ] **MOB-TRANS-03**: Desktop deletes Drive file after successful ingestion via `createNote()`; no cloud retention of note text
 - [ ] **MOB-PWA-01**: Mobile PWA hosted as static artifact at `https://mattmanNCF.github.io/notal-mobile/`; installable on iOS and Android; offline-first with IndexedDB queue
 - [ ] **MOB-PWA-02**: Capture-only UI on mobile: text input, submit, delivery-state badge; no browse, search, or wiki access
-- [ ] **MOB-SEC-01**: Per-file schema validation on desktop (≤16KB text, strict JSON schema, malformed rejected and logged); `createNote(rawText, source)` single code path shared with desktop capture
+- [x] **MOB-SEC-01**: Per-file schema validation on desktop (≤16KB text, strict JSON schema, malformed rejected and logged); `createNote(rawText, source)` single code path shared with desktop capture
 - [ ] **MOB-UX-01**: Mobile shows explicit delivery states: local → uploading → on-drive → ingested (observed via Drive file deletion)
 - [ ] **MOB-UX-02**: Desktop-wake grace banner: on app launch, drain pending Drive notes and report count processed
 - [ ] **MOB-QUOTA-01**: Warn at 10MB appdata folder; hard stop at 100MB (indicates stuck ingestion loop); user surfaced in Settings

@@ -35,7 +35,7 @@
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
 | 11. Google Calendar Integration | 6/7 | In Progress|  |
-| 12. Mobile Extension (Drive transport) | 0/6 | Not started (droppable to v0.3.2) | - |
+| 12. Mobile Extension (Drive transport) | 1/6 | In Progress|  |
 
 ---
 
@@ -221,7 +221,7 @@ Plans:
   5. Mobile PWA is capture-only (no browse, search, wiki) and works offline — IndexedDB queue persists across tab close + reconnect; when GitHub Pages is reachable and the user is online, the queue drains automatically
 **Plans**: 6 plans
 Plans:
-- [ ] 12-01-PLAN.md — Foundation: deps, source column, shared createNote(), GOOGLE_WEB_CLIENT_ID define + BLOCKING Wave 0 appDataFolder cross-client verification
+- [x] 12-01-PLAN.md — Foundation: deps, source column, shared createNote(), GOOGLE_WEB_CLIENT_ID define + BLOCKING Wave 0 appDataFolder cross-client verification
 - [ ] 12-02-PLAN.md — Desktop ingestion: oauthFlow scopes param, driveClient, changesPoller (60s appDataFolder poll), ingestService (ajv + createNote + delete + quota), IPC + preload + boot wiring
 - [ ] 12-03-PLAN.md — Mobile PWA scaffold + capture UI (Vite 6 + VitePWA + idb), GIS token client, multipart Drive upload
 - [ ] 12-04-PLAN.md — Desktop renderer UI: DriveMobileSection (Settings > Integrations), WakeBanner (MOB-UX-02)

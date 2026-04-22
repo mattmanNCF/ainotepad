@@ -2,27 +2,27 @@
 gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
-status: in_progress
-stopped_at: Phase 11 SHIP_GATE GO. Phase 12 next.
-last_updated: "2026-04-22T00:00:00.000Z"
+status: unknown
+stopped_at: Phase 12 Plan 01 complete - Wave 0 blocking gate awaiting Matt
+last_updated: "2026-04-22T16:01:26.530Z"
 progress:
   total_phases: 12
-  completed_phases: 11
-  total_plans: 49
-  completed_plans: 47
+  completed_phases: 9
+  total_plans: 55
+  completed_plans: 48
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 11 (google-calendar-integration) — EXECUTING
-Plan: 2 of 7
+Phase: 12 (Mobile Extension (Path C)) — EXECUTING
+Plan: 1 of 6
 
 ## Session Continuity
 
-**Last session:** 2026-04-22
-**Stopped at:** Phase 11 SHIP_GATE: GO. Phase 12 branch cut.
+**Last session:** 2026-04-22T16:01:26.520Z
+**Stopped at:** Phase 12 Plan 01 complete - Wave 0 blocking gate awaiting Matt
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Phase 12 kept in v0.3.1 scope (not dropped to v0.3.2). Working branch: `notal-v0.3.1-mobile` (cut from `notal-v0.2`).
 **Next action:** `/gsd:plan-phase 12` — Mobile Extension.
 **Non-blocking bug:** Toast stacking on rapid double-submit (v0.3.2 polish).
@@ -32,7 +32,7 @@ Plan: 2 of 7
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Phase 11 — google-calendar-integration
+**Current focus:** Phase 12 — Mobile Extension (Path C)
 
 ## Previous Milestone Summaries
 
@@ -186,6 +186,9 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 11]: cascadeCalendarEventForNote queries Google privateExtendedProperty (not local reminders.event_id) as source of truth; 404/410 treated as successfully deleted; cascade never re-throws
 - [Phase 11]: Cancelled reminder state renders no chip (hidden) — user already pressed Undo, chip disappearing is correct UX signal
 - [Phase 11]: UndoToast single-toast policy: new pending replaces current, matching main-process independent timer behavior
+- [Phase 12-mobile-extension]: GOOGLE_WEB_CLIENT_ID added to renderer.define as well as main.define for consistent define pattern across bundles
+- [Phase 12-mobile-extension]: createNote placed above registerIpcHandlers at module scope for clean named import from ingestService without circular dependency
+- [Phase 12-mobile-extension]: shared/envelope.ts is top-level directory not src/ because Vite root prevents PWA from importing src/main/
 
 ### Quick Tasks Completed
 
