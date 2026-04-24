@@ -11,3 +11,5 @@ build-hip.ps1
 .env.*.local
 out-extracted/
 asar-grep-output.txt
+mobile-pwa/node_modules
+docs/
