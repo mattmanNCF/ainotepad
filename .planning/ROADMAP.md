@@ -35,7 +35,7 @@
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
 | 11. Google Calendar Integration | 6/7 | In Progress|  |
-| 12. Mobile Extension (Drive transport) | 3/6 | In Progress|  |
+| 12. Mobile Extension (Drive transport) | 4/6 | In Progress|  |
 
 ---
 
@@ -225,7 +225,7 @@ Plans:
 - [x] 12-02-PLAN.md — Desktop ingestion: oauthFlow scopes param, driveClient, changesPoller (60s appDataFolder poll), ingestService (ajv + createNote + delete + quota), IPC + preload + boot wiring
 - [x] 12-03-PLAN.md — Mobile PWA scaffold + capture UI (Vite 6 + VitePWA + idb), GIS token client, multipart Drive upload
 - [ ] 12-04-PLAN.md — Desktop renderer UI: DriveMobileSection (Settings > Integrations), WakeBanner (MOB-UX-02)
-- [ ] 12-05-PLAN.md — GitHub Pages deploy pipeline (actions/deploy-pages) + mobile-pwa/README
+- [x] 12-05-PLAN.md — GitHub Pages deploy pipeline (actions/deploy-pages) + mobile-pwa/README
 - [ ] 12-06-PLAN.md — Ship-gate human-verify: 7-test matrix on packaged installer + live PWA
 **Research flag**: HIGH — targeted research on Drive Changes API push subscriptions vs 60s polling, `vite-plugin-pwa` config for static GitHub Pages publish, COOP/COEP headers if cross-origin isolation is needed for any PWA feature
 **Deps**: Drive REST API v3 via `googleapis` (reuses Phase 11 client), `vite-plugin-pwa` for mobile PWA build, `idb` (IndexedDB wrapper) for mobile offline queue

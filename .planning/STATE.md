@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed Phase 12 Plan 02 - Desktop Drive Ingestion Pipeline
-last_updated: "2026-04-24T02:43:40.422Z"
+stopped_at: Completed Phase 12 Plan 05 - GitHub Pages Deploy Pipeline
+last_updated: "2026-04-23T00:10:00.000Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 55
-  completed_plans: 50
+  completed_plans: 53
 ---
 
 # Notal — Project State
@@ -17,14 +17,14 @@ progress:
 ## Current Position
 
 Phase: 12 (mobile-extension) — EXECUTING
-Plan: 1 of 6
+Plan: 6 of 6 (awaiting human-action checkpoint at 12-05 Task 2)
 
 ## Session Continuity
 
-**Last session:** 2026-04-24T02:43:40.418Z
-**Stopped at:** Completed Phase 12 Plan 02 - Desktop Drive Ingestion Pipeline
+**Last session:** 2026-04-23T00:10:00.000Z
+**Stopped at:** Completed Phase 12 Plan 05 - GitHub Pages Deploy Pipeline (checkpoint: Matt must enable Pages + add secret)
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Phase 12 kept in v0.3.1 scope (not dropped to v0.3.2). Working branch: `notal-v0.3.1-mobile` (cut from `notal-v0.2`).
-**Next action:** `/gsd:plan-phase 12` — Mobile Extension.
+**Next action:** Matt to complete 12-05 Task 2 human-action (enable GitHub Pages, add GOOGLE_WEB_CLIENT_ID secret, trigger first deploy), then run Plan 12-06 UAT.
 **Non-blocking bug:** Toast stacking on rapid double-submit (v0.3.2 polish).
 
 ## Project Reference
@@ -194,6 +194,9 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 12]: getStartPageToken TypeScript types lack spaces param - use as any cast with comment, runtime REST API accepts it
 - [Phase 12]: changesPoller/ingestService circular imports resolved by TypeScript module scope - both files created before typecheck
 - [Phase 12]: Drive IPC handlers use dynamic await import() to keep googleapis/drive out of cold-start boot path
+- [Phase 12-05]: Split build/deploy into separate jobs required by actions/deploy-pages@v4 (deploy job must declare github-pages environment)
+- [Phase 12-05]: Post-build manifest verification step added to catch base-path regressions before artifact upload
+- [Phase 12-05]: cache-dependency-path set to mobile-pwa/package-lock.json to scope Node cache to sub-project
 
 ### Quick Tasks Completed
 
