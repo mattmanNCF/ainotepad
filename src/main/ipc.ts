@@ -602,4 +602,28 @@ export function registerIpcHandlers() {
     // Improvement runs asynchronously via the harness cron; return status
     return { status: 'queued' }
   })
+
+  // ---------- Drive (mobile transport) IPC — Phase 12 ----------
+
+  ipcMain.handle('drive:connect', async () => {
+    const { connectDrive } = await import('./drive/driveClient')
+    return connectDrive()
+  })
+
+  ipcMain.handle('drive:getStatus', async () => {
+    const { getPollStatus } = await import('./drive/changesPoller')
+    const { isConnected } = await import('./calendar/tokenStore')
+    return { connected: isConnected(), ...getPollStatus() }
+  })
+
+  ipcMain.handle('drive:checkQuota', async () => {
+    const { buildDriveClient } = await import('./drive/driveClient')
+    const { checkQuota } = await import('./drive/ingestService')
+    try {
+      const drive = buildDriveClient()
+      return await checkQuota(drive)
+    } catch (err) {
+      return { sizeBytes: 0, fileCount: 0, state: 'ok' as const, error: err instanceof Error ? err.message : String(err) }
+    }
+  })
 }

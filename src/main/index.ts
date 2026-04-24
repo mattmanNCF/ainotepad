@@ -211,6 +211,26 @@ app.whenReady().then(() => {
 
   initHarnessFiles().catch(err => console.error('[agentHarness] init failed:', err))
 
+  // Phase 12: drain any pending mobile notes and start polling if connected.
+  import('./drive/ingestService').then(async ({ drainOnLaunch }) => {
+    const count = await drainOnLaunch()
+    if (count > 0) {
+      BrowserWindow.getAllWindows().forEach(w => w.webContents.send('drive:pending-drained', count))
+    }
+  }).catch(err => console.error('[drive] drain on launch failed:', err))
+
+  // Start the 60s polling loop if the user is connected. Skip silently if not.
+  import('./drive/changesPoller').then(async ({ startPolling, initStartPageToken }) => {
+    try {
+      const { buildDriveClient } = await import('./drive/driveClient')
+      const drive = buildDriveClient()
+      await initStartPageToken(drive)
+      startPolling(drive)
+    } catch {
+      // Not connected — will start polling after user connects via Settings
+    }
+  })
+
   // Global shortcut: Ctrl+Shift+Space toggles window visibility from any app
   globalShortcut.register('CommandOrControl+Shift+Space', () => {
     if (win.isVisible()) {

@@ -171,4 +171,14 @@ contextBridge.exposeInMainWorld('api', {
     runDailyImprovement: (): Promise<{ status: string }> =>
       ipcRenderer.invoke('agent:runDailyImprovement'),
   },
+  drive: {
+    connect: () => ipcRenderer.invoke('drive:connect') as Promise<{ ok: boolean; error?: string }>,
+    getStatus: () => ipcRenderer.invoke('drive:getStatus') as Promise<{ connected: boolean; lastPollAt: string; lastPollError: string; lastAuthError: string }>,
+    checkQuota: () => ipcRenderer.invoke('drive:checkQuota') as Promise<{ sizeBytes: number; fileCount: number; state: 'ok' | 'warn' | 'hard-stop'; error?: string }>,
+    onPendingDrained: (callback: (count: number) => void) => {
+      const handler = (_e: unknown, count: number) => callback(count)
+      ipcRenderer.on('drive:pending-drained', handler)
+      return () => ipcRenderer.removeListener('drive:pending-drained', handler)
+    },
+  },
 })

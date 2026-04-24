@@ -139,5 +139,11 @@ interface Window {
       updateUserProfile: (observation: string) => Promise<void>
       runDailyImprovement: () => Promise<{ status: string }>
     }
+    drive: {
+      connect: () => Promise<{ ok: boolean; error?: string }>
+      getStatus: () => Promise<{ connected: boolean; lastPollAt: string; lastPollError: string; lastAuthError: string }>
+      checkQuota: () => Promise<{ sizeBytes: number; fileCount: number; state: 'ok' | 'warn' | 'hard-stop'; error?: string }>
+      onPendingDrained: (callback: (count: number) => void) => () => void
+    }
   }
 }
