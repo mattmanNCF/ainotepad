@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Phase 12 Plan 03 complete - mobile PWA built
-last_updated: "2026-04-24T02:42:32.672Z"
+stopped_at: Completed Phase 12 Plan 02 - Desktop Drive Ingestion Pipeline
+last_updated: "2026-04-24T02:43:40.422Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 55
-  completed_plans: 49
+  completed_plans: 50
 ---
 
 # Notal — Project State
@@ -21,8 +21,8 @@ Plan: 1 of 6
 
 ## Session Continuity
 
-**Last session:** 2026-04-24T02:42:27.399Z
-**Stopped at:** Phase 12 Plan 03 complete - mobile PWA built
+**Last session:** 2026-04-24T02:43:40.418Z
+**Stopped at:** Completed Phase 12 Plan 02 - Desktop Drive Ingestion Pipeline
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Phase 12 kept in v0.3.1 scope (not dropped to v0.3.2). Working branch: `notal-v0.3.1-mobile` (cut from `notal-v0.2`).
 **Next action:** `/gsd:plan-phase 12` — Mobile Extension.
 **Non-blocking bug:** Toast stacking on rapid double-submit (v0.3.2 polish).
@@ -191,6 +191,9 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 12-mobile-extension]: shared/envelope.ts is top-level directory not src/ because Vite root prevents PWA from importing src/main/
 - [Phase 12]: Stub App.tsx created in Task 1 scaffold commit to allow build to pass; replaced in Task 2 with full capture UI
 - [Phase 12]: mobile-pwa/node_modules + docs/ added to .gitignore; docs/notal-mobile/ built by CI not committed
+- [Phase 12]: getStartPageToken TypeScript types lack spaces param - use as any cast with comment, runtime REST API accepts it
+- [Phase 12]: changesPoller/ingestService circular imports resolved by TypeScript module scope - both files created before typecheck
+- [Phase 12]: Drive IPC handlers use dynamic await import() to keep googleapis/drive out of cold-start boot path
 
 ### Quick Tasks Completed
 

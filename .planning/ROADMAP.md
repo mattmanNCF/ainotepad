@@ -35,7 +35,7 @@
 | 09. App Icon | 3/3 | Complete    | 2026-04-19 |
 | 10. Dynamic Wiki Graph Parameters | 4/4 | Complete    | 2026-04-21 |
 | 11. Google Calendar Integration | 6/7 | In Progress|  |
-| 12. Mobile Extension (Drive transport) | 2/6 | In Progress|  |
+| 12. Mobile Extension (Drive transport) | 3/6 | In Progress|  |
 
 ---
 
@@ -222,7 +222,7 @@ Plans:
 **Plans**: 6 plans
 Plans:
 - [x] 12-01-PLAN.md — Foundation: deps, source column, shared createNote(), GOOGLE_WEB_CLIENT_ID define + BLOCKING Wave 0 appDataFolder cross-client verification
-- [ ] 12-02-PLAN.md — Desktop ingestion: oauthFlow scopes param, driveClient, changesPoller (60s appDataFolder poll), ingestService (ajv + createNote + delete + quota), IPC + preload + boot wiring
+- [x] 12-02-PLAN.md — Desktop ingestion: oauthFlow scopes param, driveClient, changesPoller (60s appDataFolder poll), ingestService (ajv + createNote + delete + quota), IPC + preload + boot wiring
 - [x] 12-03-PLAN.md — Mobile PWA scaffold + capture UI (Vite 6 + VitePWA + idb), GIS token client, multipart Drive upload
 - [ ] 12-04-PLAN.md — Desktop renderer UI: DriveMobileSection (Settings > Integrations), WakeBanner (MOB-UX-02)
 - [ ] 12-05-PLAN.md — GitHub Pages deploy pipeline (actions/deploy-pages) + mobile-pwa/README
