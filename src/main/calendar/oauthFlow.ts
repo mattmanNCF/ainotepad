@@ -4,7 +4,8 @@ import { shell } from 'electron'
 import { OAuth2Client, CodeChallengeMethod } from 'google-auth-library'
 
 const AUTH_TIMEOUT_MS = 5 * 60 * 1000 // 5-minute user timeout
-const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
+export const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events'
+export const DRIVE_APPDATA_SCOPE = 'https://www.googleapis.com/auth/drive.appdata'
 
 export interface OAuthTokens {
   access_token: string
@@ -24,7 +25,7 @@ export interface OAuthTokens {
  * Requires __GOOGLE_CLIENT_ID__ and __GOOGLE_CLIENT_SECRET__ to be non-empty
  * (Plan 11-01 injects these via electron-vite define from .env.local).
  */
-export async function startOAuthFlow(): Promise<OAuthTokens> {
+export async function startOAuthFlow(scopes: string[] = [CALENDAR_SCOPE]): Promise<OAuthTokens> {
   if (!__GOOGLE_CLIENT_ID__ || !__GOOGLE_CLIENT_SECRET__) {
     throw new Error(
       'Google OAuth credentials not injected at build time. ' +
@@ -66,7 +67,8 @@ export async function startOAuthFlow(): Promise<OAuthTokens> {
 
         const authUrl = oAuth2Client.generateAuthUrl({
           access_type: 'offline',
-          scope: [CALENDAR_SCOPE],
+          scope: scopes,
+          include_granted_scopes: true,
           code_challenge: codeChallenge,
           code_challenge_method: CodeChallengeMethod.S256,
           prompt: 'consent', // force refresh_token on every grant (avoids "no refresh_token on second connect")
