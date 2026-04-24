@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/notal-mobile/',
+  base: '/ainotepad/notal-mobile/',
   plugins: [
     react(),
     VitePWA({
@@ -16,11 +16,11 @@ export default defineConfig({
         theme_color: '#1a1a1a',
         background_color: '#1a1a1a',
         display: 'standalone',
-        scope: '/notal-mobile/',
-        start_url: '/notal-mobile/',
+        scope: '/ainotepad/notal-mobile/',
+        start_url: '/ainotepad/notal-mobile/',
         icons: [
-          { src: '/notal-mobile/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/notal-mobile/pwa-512x512.png', sizes: '512x512', type: 'image/png' }
+          { src: '/ainotepad/notal-mobile/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/ainotepad/notal-mobile/pwa-512x512.png', sizes: '512x512', type: 'image/png' }
         ]
       },
       workbox: {

@@ -50,12 +50,12 @@ jobs:
         run: |
           test -f docs/notal-mobile/index.html
           test -f docs/notal-mobile/manifest.webmanifest
-          grep -q '/notal-mobile/' docs/notal-mobile/manifest.webmanifest
+          grep -q '/ainotepad/notal-mobile/' docs/notal-mobile/manifest.webmanifest
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/notal-mobile
+          path: docs
 
   deploy:
     needs: build
