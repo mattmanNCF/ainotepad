@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Completed Phase 12 Plan 05 - GitHub Pages Deploy Pipeline
-last_updated: "2026-04-23T00:10:00.000Z"
+stopped_at: Completed Phase 12 Plan 04 - Desktop Renderer UI for Mobile Sync
+last_updated: "2026-04-24T02:48:46.353Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 55
-  completed_plans: 53
+  completed_plans: 52
 ---
 
 # Notal — Project State
@@ -21,8 +21,8 @@ Plan: 6 of 6 (awaiting human-action checkpoint at 12-05 Task 2)
 
 ## Session Continuity
 
-**Last session:** 2026-04-23T00:10:00.000Z
-**Stopped at:** Completed Phase 12 Plan 05 - GitHub Pages Deploy Pipeline (checkpoint: Matt must enable Pages + add secret)
+**Last session:** 2026-04-24T02:48:46.348Z
+**Stopped at:** Completed Phase 12 Plan 04 - Desktop Renderer UI for Mobile Sync
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Phase 12 kept in v0.3.1 scope (not dropped to v0.3.2). Working branch: `notal-v0.3.1-mobile` (cut from `notal-v0.2`).
 **Next action:** Matt to complete 12-05 Task 2 human-action (enable GitHub Pages, add GOOGLE_WEB_CLIENT_ID secret, trigger first deploy), then run Plan 12-06 UAT.
 **Non-blocking bug:** Toast stacking on rapid double-submit (v0.3.2 polish).
@@ -197,6 +197,7 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 12-05]: Split build/deploy into separate jobs required by actions/deploy-pages@v4 (deploy job must declare github-pages environment)
 - [Phase 12-05]: Post-build manifest verification step added to catch base-path regressions before artifact upload
 - [Phase 12-05]: cache-dependency-path set to mobile-pwa/package-lock.json to scope Node cache to sub-project
+- [Phase 12]: DriveMobileSection uses neutral-*/bg-blue-600 palette (plan-prescribed); WakeBanner zIndex 9996 below UndoToast 9997; Mobile PWA URL as static code element
 
 ### Quick Tasks Completed
 

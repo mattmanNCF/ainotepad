@@ -34,7 +34,7 @@
 - [x] **MOB-PWA-02**: Capture-only UI on mobile: text input, submit, delivery-state badge; no browse, search, or wiki access
 - [x] **MOB-SEC-01**: Per-file schema validation on desktop (≤16KB text, strict JSON schema, malformed rejected and logged); `createNote(rawText, source)` single code path shared with desktop capture
 - [x] **MOB-UX-01**: Mobile shows explicit delivery states: local → uploading → on-drive → ingested (observed via Drive file deletion)
-- [ ] **MOB-UX-02**: Desktop-wake grace banner: on app launch, drain pending Drive notes and report count processed
+- [x] **MOB-UX-02**: Desktop-wake grace banner: on app launch, drain pending Drive notes and report count processed
 - [x] **MOB-QUOTA-01**: Warn at 10MB appdata folder; hard stop at 100MB (indicates stuck ingestion loop); user surfaced in Settings
 
 ### Cross-cutting
