@@ -6,6 +6,7 @@ import { SearchTab } from './components/SearchTab'
 import { SettingsPanel } from './components/SettingsPanel'
 import { OnboardingModal } from './components/OnboardingModal'
 import { UndoToast } from './components/UndoToast'
+import { WakeBanner } from './components/WakeBanner'
 
 type Tab = 'notes' | 'wiki' | 'search'
 
@@ -41,6 +42,7 @@ export default function App() {
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
       {showOnboarding && <OnboardingModal onDismiss={() => setShowOnboarding(false)} />}
       <UndoToast />
+      <WakeBanner />
     </div>
   )
 }
