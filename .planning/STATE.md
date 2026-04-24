@@ -3,26 +3,26 @@ gsd_state_version: 1.0
 milestone: v0.3.1
 milestone_name: — Reminders, Graph Control, Mobile
 status: unknown
-stopped_at: Phase 12 Plan 01 complete - Wave 0 blocking gate awaiting Matt
-last_updated: "2026-04-22T16:01:26.530Z"
+stopped_at: Phase 12 Plan 03 complete - mobile PWA built
+last_updated: "2026-04-24T02:42:32.672Z"
 progress:
   total_phases: 12
   completed_phases: 9
   total_plans: 55
-  completed_plans: 48
+  completed_plans: 49
 ---
 
 # Notal — Project State
 
 ## Current Position
 
-Phase: 12 (Mobile Extension (Path C)) — EXECUTING
+Phase: 12 (mobile-extension) — EXECUTING
 Plan: 1 of 6
 
 ## Session Continuity
 
-**Last session:** 2026-04-22T16:01:26.520Z
-**Stopped at:** Phase 12 Plan 01 complete - Wave 0 blocking gate awaiting Matt
+**Last session:** 2026-04-24T02:42:27.399Z
+**Stopped at:** Phase 12 Plan 03 complete - mobile PWA built
 **Key locked decision:** Mobile = Path C (Drive appDataFolder + github.io PWA). Phase 12 kept in v0.3.1 scope (not dropped to v0.3.2). Working branch: `notal-v0.3.1-mobile` (cut from `notal-v0.2`).
 **Next action:** `/gsd:plan-phase 12` — Mobile Extension.
 **Non-blocking bug:** Toast stacking on rapid double-submit (v0.3.2 polish).
@@ -32,7 +32,7 @@ Plan: 1 of 6
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every note is silently enriched by AI and grows into a searchable knowledge base — zero friction, zero prompting.
-**Current focus:** Phase 12 — Mobile Extension (Path C)
+**Current focus:** Phase 12 — mobile-extension
 
 ## Previous Milestone Summaries
 
@@ -189,6 +189,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 - [Phase 12-mobile-extension]: GOOGLE_WEB_CLIENT_ID added to renderer.define as well as main.define for consistent define pattern across bundles
 - [Phase 12-mobile-extension]: createNote placed above registerIpcHandlers at module scope for clean named import from ingestService without circular dependency
 - [Phase 12-mobile-extension]: shared/envelope.ts is top-level directory not src/ because Vite root prevents PWA from importing src/main/
+- [Phase 12]: Stub App.tsx created in Task 1 scaffold commit to allow build to pass; replaced in Task 2 with full capture UI
+- [Phase 12]: mobile-pwa/node_modules + docs/ added to .gitignore; docs/notal-mobile/ built by CI not committed
 
 ### Quick Tasks Completed
 
