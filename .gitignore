@@ -13,3 +13,4 @@ out-extracted/
 asar-grep-output.txt
 mobile-pwa/node_modules
 docs/
+scripts/get-desktop-token.mjs
